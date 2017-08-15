@@ -34,7 +34,7 @@ def on_chat_message(msg):
     log("[Debug] Raw message:"+str(msg))
     dlog = "["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info]"
     try:
-        dlog=dlog+"[EDITED"+msg['edit_date']+"]"
+        dlog=dlog+"[EDITED"+str(msg['edit_date'])+"]"
     except:
         time.sleep(0)
     fuser= bot.getChatMember(chat_id,msg['from']['id'])
@@ -623,11 +623,11 @@ def lsadmins(chat_id,msg,cmd):
 
 def groupinfo(chat_id,msg,chat_type):
     dre = bot.sendMessage(chat_id,\
-        "*群組類型*: "+chat_type+"\n"+\
-        "*群組名稱*: "+msg['chat']['title']+"\n"+\
-        "*群組人數*: " + str(bot.getChatMembersCount(chat_id)) +"\n"+\
-        "*群組ID*: `" +str(chat_id) + "`",\
-        parse_mode = 'Markdown',\
+        "<b>群組類型</b>: "+chat_type+"\n"+\
+        "<b>群組名稱</b>: "+msg['chat']['title']+"\n"+\
+        "<b>群組人數</b>: " + str(bot.getChatMembersCount(chat_id)) +"\n"+\
+        "<b>群組ID</b>: <code>" +str(chat_id) + "</code>",\
+        parse_mode = 'HTML',\
         reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
@@ -713,16 +713,16 @@ def getuser(chat_id,msg,txt):
                     lastname = ''
                 try:
                     uusername = '@' + user['user']['username']
-                    nickname = '['+ firstname + ' ' + lastname + '](https://t.me/' + user['user']['username'] + ')'
+                    nickname = '<a href="https://t.me/' + user['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
                 except:
                     uusername = 'Undefined'
                     nickname = firstname + ' ' + lastname
                 userid = str(user['user']['id'])
                 dre = bot.sendMessage(chat_id, \
-                    '*暱稱*: ' + nickname + '\n'+\
-                    '*Username*: ' + uusername + '\n' +\
-                    '*User id*: `' + userid +'`'+ '\n' +\
-                    '*目前職位*: ' + user['status'],parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
+                    '<b>暱稱</b>: ' + nickname + '\n'+\
+                    '<b>Username</b>: ' + uusername + '\n' +\
+                    '<b>User id</b>: <code>' + userid +'</code>'+ '\n' +\
+                    '<b>目前職位</b>: ' + user['status'],parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
     else:
         user = bot.getChatMember(chat_id,reply_to['from']['id'])
@@ -733,16 +733,16 @@ def getuser(chat_id,msg,txt):
             lastname = ''
         try:
             uusername = '@' + user['user']['username']
-            nickname = '['+ firstname + ' ' + lastname + '](https://t.me/' + user['user']['username'] + ')'
+            nickname = '<a href="https://t.me/' + user['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
         except:
             uusername = 'Undefined'
             nickname = firstname + ' ' + lastname
         userid = str(user['user']['id'])
         dre = bot.sendMessage(chat_id, \
-            '*暱稱*: ' + nickname + '\n'+\
-            '*Username*: ' + uusername + '\n' +\
-            '*User id*: `' + userid +'`'+ '\n' +\
-            '*目前職位*: ' + user['status'],parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
+            '<b>暱稱</b>: ' + nickname + '\n'+\
+            '<b>Username</b>: ' + uusername + '\n' +\
+            '<b>User id</b>: <code>' + userid +'</code>'+ '\n' +\
+            '<b>目前職位</b>: ' + user['status'],parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     return
 
@@ -755,16 +755,16 @@ def getme(chat_id,msg):
         lastname = ''
     try:
         uusername = '@' + user['user']['username']
-        nickname = '['+ firstname + ' ' + lastname + '](https://t.me/' + user['user']['username'] + ')'
+        nickname = '<a href="https://t.me/' + user['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
     except:
         uusername = 'Undefined'
         nickname = firstname + ' ' + lastname
     userid = str(user['user']['id'])
     dre = bot.sendMessage(chat_id, \
-        '*暱稱*: ' + nickname + '\n'+\
-        '*Username*: ' + uusername + '\n' +\
-        '*User id*: `' + userid +'`'+ '\n' +\
-        '*目前職位*: ' + user['status'],parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
+        '<b>暱稱</b>: ' + nickname + '\n'+\
+        '<b>Username</b>: ' + uusername + '\n' +\
+        '<b>User id</b>: <code>' + userid +'</code>'+ '\n' +\
+        '<b>目前職位</b>: ' + user['status'],parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
 
