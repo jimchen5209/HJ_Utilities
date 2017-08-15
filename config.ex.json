@@ -1,0 +1,6 @@
+{
+    "TOKEN":"", #Insert your telegram bot token here.
+    "pastebin_dev_key" : "", #Insert your pastebin dev token here.
+    "pastebin_user_key" : "", #Get your user key here: https://pastebin.com/api/api_user_key.html
+    "Debug" : False #If True,raw debug info will be logged into -debug.log file
+}
