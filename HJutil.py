@@ -173,7 +173,7 @@ def on_chat_message(msg):
                     tuser= tuser + '@' + msg['left_chat_member']['username']
                 except:
                     tuser= tuser 
-                dlog = dlog+' '+ tuser +' left the ' , chat_type, ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) '
+                dlog = dlog+' '+ tuser +' left the ' + chat_type + ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) '
         else:
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) in "+msg['chat']['title']+' ( '+str(chat_id)+ ' ) sent a '+ content_type
         clog(dlog)
@@ -262,6 +262,8 @@ def on_chat_message(msg):
                 tag(chat_id,msg,cmd,chat_type)
             if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username:
                 confirm(chat_id,msg)
+            if cmd[0] == '/gtts' or cmd[0] == '/gtts@'+username:
+                gtts(chat_id,msg)
             if cmd[0] == '/help' or cmd[0] == '/help@'+username:
                 help(chat_id,msg)
 
@@ -954,6 +956,8 @@ def addtag(chat_id,msg,cmd):
                         successcount = successcount + 1
                         clog("[Info] " + firstname + ' ' + lastname + " was added to "+cmd[2])
                 grouptagdict[cmd[2]]=temptaglist
+                if len(grouptagdict[cmd[2]]) == 0:
+                    del grouptagdict[cmd[2]]
                 data[str(chat_id)]=grouptagdict
                 writetag(data)
                 successmsg = successmsg + "\n"
@@ -1013,6 +1017,8 @@ def addtag(chat_id,msg,cmd):
             smsg = smsg + "已將 " + nickname + " 加到 <b>" + cmd[2] + "</b>清單"
             clog("[Info] " + firstname + ' ' + lastname + " was added to "+cmd[2])
         grouptagdict[cmd[2]]=temptaglist
+        if len(grouptagdict[cmd[2]]) == 0:
+            del grouptagdict[cmd[2]]
         data[str(chat_id)]=grouptagdict
         writetag(data)
         dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
@@ -1124,6 +1130,8 @@ def rmtag(chat_id,msg,cmd,chat_type):
                         successcount = successcount + 1
                         clog("[Info] " + firstname + ' ' + lastname + " was removed from "+cmd[2])
                 grouptagdict[cmd[2]]=temptaglist
+                if len(grouptagdict[cmd[2]]) == 0:
+                    del grouptagdict[cmd[2]]
                 data[str(chat_id)]=grouptagdict
                 writetag(data)
                 successmsg = successmsg + "\n"
@@ -1179,6 +1187,8 @@ def rmtag(chat_id,msg,cmd,chat_type):
             smsg = smsg + "已將 " + nickname + " 從 <b>" + cmd[2] + "</b>移除"
             clog("[Info] " + firstname + ' ' + lastname + " was removed from "+cmd[2])
         grouptagdict[cmd[2]]=temptaglist
+        if len(grouptagdict[cmd[2]]) == 0:
+            del grouptagdict[cmd[2]]
         data[str(chat_id)]=grouptagdict
         writetag(data)
         dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
@@ -1208,7 +1218,7 @@ def confirm(chat_id,msg):
             if ccmd[0] == '/tag' or ccmd[0] == '/tag@'+username:
                 if ccmd[1] == 'remove' and ccmd[2] == "*":
                     data=readtag()
-                    data[str(chat_id)]={}
+                    del data[str(chat_id)]
                     writetag(data)
                     dre = bot.sendMessage(chat_id,"已移除本群組的所有tag",disable_web_page_preview=True,reply_to_message_id=confirmsg['reply_to_message']["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
@@ -1335,9 +1345,30 @@ def tag(chat_id,msg,cmd,chat_type):
 
     return
 
+def gtts(chat_id,msg):
+    cmd = msg['text'].split(' ',2)
+    try:
+        lang = cmd[1]
+    except:
+        dre = bot.sendMessage(chat_id,"/gtts <lang_code> <txt>\nEx: /gtts en-GB Hello World!",reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    else:
+        try:
+            txt = cmd[2]
+        except:
+            dre = bot.sendMessage(chat_id,"/gtts <lang_code> <txt>\nEx: /gtts en-GB Hello World!",reply_to_message_id=msg["message_id"])
+            log("[Debug] Raw sent data:"+str(dre))
+            return
+        else:
+            smsg = '[Link](https://translate.google.com.tw/translate_tts?ie=UTF-8&q='+txt+'&tl='+lang+'&client=tw-ob)'
+            dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown",reply_to_message_id=msg["message_id"])
+            log("[Debug] Raw sent data:"+str(dre))
+    return
+
 def help(chat_id,msg):
     dre = bot.sendMessage(chat_id,\
-        '/a2z\n/cgp\n/rgp\n/ping\n/echo\n/groupinfo\n/pin\n/getme\n/title\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag',\
+        '/a2z\n/cgp\n/rgp\n/ping\n/echo\n/groupinfo\n/pin\n/getme\n/title\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag\n/gtts',\
         reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
