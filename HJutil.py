@@ -25,6 +25,7 @@ TOKEN = config["TOKEN"]
 pastebin_dev_key = config["pastebin_dev_key"]
 pastebin_user_key = config["pastebin_user_key"]
 Debug = config["Debug"]
+OWNERID=config["OWNERID"]
 confirmsg = None
 
 def on_chat_message(msg):
@@ -127,8 +128,24 @@ def on_chat_message(msg):
             cmd = msg['text'].split()
             if cmd[0] == '/start':
                 startc(chat_id,msg)
-        dre = bot.sendMessage(chat_id,'本機器人在私訊中沒有功能，請將我加入到群組',reply_to_message_id=msg['message_id'])
-        log("[Debug] Raw sent data:"+str(dre))
+            if cmd[0] == '/getme':
+                getme(chat_id,msg)
+            if cmd[0] == '/getfile':
+                getfile(chat_id,msg,cmd)
+            if cmd[0] == '/exportblog':
+                exportblog(chat_id,msg)
+            if cmd[0] == '/ping':
+                ping(chat_id,msg)
+            if cmd[0] == '/echo':
+                echo(chat_id,msg)
+            if cmd[0] == '/ns':
+                ns(chat_id,msg,cmd)
+            if cmd[0] == '/gtts':
+                gtts(chat_id,msg)
+            if cmd[0] == '/help':
+                helpp(chat_id,msg)
+        #dre = bot.sendMessage(chat_id,'本機器人在私訊中沒有功能，請將我加入到群組',reply_to_message_id=msg['message_id'])
+        #log("[Debug] Raw sent data:"+str(dre))
     elif chat_type == 'group' or chat_type == 'supergroup':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         try:
@@ -263,6 +280,8 @@ def on_chat_message(msg):
                 replace(chat_id,msg,cmd)
             if cmd[0] == '/getfile' or cmd[0] == '/getfile@'+username:
                 getfile(chat_id,msg,cmd)
+            if cmd[0] == '/fileinfo' or cmd[0] == '/fileinfo@'+username:
+                fileinfo(chat_id,msg)
             if cmd[0] == '/tag' or cmd[0] == '/tag@'+username:
                 tag(chat_id,msg,cmd,chat_type)
             if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username:
@@ -701,6 +720,12 @@ def groupinfo(chat_id,msg,chat_type):
     return
 
 def leavegroup(chat_id,msg,chat_type):
+    if msg['from']['id'] == OWNERID:
+        clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+        dre = bot.sendMessage(chat_id,'Bye~',reply_to_message_id=msg['message_id'])
+        bot.leaveChat(chat_id)
+        log("[Debug] Raw sent data:"+str(dre))
+        return
     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
         dre = bot.sendMessage(chat_id,'Bye~',reply_to_message_id=msg['message_id'])
         bot.leaveChat(chat_id)
@@ -714,7 +739,7 @@ def leavegroup(chat_id,msg,chat_type):
                 log("[Debug] Raw sent data:"+str(dre))
                 bot.leaveChat(chat_id)
                 return
-        clog('[Info] No admins matched with' + msg['from']['username'],'('+msg['from']['id']+ ')')
+        clog('[Info] No admins matched with' + msg['from']['username'],'('+str(msg['from']['id'])+ ')')
         dre = bot.sendMessage(chat_id,'你沒有辦法讓我離開喔',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
@@ -918,20 +943,112 @@ def getfile(chat_id,msg,cmd):
     try:
         file_id = cmd[1]
     except:
-        dre = bot.sendMessage(chat_id,"/getfile <file_id>")
+        dre = bot.sendMessage(chat_id,"/getfile <file_id>",reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         try:
-            dre = bot.sendDocument(chat_id,file_id,reply_to_message_id=msg['message_id'])
-            log("[Debug] Raw sent data:"+str(dre))
+            file = bot.getFile(file_id)
+            log("[Debug] Raw get data:"+str(file))
         except:
             tp, val, tb = sys.exc_info()
             dre = bot.sendMessage(chat_id,\
-                '無法取得檔案\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
-                parse_mode = 'Markdown',\
+                '無法取得檔案\n\n<code>'+str(val).split(',')[0].replace('(','').replace("'","")+"</code>",\
+                parse_mode = 'HTML',\
                 reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
-            clog('[ERROR] Unable to fetch the file '+file_id+' in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
+            clog('[ERROR] Unable to fetch the file '+file_id+'  : '+str(val).split(',')[0].replace('(','').replace("'",""))
+        else:
+            type = file['file_path'].split("/")
+            try:
+                if type[0] == 'photos':
+                    dre = bot.sendPhoto(chat_id,file_id,reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                elif type[0] == 'voice':
+                    dre = bot.sendVoice(chat_id,file_id,reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                elif type[0] == 'videos':
+                    dre = bot.sendVideo(chat_id,file_id,reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                else:
+                    dre = bot.sendDocument(chat_id,file_id,reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+            except:
+                tp, val, tb = sys.exc_info()
+                dre = bot.sendMessage(chat_id,\
+                    '傳送檔案時發生問題\n\n<code>'+str(val).split(',')[0].replace('(','').replace("'","")+"</code>",\
+                    parse_mode = 'HTML',\
+                    reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                clog('[ERROR] Unable to send the file '+file_id+'  : '+str(val).split(',')[0].replace('(','').replace("'",""))
+    return
+
+def fileinfo(chat_id,msg):
+    try:
+        reply_to = msg['reply_to_message']
+    except:
+        dre = bot.sendMessage(chat_id,'回覆一個信息以取得檔案資訊',reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+    else:
+        tcontent_type, tchat_type, tchat_id = telepot.glance(reply_to)
+        if tcontent_type == 'text':
+            dre = bot.sendMessage(chat_id,'這是文字訊息',reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+            return
+        elif tcontent_type == 'photo':
+            photo_array=reply_to['photo']
+            photo_array.reverse()
+            fileid = photo_array[0]['file_id']
+        elif tcontent_type == 'audio':
+            fileid = reply_to['audio']['file_id']
+        elif tcontent_type == 'document':
+            fileid = reply_to['document']['file_id']
+        elif tcontent_type == 'video':
+            fileid = reply_to['video']['file_id']
+        elif tcontent_type == 'voice':
+            fileid = reply_to['voice']['file_id']
+        elif tcontent_type == 'sticker':
+            fileid = reply_to['sticker']['file_id']
+        dre = bot.sendMessage(chat_id,\
+            '<b>檔案類型</b> : '+tcontent_type+"\n"+\
+            '<b>File id</b> : <code>'+fileid+"</code>",\
+            parse_mode="HTML",reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+    return
+
+def exportblog(chat_id,msg):
+    cmd = msg['text'].split(" ",1)
+    try:
+        debugs = cmd[1]
+    except:
+        if msg['from']['id'] == OWNERID:
+            f = open(logpath+".log","rb")
+            dre = bot.sendDocument(chat_id,f,reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+            f.close()
+        else:
+            dre = bot.sendMessage(chat_id,"你沒有權限",reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+    else:
+        if msg['from']['id'] == OWNERID:
+            if Debug == True and debugs == "-debug":
+                f = open(logpath+"-debug.log","rb")
+                dre = bot.sendDocument(chat_id,f,reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                f.close()
+            else:
+                if Debug == False and debugs == "-debug":
+                    dre = bot.sendMessage(chat_id,"Debug選項是關的",reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                elif Debug == True and debugs != "-debug":
+                    dre = bot.sendMessage(chat_id,"若要取得Debug log請輸入 /exportblog -debug ",reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                f = open(logpath+".log","rb")
+                dre = bot.sendDocument(chat_id,f,reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                f.close()
+        else:
+            dre = bot.sendMessage(chat_id,"你沒有權限",reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
     return
 
 def readtag():
@@ -1436,11 +1553,18 @@ def gtts(chat_id,msg):
 
 def help(chat_id,msg):
     dre = bot.sendMessage(chat_id,\
-        '/a2z\n/cgp\n/rgp\n/ping\n/echo\n/groupinfo\n/pin\n/getme\n/title\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag\n/gtts',\
+        '/a2z\n/cgp\n/rgp\n/ping\n/echo\n/groupinfo\n/pin\n/getme\n/title\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag\n/gtts\n/fileinfo',\
         reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
-            
+   
+def helpp(chat_id,msg):
+    dre = bot.sendMessage(chat_id,\
+        '/ping\n/echo\n/getme\n/ns\n/getfile\n/gtts\n/exportblog',\
+        reply_to_message_id=msg['message_id'])
+    log("[Debug] Raw sent data:"+str(dre))
+    return
+ 
 def pastebin(data,title):
     if pastebin_dev_key != "none" and pastebin_user_key != "none":
         pastebin_vars = {'api_dev_key': pastebin_dev_key,
