@@ -34,6 +34,7 @@ def on_chat_message(msg):
     username= bot_me['username'].replace(' ','')
     log("[Debug] Raw message:"+str(msg))
     dlog = "["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info]"
+    flog = ""
     try:
         dlog=dlog+"[EDITED"+str(msg['edit_date'])+"]"
     except:
@@ -87,41 +88,37 @@ def on_chat_message(msg):
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ photo_array[0]['file_id']
             except:
                 flog = flog +"FileID:"+ photo_array[0]['file_id']
-            clog(flog)
         elif content_type == 'audio':
             flog = "[Audio]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['audio']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['audio']['file_id']
-            clog(flog)
         elif content_type == 'document':
             flog = "[Document]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['document']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['document']['file_id']
-            clog(flog)
         elif content_type == 'video':
             flog = "[Video]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['video']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['video']['file_id']
-            clog(flog)
         elif content_type == 'voice':
             flog = "[Voice]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['voice']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['voice']['file_id']
-            clog(flog)
         elif content_type == 'sticker':
             flog = "[Sticker]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['sticker']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['sticker']['file_id']
+        if flog != "":
             clog(flog)
         #command_detect
         if content_type == 'text':
@@ -196,6 +193,74 @@ def on_chat_message(msg):
                 except:
                     tuser= tuser 
                 dlog = dlog+' '+ tuser +' left the ' + chat_type + ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) '
+        elif content_type == 'pinned_message':
+            tuser= msg['pinned_message']['from']['first_name']
+            try:
+                tuser= tuser + ' ' + msg['pinned_message']['from']['last_name']
+            except:
+                tuser= tuser
+            try:
+                tuser= tuser + '@' + msg['pinned_message']['from']['username']
+            except:
+                tuser= tuser 
+            tmpcontent_type, tmpchat_type, tmpchat_id = telepot.glance(msg['pinned_message'])
+            if tmpcontent_type == 'text':
+                dlog = dlog + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+\
+                    msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+ fnick + " ( "+fuserid+" ):\n"+msg['pinned_message']['text']
+            else:
+                dlog = dlog + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+\
+                    msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+ fnick + " ( "+fuserid+" )"
+                if tmpcontent_type == 'photo':
+                    flog = "[Pinned Photo]"
+                    photo_array=msg['pinned_message']['photo']
+                    photo_array.reverse()
+                    try:
+                        flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ photo_array[0]['file_id']
+                    except:
+                        flog = flog +"FileID:"+ photo_array[0]['file_id']
+                elif tmpcontent_type == 'audio':
+                    flog = "[Pinned Audio]"
+                    try:
+                        flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['pinned_message']['audio']['file_id']
+                    except:
+                        flog = flog +"FileID:"+ msg['pinned_message']['audio']['file_id']
+                elif tmpcontent_type == 'document':
+                    flog = "[Pinned Document]"
+                    try:
+                        flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['pinned_message']['document']['file_id']
+                    except:
+                        flog = flog +"FileID:"+ msg['pinned_message']['document']['file_id']
+                elif tmpcontent_type == 'video':
+                    flog = "[Pinned Video]"
+                    try:
+                        flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['pinned_message']['video']['file_id']
+                    except:
+                        flog = flog +"FileID:"+ msg['pinned_message']['video']['file_id']
+                elif tmpcontent_type == 'voice':
+                    flog = "[Pinned Voice]"
+                    try:
+                        flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['pinned_message']['voice']['file_id']
+                    except:
+                        flog = flog +"FileID:"+ msg['pinned_message']['voice']['file_id']
+                elif tmpcontent_type == 'sticker':
+                    flog = "[Pinned Sticker]"
+                    try:
+                        flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['pinned_message']['sticker']['file_id']
+                    except:
+                        flog = flog +"FileID:"+ msg['pinned_message']['sticker']['file_id']
+        elif content_type == 'new_chat_photo':
+            dlog = dlog + "The photo of this "+chat_type+""+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick + " ( "+fuserid+" )"
+            flog = "[New Chat Photo]"
+            photo_array=msg['new_chat_photo']
+            photo_array.reverse()
+            try:
+                flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ photo_array[0]['file_id']
+            except:
+                flog = flog +"FileID:"+ photo_array[0]['file_id']
+        elif content_type == 'delete_chat_photo':
+            dlog = dlog + "The photo of this "+chat_type+ " was deleted by "+fnick + " ( "+fuserid+" )"
+        elif content_type == 'new_chat_title':
+            dlog = dlog + "The title of this "+chat_type+ " was changed to "+msg['new_chat_title']+" by "+fnick + " ( "+fuserid+" )"
         else:
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) in "+msg['chat']['title']+' ( '+str(chat_id)+ ' ) sent a '+ content_type
         clog(dlog)
@@ -207,41 +272,37 @@ def on_chat_message(msg):
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ photo_array[0]['file_id']
             except:
                 flog = flog +"FileID:"+ photo_array[0]['file_id']
-            clog(flog)
         elif content_type == 'audio':
             flog = "[Audio]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['audio']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['audio']['file_id']
-            clog(flog)
         elif content_type == 'document':
             flog = "[Document]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['document']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['document']['file_id']
-            clog(flog)
         elif content_type == 'video':
             flog = "[Video]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['video']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['video']['file_id']
-            clog(flog)
         elif content_type == 'voice':
             flog = "[Voice]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['voice']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['voice']['file_id']
-            clog(flog)
         elif content_type == 'sticker':
             flog = "[Sticker]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['sticker']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['sticker']['file_id']
+        if flog != "":
             clog(flog)
         #command_detect
         if content_type == 'text':
@@ -303,6 +364,25 @@ def on_chat_message(msg):
             if fuserid:
                 dlog = dlog + " ( "+fuserid+" )"
             dlog = dlog + " in channel "+msg['chat']['title']+' ( '+str(chat_id)+ ' ): ' + msg['text']
+        elif content_type == 'new_chat_photo':
+            dlog = dlog + "The photo of this "+chat_type+""+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick 
+            if fuserid:
+                dlog = dlog+ " ( "+fuserid+" )"
+            flog = "[New Chat Photo]"
+            photo_array=msg['new_chat_photo']
+            photo_array.reverse()
+            try:
+                flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ photo_array[0]['file_id']
+            except:
+                flog = flog +"FileID:"+ photo_array[0]['file_id']
+        elif content_type == 'delete_chat_photo':
+            dlog = dlog + "The photo of this "+chat_type+ " was deleted by "+fnick
+            if fuserid:
+                dlog = dlog+ " ( "+fuserid+" )"
+        elif content_type == 'new_chat_title':
+            dlog = dlog + "The title of this "+chat_type+ " was changed to "+msg['new_chat_title']+" by "+fnick
+            if fuserid:
+                dlog = dlog+ " ( "+fuserid+" )"
         else:
             dlog = dlog + ' ' + fnick 
             if fuserid:
@@ -317,41 +397,37 @@ def on_chat_message(msg):
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ photo_array[0]['file_id']
             except:
                 flog = flog +"FileID:"+ photo_array[0]['file_id']
-            clog(flog)
         elif content_type == 'audio':
             flog = "[Audio]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['audio']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['audio']['file_id']
-            clog(flog)
         elif content_type == 'document':
             flog = "[Document]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['document']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['document']['file_id']
-            clog(flog)
         elif content_type == 'video':
             flog = "[Video]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['video']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['video']['file_id']
-            clog(flog)
         elif content_type == 'voice':
             flog = "[Voice]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['voice']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['voice']['file_id']
-            clog(flog)
         elif content_type == 'sticker':
             flog = "[Sticker]"
             try:
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ msg['sticker']['file_id']
             except:
                 flog = flog +"FileID:"+ msg['sticker']['file_id']
+        if flog != "":
             clog(flog)
 
 def startc(chat_id,msg):
@@ -596,11 +672,28 @@ def title(chat_id,msg,chat_type):
             reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     else:
+        if msg['from']['id'] == OWNERID:
+            clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+            try:
+                bot.setChatTitle(chat_id,title)
+            except:
+                tp, val, tb = sys.exc_info()
+                sval=str(val)
+                bot.sendChatAction(chat_id,'typing')
+                dre = bot.sendMessage(chat_id,\
+                    '設置群組標題時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                    parse_mode = 'Markdown',\
+                    reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                clog('[ERROR] Unable to change the Group title in '+msg['chat']['title']+'('+str(chat_id)+') : '\
+                    +str(val).split(',')[0].replace('(','').replace("'",""))
+            else:
+                clog('[Info] Sucessfully changed the Group title in '+msg['chat']['title']+'('+str(chat_id)+')')
+            return
         clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
         for admin in bot.getChatAdministrators(chat_id):
             if msg['from']['id'] == admin['user']['id']:
-                print('[Info] Admin Matched for \n[Info] '+ str(admin))
-                log('[Info] Admin Matched for \n[Info] '+ str(admin))
+                clog('[Info] Admin Matched for \n[Info] '+ str(admin))
                 try:
                     bot.setChatTitle(chat_id,title)
                 except:
@@ -872,6 +965,23 @@ def pin(chat_id,msg,chat_type):
             dre = bot.sendMessage(chat_id,'普通群組無法置頂訊息',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
+            if msg['from']['id'] == OWNERID:
+                clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+                try:
+                    bot.pinChatMessage(chat_id,reply_to['message_id'],disable_notification=True)
+                except:
+                    tp, val, tb = sys.exc_info()
+                    sval=str(val)
+                    bot.sendChatAction(chat_id,'typing')
+                    dre = bot.sendMessage(chat_id,\
+                        '置頂時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        parse_mode = 'Markdown',\
+                        reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                    clog('[ERROR] Unable to pin the message '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
+                else:
+                    clog('[Info] Sucessfully pinned the message '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+')')
+                return
             clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
             for admin in bot.getChatAdministrators(chat_id):
                 if msg['from']['id'] == admin['user']['id']:
@@ -887,11 +997,11 @@ def pin(chat_id,msg,chat_type):
                             parse_mode = 'Markdown',\
                             reply_to_message_id=msg['message_id'])
                         log("[Debug] Raw sent data:"+str(dre))
-                        clog('[ERROR] Unable to pin the message '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+chat_id+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
+                        clog('[ERROR] Unable to pin the message '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
                     else:
-                        clog('[Info] Sucessfully pinned the message '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+chat_id+')')
+                        clog('[Info] Sucessfully pinned the message '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+')')
                     return
-            clog('[Info] No admins matched with' + msg['from']['username']+'('+msg['from']['id']+ ')')
+            clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
             dre = bot.sendMessage(chat_id,'你沒有權限置頂訊息',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
             return
@@ -1242,6 +1352,12 @@ def rmtag(chat_id,msg,cmd,chat_type):
                     confirmsg = dre
                     return
                 else:
+                    if msg['from']['id'] == OWNERID:
+                        clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+                        dre = bot.sendMessage(chat_id,"將移除本群組中的所有tag,此操作無法復原,確認執行請回復這則訊息並輸入 /confirm",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                        confirmsg = dre
+                        log("[Debug] Raw sent data:"+str(dre))
+                        return
                     clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
                     for admin in bot.getChatAdministrators(chat_id):
                         if msg['from']['id'] == admin['user']['id']:
