@@ -1,11 +1,12 @@
 #-*-coding:UTF-8-*-
 import sys
 import time
-import telepot
 import urllib
 import urllib.request
+from urllib.request import Request, urlopen
 import os
 import io
+import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, ForceReply
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -345,12 +346,17 @@ def on_chat_message(msg):
                 fileinfo(chat_id,msg)
             if cmd[0] == '/tag' or cmd[0] == '/tag@'+username:
                 tag(chat_id,msg,cmd,chat_type)
+            if cmd[0] == '/tagall' or cmd[0] == '/tagall@'+username:
+                tag(chat_id,msg,["/tag","all"],chat_type)
             if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username:
                 confirm(chat_id,msg)
             if cmd[0] == '/gtts' or cmd[0] == '/gtts@'+username:
                 gtts(chat_id,msg)
             if cmd[0] == '/help' or cmd[0] == '/help@'+username:
                 help(chat_id,msg)
+            for txt in cmd:
+                if txt == '@tagall':
+                    tag(chat_id,msg,["/tag","all"],chat_type)
     elif chat_type == 'channel':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         try:
@@ -1578,8 +1584,6 @@ def lstag(chat_id,msg,cmd):
 def tags(chat_id,msg,cmd):
     data=readtag()
     smsg = ""
-    nousername = "無法tag下列用戶,因為他們沒有username:\n"
-    nousernamecount = 0
     try:
         listname = cmd[2]
     except:
@@ -1596,34 +1600,56 @@ def tags(chat_id,msg,cmd):
                 dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
                 return
-            count = 0
+            dre = bot.sendMessage(chat_id,"正在提及清單 <b>"+listname+"</b> 的 <b>"+str(len(temptaglist))+"</b> 個人",parse_mode="HTML",reply_to_message_id=msg["message_id"])
+            log("[Debug] Raw sent data:"+str(dre))
+            totalcount=0
+            linecount=0
             for userid in temptaglist:
-                adduser = bot.getChatMember(chat_id,int(userid))
-                firstname = adduser['user']['first_name']
-                try:
-                    lastname = adduser['user']['last_name']
-                except:
-                    lastname = ''
-                try:
-                    uusername = adduser['user']['username']
-                    nickname = '<a href="https://t.me/' + adduser['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
-                except:
-                    nickname = firstname + ' ' + lastname
-                    nousername = nousername + nickname + "\n"
-                    nousernamecount = nousernamecount+1
-                else:
-                    smsg = smsg + "@"+uusername+" "
-                count = count +1
-                if count >= 2:
+                smsg = smsg + "[.](tg://user?id="+str(userid)+")"
+                totalcount=totalcount+1
+                linecount=linecount+1
+                if linecount >= 50:
                     smsg = smsg + "\n"
-                    count = 0
-    print(smsg)
-    dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",reply_to_message_id=msg["message_id"])
-    log("[Debug] Raw sent data:"+str(dre))
-    if nousernamecount != 0:
-        dre = bot.sendMessage(chat_id,nousername,parse_mode="HTML",reply_to_message_id=msg["message_id"])
-        log("[Debug] Raw sent data:"+str(dre))
+                    linecount = 0
+                if totalcount >= 100:
+                    dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
+                    log("[Debug] Raw sent data:"+str(dre))
+                    smsg=""
+                    totalcount=0
+            if totalcount != 0:
+                dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
+                log("[Debug] Raw sent data:"+str(dre))
     return
+
+def tagall(chat_id,msg):
+    dre = bot.sendMessage(chat_id,"正在提及群組內的所有人",parse_mode="HTML",reply_to_message_id=msg["message_id"])
+    log("[Debug] Raw sent data:"+str(dre))
+    try:
+        full_response = pwrtg_getchat(chat_id)
+    except:
+        tp, val, tb = sys.exc_info()
+        clog("[ERROR] Errored when getting chat "+str(chat_id)+":"+str(val))
+    else:
+        totalcount=0
+        linecount=0
+        smsg=""
+        for user in full_response['participants']:
+            if user['user']['type'] != 'bot':
+                smsg = smsg + "[.](tg://user?id="+str(user['user']['id'])+")"
+                totalcount=totalcount+1
+                linecount=linecount+1
+            if linecount >= 50:
+                smsg = smsg + "\n"
+                linecount = 0
+            if totalcount >= 100:
+                dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
+                log("[Debug] Raw sent data:"+str(dre))
+                smsg=""
+                totalcount=0
+        if totalcount != 0:
+            dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
+            log("[Debug] Raw sent data:"+str(dre))
+        
 
 def tag(chat_id,msg,cmd,chat_type):
     try:
@@ -1640,8 +1666,10 @@ def tag(chat_id,msg,cmd,chat_type):
             lstag(chat_id,msg,cmd)
         elif cmd[1] == "tag":
             tags(chat_id,msg,cmd)
+        elif cmd[1] == "all":
+            tagall(chat_id,msg)
         else:
-            dre = bot.sendMessage(chat_id,"/tag <add|remove|list|tag>",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,"/tag <add|remove|list|tag|all>",reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
 
     return
@@ -1695,6 +1723,18 @@ def pastebin(data,title):
         return(str(url,'utf-8'))
     else:
         return("invalid pastebin key")
+
+def pwrtg_getchat(chat_id):
+    req = Request('https://api.pwrtelegram.xyz/bot'+TOKEN+'/getChat?chat_id='+str(chat_id), headers={'User-Agent': 'Mozilla/5.0'})
+    true=True
+    false=False
+    try:
+        a = urlopen(req).read()
+    except urllib.error.HTTPError as error:
+        a=eval(error.read())
+        raise Exception("PWRTelegram API HTTP ERROR "+str(a['error_code'])+":"+a['description'])
+    fullresult=eval(a)
+    return fullresult['result']
 
 def a2z(textLine):
     zh = textLine.lower()
