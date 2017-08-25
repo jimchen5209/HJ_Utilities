@@ -1629,6 +1629,11 @@ def tagall(chat_id,msg):
     except:
         tp, val, tb = sys.exc_info()
         clog("[ERROR] Errored when getting chat "+str(chat_id)+":"+str(val))
+        dre = bot.sendMessage(chat_id,\
+                    '向[pwrtelegram](https://t.me/pwrtelegram)取得該群組成員時時發生錯誤\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                    parse_mode = 'Markdown',\
+                    reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
     else:
         totalcount=0
         linecount=0
@@ -1650,7 +1655,6 @@ def tagall(chat_id,msg):
             dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
             log("[Debug] Raw sent data:"+str(dre))
         
-
 def tag(chat_id,msg,cmd,chat_type):
     try:
         testsubcmd = cmd[1]
