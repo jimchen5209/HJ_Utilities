@@ -1731,7 +1731,10 @@ def pwrtg_getchat(chat_id):
     try:
         a = urlopen(req).read()
     except urllib.error.HTTPError as error:
-        a=eval(error.read())
+        try:
+            a=eval(error.read())
+        except SyntaxError:
+            a = urlopen(req).read()
         raise Exception("PWRTelegram API HTTP ERROR "+str(a['error_code'])+":"+a['description'])
     fullresult=eval(a)
     return fullresult['result']
