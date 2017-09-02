@@ -8,9 +8,7 @@ import os
 import io
 import telepot
 from telepot.loop import MessageLoop
-from telepot.namedtuple import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, ForceReply
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
-from telepot.namedtuple import InlineQueryResultArticle, InlineQueryResultPhoto, InputTextMessageContent
 try:
     fs = open("./config.json","r")
 except:
@@ -357,6 +355,11 @@ def on_chat_message(msg):
             for txt in cmd:
                 if txt == '@tagall':
                     tag(chat_id,msg,["/tag","all"],chat_type)
+                elif txt[0:4] == '@tag':
+                    if txt == '@tag':
+                        return
+                    else:
+                        tag(chat_id,msg,["/tag","tag",txt[4:]],chat_type)
     elif chat_type == 'channel':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         try:
@@ -451,63 +454,144 @@ def cgp(chat_id,msg,chat_type):
     try:
         reply_to = msg['reply_to_message']
     except:
-        url = msg['text'].split(' ',1)
-        log("[Debug] Attemping to download "+url[1])
-        try:
-            urllib.request.urlretrieve (url[1],"image.jpg")
-        except:
-            dre = bot.sendMessage(chat_id,'/cgp <PIC URL>\n或回覆一個圖片以更改群組圖片',reply_to_message_id=msg['message_id'])
-            log("[Debug] Raw sent data:"+str(dre))
-        else:
-            fo=open(os.getcwd()+"/image.jpg", 'rb')
+        if msg['from']['id'] == OWNERID:
+            clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+            url = msg['text'].split(' ',1)
             try:
-                bot.sendChatAction(chat_id,'upload_photo')
-                log("[Debug]Uploading...")
-                bot.setChatPhoto(chat_id,fo)
+                log("[Debug] Attemping to download "+url[1])
+                urllib.request.urlretrieve (url[1],"image.jpg")
             except:
-                tp, val, tb = sys.exc_info()
-                sval=str(val)
-                bot.sendChatAction(chat_id,'typing')
-                dre = bot.sendMessage(chat_id,\
-                    '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
-                    parse_mode = 'Markdown',\
-                    reply_to_message_id=msg['message_id'])
+                dre = bot.sendMessage(chat_id,'/cgp <PIC URL>\n或回覆一個圖片以更改群組圖片',reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
-                clog('[ERROR] Unable to change the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '\
-                    +str(val).split(',')[0].replace('(','').replace("'",""))
             else:
-                clog('[Info] Sucessfully changed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
-            fo.close()
-            os.remove('image.jpg')
+                fo=open(os.getcwd()+"/image.jpg", 'rb')
+                try:
+                    bot.sendChatAction(chat_id,'upload_photo')
+                    log("[Debug]Uploading...")
+                    bot.setChatPhoto(chat_id,fo)
+                except:
+                    tp, val, tb = sys.exc_info()
+                    sval=str(val)
+                    bot.sendChatAction(chat_id,'typing')
+                    dre = bot.sendMessage(chat_id,\
+                        '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        parse_mode = 'Markdown',\
+                        reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                    clog('[ERROR] Unable to change the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '\
+                        +str(val).split(',')[0].replace('(','').replace("'",""))
+                else:
+                    clog('[Info] Sucessfully changed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
+                fo.close()
+                os.remove('image.jpg')
+            return
+        else:
+            clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+            for admin in bot.getChatAdministrators(chat_id):
+                if msg['from']['id'] == admin['user']['id']:
+                    clog('[Info] Admin Matched for \n[Info] '+ str(admin))
+                    url = msg['text'].split(' ',1)
+                    log("[Debug] Attemping to download "+url[1])
+                    try:
+                        urllib.request.urlretrieve (url[1],"image.jpg")
+                    except:
+                        dre = bot.sendMessage(chat_id,'/cgp <PIC URL>\n或回覆一個圖片以更改群組圖片',reply_to_message_id=msg['message_id'])
+                        log("[Debug] Raw sent data:"+str(dre))
+                    else:
+                        fo=open(os.getcwd()+"/image.jpg", 'rb')
+                        try:
+                            bot.sendChatAction(chat_id,'upload_photo')
+                            log("[Debug]Uploading...")
+                            bot.setChatPhoto(chat_id,fo)
+                        except:
+                            tp, val, tb = sys.exc_info()
+                            sval=str(val)
+                            bot.sendChatAction(chat_id,'typing')
+                            dre = bot.sendMessage(chat_id,\
+                                '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                                parse_mode = 'Markdown',\
+                                reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                            clog('[ERROR] Unable to change the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '\
+                                +str(val).split(',')[0].replace('(','').replace("'",""))
+                        else:
+                            clog('[Info] Sucessfully changed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
+                        fo.close()
+                        os.remove('image.jpg')
+                    return
+            clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+            bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
+            return
+        
     else:
-        try:
-            photo_array=msg['reply_to_message']['photo']
-            log("[Debug] File_id to set:"+str(photo_array))
-        except:
-            dre = bot.sendMessage(chat_id,'請回覆一個圖片信息',reply_to_message_id=msg['message_id'])
-            log("[Debug] Raw sent data:"+str(dre))
-        else:
-            bot.sendChatAction(chat_id,'upload_photo')
-            photo_array.reverse()
-            file = bot.getFile(photo_array[0]['file_id'])['file_path']
-            urllib.request.urlretrieve ("https://api.telegram.org/file/bot"+TOKEN+"/"+file, "image.jpg")
-            fo=open(os.getcwd()+"/image.jpg", 'rb')
+        if msg['from']['id'] == OWNERID:
+            clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
             try:
-                bot.setChatPhoto(chat_id,fo)
+                photo_array=msg['reply_to_message']['photo']
+                log("[Debug] File_id to set:"+str(photo_array))
             except:
-                tp, val, tb = sys.exc_info()
-                sval=str(val)
-                bot.sendChatAction(chat_id,'typing')
-                dre = bot.sendMessage(chat_id,\
-                    '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
-                    parse_mode = 'Markdown',\
-                    reply_to_message_id=msg['message_id'])
+                dre = bot.sendMessage(chat_id,'請回覆一個圖片信息',reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
-                clog('[ERROR] Unable to change the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
             else:
-                clog('[Info] Sucessfully changed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
-            fo.close()
-            os.remove('image.jpg')
+                bot.sendChatAction(chat_id,'upload_photo')
+                photo_array.reverse()
+                file = bot.getFile(photo_array[0]['file_id'])['file_path']
+                urllib.request.urlretrieve ("https://api.telegram.org/file/bot"+TOKEN+"/"+file, "image.jpg")
+                fo=open(os.getcwd()+"/image.jpg", 'rb')
+                try:
+                    bot.setChatPhoto(chat_id,fo)
+                except:
+                    tp, val, tb = sys.exc_info()
+                    sval=str(val)
+                    bot.sendChatAction(chat_id,'typing')
+                    dre = bot.sendMessage(chat_id,\
+                        '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        parse_mode = 'Markdown',\
+                        reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                    clog('[ERROR] Unable to change the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
+                else:
+                    clog('[Info] Sucessfully changed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
+                fo.close()
+                os.remove('image.jpg')
+            return
+        else:
+            clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+            for admin in bot.getChatAdministrators(chat_id):
+                if msg['from']['id'] == admin['user']['id']:
+                    clog('[Info] Admin Matched for \n[Info] '+ str(admin))
+                    try:
+                        photo_array=msg['reply_to_message']['photo']
+                        log("[Debug] File_id to set:"+str(photo_array))
+                    except:
+                        dre = bot.sendMessage(chat_id,'請回覆一個圖片信息',reply_to_message_id=msg['message_id'])
+                        log("[Debug] Raw sent data:"+str(dre))
+                    else:
+                        bot.sendChatAction(chat_id,'upload_photo')
+                        photo_array.reverse()
+                        file = bot.getFile(photo_array[0]['file_id'])['file_path']
+                        urllib.request.urlretrieve ("https://api.telegram.org/file/bot"+TOKEN+"/"+file, "image.jpg")
+                        fo=open(os.getcwd()+"/image.jpg", 'rb')
+                        try:
+                            bot.setChatPhoto(chat_id,fo)
+                        except:
+                            tp, val, tb = sys.exc_info()
+                            sval=str(val)
+                            bot.sendChatAction(chat_id,'typing')
+                            dre = bot.sendMessage(chat_id,\
+                                '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                                parse_mode = 'Markdown',\
+                                reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                            clog('[ERROR] Unable to change the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
+                        else:
+                            clog('[Info] Sucessfully changed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
+                        fo.close()
+                        os.remove('image.jpg')
+                    return
+            clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+            bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
+            return
     return
 
 def rgp(chat_id,msg,chat_type):
@@ -516,21 +600,49 @@ def rgp(chat_id,msg,chat_type):
             '所有人都是管理員的普通群組無法透過我來設置群組圖片',\
             reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
-    try:
-        bot.deleteChatPhoto(chat_id)
-    except:
-        tp, val, tb = sys.exc_info()
-        sval=str(val)
-        bot.sendChatAction(chat_id,'typing')
-        dre = bot.sendMessage(chat_id,\
-            '移除群組圖片時發生錯誤 :(\n\n' +str(val).split(',')[0].replace('(','').replace("'","`"),\
-            parse_mode = 'Markdown',\
-            reply_to_message_id=msg['message_id'])
-        log("[Debug] Raw sent data:"+str(dre))
-        clog('[ERROR] Unable to remove the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '\
-            +str(val).split(',')[0].replace('(','').replace("'",""))
+        return
+    if msg['from']['id'] == OWNERID:
+        clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+        try:
+            bot.deleteChatPhoto(chat_id)
+        except:
+            tp, val, tb = sys.exc_info()
+            sval=str(val)
+            bot.sendChatAction(chat_id,'typing')
+            dre = bot.sendMessage(chat_id,\
+                '移除群組圖片時發生錯誤 :(\n\n' +str(val).split(',')[0].replace('(','').replace("'","`"),\
+                parse_mode = 'Markdown',\
+                reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+            clog('[ERROR] Unable to remove the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '\
+                +str(val).split(',')[0].replace('(','').replace("'",""))
+        else:
+            clog('[Info] Sucessfully removed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
+        return
     else:
-        clog('[Info] Sucessfully removed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
+        clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+        for admin in bot.getChatAdministrators(chat_id):
+            if msg['from']['id'] == admin['user']['id']:
+                clog('[Info] Admin Matched for \n[Info] '+ str(admin))
+                try:
+                    bot.deleteChatPhoto(chat_id)
+                except:
+                    tp, val, tb = sys.exc_info()
+                    sval=str(val)
+                    bot.sendChatAction(chat_id,'typing')
+                    dre = bot.sendMessage(chat_id,\
+                        '移除群組圖片時發生錯誤 :(\n\n' +str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        parse_mode = 'Markdown',\
+                        reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                    clog('[ERROR] Unable to remove the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '\
+                        +str(val).split(',')[0].replace('(','').replace("'",""))
+                else:
+                    clog('[Info] Sucessfully removed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
+                return
+        clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+        bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
+    
     return
 
 def echo(chat_id,msg):
@@ -1593,11 +1705,11 @@ def tags(chat_id,msg,cmd):
         try:
             temptaglist = data[str(chat_id)][listname]
         except:
-            dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",parse_mode="HTML",reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             if temptaglist == []:
-                dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",reply_to_message_id=msg["message_id"])
+                dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",parse_mode="HTML",reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
                 return
             dre = bot.sendMessage(chat_id,"正在提及清單 <b>"+listname+"</b> 的 <b>"+str(len(temptaglist))+"</b> 個人",parse_mode="HTML",reply_to_message_id=msg["message_id"])
