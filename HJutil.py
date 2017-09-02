@@ -1812,9 +1812,20 @@ def gtts(chat_id,msg):
     return
 
 def help(chat_id,msg):
+    bot_me=bot.getMe()
+    clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+    for admin in bot.getChatAdministrators(chat_id):
+        if bot_me['id'] == admin['user']['id']:
+            clog('[Info] I am an admin in this chat.')
+            dre = bot.sendMessage(chat_id,\
+                '/a2z\n/cgp\n/rgp\n/ping\n/echo\n/groupinfo\n/pin\n/getme\n/title\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag\n/gtts\n/fileinfo',\
+                reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+            return
+    clog('[Info] I am not an admin in this chat.')
     dre = bot.sendMessage(chat_id,\
-        '/a2z\n/cgp\n/rgp\n/ping\n/echo\n/groupinfo\n/pin\n/getme\n/title\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag\n/gtts\n/fileinfo',\
-        reply_to_message_id=msg['message_id'])
+                '/a2z\n/ping\n/echo\n/groupinfo\n/getme\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag\n/gtts\n/fileinfo',\
+                reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
    
