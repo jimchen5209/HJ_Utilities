@@ -306,51 +306,52 @@ def on_chat_message(msg):
         #command_detect
         if content_type == 'text':
             cmd = msg['text'].split()
-            if cmd[0] == '/start' or cmd[0] == '/start@'+username:
+            cmd[0]=cmd[0].lower()
+            if cmd[0] == '/start' or cmd[0] == '/start@'+username.lower():
                 startc(chat_id,msg)
-            if cmd[0] == '/cgp' or cmd[0] == '/cgp@'+username:
+            if cmd[0] == '/cgp' or cmd[0] == '/cgp@'+username.lower():
                 cgp(chat_id,msg,chat_type)
-            if cmd[0] == '/rgp' or cmd[0] == '/rgp@'+username:
+            if cmd[0] == '/rgp' or cmd[0] == '/rgp@'+username.lower():
                 rgp(chat_id,msg,chat_type)
-            if cmd[0] == '/echo' or cmd[0] == '/echo@'+username:
+            if cmd[0] == '/echo' or cmd[0] == '/echo@'+username.lower():
                 echo(chat_id,msg)
-            if cmd[0] == '/ns' or cmd[0] == '/ns@'+username:
+            if cmd[0] == '/ns' or cmd[0] == '/ns@'+username.lower():
                 ns(chat_id,msg,cmd)
-            if cmd[0] == 'ping' or cmd[0] == 'Ping':
+            if cmd[0] == 'ping':
                 ping(chat_id,msg)
-            if cmd[0] == '/ping' or cmd[0] == '/ping@'+username:
+            if cmd[0] == '/ping' or cmd[0] == '/ping@'+username.lower():
                 ping(chat_id,msg)
-            if cmd[0] == '/title' or cmd[0] == '/title@'+username:
+            if cmd[0] == '/title' or cmd[0] == '/title@'+username.lower():
                 title(chat_id,msg,chat_type)
-            if cmd[0] == '/lsadmins' or cmd[0] == '/lsadmins@'+username:
+            if cmd[0] == '/lsadmins' or cmd[0] == '/lsadmins@'+username.lower():
                 lsadmins(chat_id,msg,cmd)
-            if cmd[0] == '/groupinfo' or cmd[0] == '/groupinfo@'+username:
+            if cmd[0] == '/groupinfo' or cmd[0] == '/groupinfo@'+username.lower():
                 groupinfo(chat_id,msg,chat_type)
-            if cmd[0] == '/leavegroup' or cmd[0] == '/leavegroup@'+username:
+            if cmd[0] == '/leavegroup' or cmd[0] == '/leavegroup@'+username.lower():
                 leavegroup(chat_id,msg,chat_type)
-            if cmd[0] == '/a2z' or cmd[0] == '/a2z@'+username:
+            if cmd[0] == '/a2z' or cmd[0] == '/a2z@'+username.lower():
                 a2zc(chat_id,msg)
-            if cmd[0] == '/getuser' or cmd[0] == '/getuser@'+username:
+            if cmd[0] == '/getuser' or cmd[0] == '/getuser@'+username.lower():
                 getuser(chat_id,msg,cmd)
-            if cmd[0] == '/getme' or cmd[0] == '/getme@'+username:
+            if cmd[0] == '/getme' or cmd[0] == '/getme@'+username.lower():
                 getme(chat_id,msg)
-            if cmd[0] == '/pin' or cmd[0] == '/pin@'+username:
+            if cmd[0] == '/pin' or cmd[0] == '/pin@'+username.lower():
                 pin(chat_id,msg,chat_type)
-            if cmd[0] == '/replace' or cmd[0] == '/replace@'+username:
+            if cmd[0] == '/replace' or cmd[0] == '/replace@'+username.lower():
                 replace(chat_id,msg,cmd)
-            if cmd[0] == '/getfile' or cmd[0] == '/getfile@'+username:
+            if cmd[0] == '/getfile' or cmd[0] == '/getfile@'+username.lower():
                 getfile(chat_id,msg,cmd)
-            if cmd[0] == '/fileinfo' or cmd[0] == '/fileinfo@'+username:
+            if cmd[0] == '/fileinfo' or cmd[0] == '/fileinfo@'+username.lower():
                 fileinfo(chat_id,msg)
-            if cmd[0] == '/tag' or cmd[0] == '/tag@'+username:
+            if cmd[0] == '/tag' or cmd[0] == '/tag@'+username.lower():
                 tag(chat_id,msg,cmd,chat_type)
-            if cmd[0] == '/tagall' or cmd[0] == '/tagall@'+username:
+            if cmd[0] == '/tagall' or cmd[0] == '/tagall@'+username.lower():
                 tag(chat_id,msg,["/tag","all"],chat_type)
-            if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username:
+            if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username.lower():
                 confirm(chat_id,msg)
-            if cmd[0] == '/gtts' or cmd[0] == '/gtts@'+username:
+            if cmd[0] == '/gtts' or cmd[0] == '/gtts@'+username.lower():
                 gtts(chat_id,msg)
-            if cmd[0] == '/help' or cmd[0] == '/help@'+username:
+            if cmd[0] == '/help' or cmd[0] == '/help@'+username.lower():
                 help(chat_id,msg)
             for txt in cmd:
                 if txt == '@tagall':
