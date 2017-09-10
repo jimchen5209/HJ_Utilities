@@ -355,12 +355,16 @@ def on_chat_message(msg):
                 help(chat_id,msg)
             for txt in cmd:
                 if txt == '@tagall':
-                    tag(chat_id,msg,["/tag","all"],chat_type)
+                    #tag(chat_id,msg,["/tag","all"],chat_type)
+                    time.sleep(0)
                 elif txt[0:4] == '@tag':
                     if txt == '@tag':
                         return
                     else:
                         tag(chat_id,msg,["/tag","tag",txt[4:]],chat_type)
+            repsep = msg['text'].split('/',2)
+            if repsep[0] == "s":
+                replace(chat_id,msg,['/replace',repsep[1],repsep[2]])
     elif chat_type == 'channel':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         try:
@@ -1163,7 +1167,20 @@ def replace(chat_id,msg,cmd):
                     clog('[ERROR] ERROR when replacing '+cmd[1]+' to ' + cmd[2]+msg['chat']['title']+'('+str(chat_id)+') : '\
                         +str(val).split(',')[0].replace('(','').replace("'",""))
                 else:
-                    dre = bot.sendMessage(chat_id,rstring,reply_to_message_id=msg['message_id'])
+                    fuser = msg['from']
+                    fnick = fuser['first_name']
+                    try:
+                        fnick = fnick + ' ' + fuser['last_name']
+                    except:
+                        fnick = fnick
+                    tuser = msg['reply_to_message']['from']
+                    tnick = tuser['first_name']
+                    try:
+                        tnick = tnick + ' ' + tuser['last_name']
+                    except:
+                        tnick = tnick
+                    smsg= '<a href="tg://user?id='+str(fuser['id'])+'">'+fnick+'</a> 認為 <a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a> 的意思是 <i>'+rstring +'</i>'
+                    dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
     return
 
@@ -1734,39 +1751,39 @@ def tags(chat_id,msg,cmd):
                 log("[Debug] Raw sent data:"+str(dre))
     return
 
-def tagall(chat_id,msg):
-    dre = bot.sendMessage(chat_id,"正在提及群組內的所有人",parse_mode="HTML",reply_to_message_id=msg["message_id"])
-    log("[Debug] Raw sent data:"+str(dre))
-    try:
-        full_response = pwrtg_getchat(chat_id)
-    except:
-        tp, val, tb = sys.exc_info()
-        clog("[ERROR] Errored when getting chat "+str(chat_id)+":"+str(val))
-        dre = bot.sendMessage(chat_id,\
-                    '向[pwrtelegram](https://t.me/pwrtelegram)取得該群組成員時時發生錯誤\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
-                    parse_mode = 'Markdown',\
-                    reply_to_message_id=msg['message_id'])
-        log("[Debug] Raw sent data:"+str(dre))
-    else:
-        totalcount=0
-        linecount=0
-        smsg=""
-        for user in full_response['participants']:
-            if user['user']['type'] != 'bot':
-                smsg = smsg + "[.](tg://user?id="+str(user['user']['id'])+")"
-                totalcount=totalcount+1
-                linecount=linecount+1
-            if linecount >= 50:
-                smsg = smsg + "\n"
-                linecount = 0
-            if totalcount >= 100:
-                dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
-                log("[Debug] Raw sent data:"+str(dre))
-                smsg=""
-                totalcount=0
-        if totalcount != 0:
-            dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
-            log("[Debug] Raw sent data:"+str(dre))
+#def tagall(chat_id,msg):
+#    dre = bot.sendMessage(chat_id,"正在提及群組內的所有人",parse_mode="HTML",reply_to_message_id=msg["message_id"])
+#    log("[Debug] Raw sent data:"+str(dre))
+#    try:
+#        full_response = pwrtg_getchat(chat_id)
+#    except:
+#        tp, val, tb = sys.exc_info()
+#        clog("[ERROR] Errored when getting chat "+str(chat_id)+":"+str(val))
+#        dre = bot.sendMessage(chat_id,\
+#                    '向[pwrtelegram](https://t.me/pwrtelegram)取得該群組成員時時發生錯誤\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+#                    parse_mode = 'Markdown',\
+#                    reply_to_message_id=msg['message_id'])
+#        log("[Debug] Raw sent data:"+str(dre))
+#    else:
+#        totalcount=0
+#        linecount=0
+#        smsg=""
+#        for user in full_response['participants']:
+#            if user['user']['type'] != 'bot':
+#                smsg = smsg + "[.](tg://user?id="+str(user['user']['id'])+")"
+#                totalcount=totalcount+1
+#                linecount=linecount+1
+#            if linecount >= 50:
+#                smsg = smsg + "\n"
+#                linecount = 0
+#            if totalcount >= 100:
+#                dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
+#                log("[Debug] Raw sent data:"+str(dre))
+#                smsg=""
+#                totalcount=0
+#        if totalcount != 0:
+#            dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
+#            log("[Debug] Raw sent data:"+str(dre))
         
 def tag(chat_id,msg,cmd,chat_type):
     try:
@@ -1784,9 +1801,11 @@ def tag(chat_id,msg,cmd,chat_type):
         elif cmd[1] == "tag":
             tags(chat_id,msg,cmd)
         elif cmd[1] == "all":
-            tagall(chat_id,msg)
+            #tagall(chat_id,msg)
+            dre = bot.sendMessage(chat_id,"此功能因為API終止服務暫時停用，詳情請到[pwrtelegram](https://t.me/pwrtelegram)",parse_mode='Markdown',reply_to_message_id=msg["message_id"])
+            log("[Debug] Raw sent data:"+str(dre))
         else:
-            dre = bot.sendMessage(chat_id,"/tag <add|remove|list|tag|all>",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,"/tag <add|remove|list|tag>",reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
 
     return
@@ -1852,20 +1871,20 @@ def pastebin(data,title):
     else:
         return("invalid pastebin key")
 
-def pwrtg_getchat(chat_id):
-    req = Request('https://api.pwrtelegram.xyz/bot'+TOKEN+'/getChat?chat_id='+str(chat_id), headers={'User-Agent': 'Mozilla/5.0'})
-    true=True
-    false=False
-    try:
-        a = urlopen(req).read()
-    except urllib.error.HTTPError as error:
-        try:
-            a=eval(error.read())
-        except SyntaxError:
-            a = urlopen(req).read()
-        raise Exception("PWRTelegram API HTTP ERROR "+str(a['error_code'])+":"+a['description'])
-    fullresult=eval(a)
-    return fullresult['result']
+#def pwrtg_getchat(chat_id):
+#    req = Request('https://api.pwrtelegram.xyz/bot'+TOKEN+'/getChat?chat_id='+str(chat_id), headers={'User-Agent': 'Mozilla/5.0'})
+#    true=True
+#    false=False
+#    try:
+#        a = urlopen(req).read()
+#    except urllib.error.HTTPError as error:
+#        try:
+#            a=eval(error.read())
+#        except SyntaxError:
+#            a = urlopen(req).read()
+#        raise Exception("PWRTelegram API HTTP ERROR "+str(a['error_code'])+":"+a['description'])
+#    fullresult=eval(a)
+#    return fullresult['result']
 
 def a2z(textLine):
     zh = textLine.lower()
