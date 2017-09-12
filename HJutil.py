@@ -1690,7 +1690,7 @@ def lstag(chat_id,msg,cmd):
         try:
             temptaglist = data[str(chat_id)][listname]
         except:
-            dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",parse_mode="HTML",reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             smsg = smsg +"清單 <b>"+listname+"</b> ,共 <b>" + str(len(temptaglist)) +"</b> 人\n"
