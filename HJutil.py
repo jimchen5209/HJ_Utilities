@@ -307,6 +307,10 @@ def on_chat_message(msg):
         if content_type == 'text':
             cmd = msg['text'].split()
             cmd[0]=cmd[0].lower()
+            sortedcmd = []
+            for i in cmd:
+                if i not in sortedcmd:
+                    sortedcmd.append(i)
             if cmd[0] == '/start' or cmd[0] == '/start@'+username.lower():
                 startc(chat_id,msg)
             if cmd[0] == '/cgp' or cmd[0] == '/cgp@'+username.lower():
@@ -344,7 +348,7 @@ def on_chat_message(msg):
             if cmd[0] == '/fileinfo' or cmd[0] == '/fileinfo@'+username.lower():
                 fileinfo(chat_id,msg)
             if cmd[0] == '/tag' or cmd[0] == '/tag@'+username.lower():
-                tag(chat_id,msg,cmd,chat_type)
+                tag(chat_id,msg,sortedcmd,chat_type)
             if cmd[0] == '/tagall' or cmd[0] == '/tagall@'+username.lower():
                 tag(chat_id,msg,["/tag","all"],chat_type)
             if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username.lower():
@@ -353,7 +357,7 @@ def on_chat_message(msg):
                 gtts(chat_id,msg)
             if cmd[0] == '/help' or cmd[0] == '/help@'+username.lower():
                 help(chat_id,msg)
-            for txt in cmd:
+            for txt in sortedcmd:
                 if txt == '@tagall':
                     #tag(chat_id,msg,["/tag","all"],chat_type)
                     time.sleep(0)
