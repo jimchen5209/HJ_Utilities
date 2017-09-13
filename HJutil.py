@@ -367,8 +367,14 @@ def on_chat_message(msg):
                     else:
                         tag(chat_id,msg,["/tag","tag",txt[4:]],chat_type)
             repsep = msg['text'].split('/',2)
-            if repsep[0] == "s":
-                replace(chat_id,msg,['/replace',repsep[1],repsep[2]])
+            try:
+                tobereplaced = repsep[1]
+                toreplace = repsep[2]
+            except:
+                clog('[Info] Imcompleted replace method.Ignoring.')
+            else:
+                if repsep[0] == "s":
+                    replace(chat_id,msg,['/replace',tobereplaced,toreplace])
     elif chat_type == 'channel':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         try:
