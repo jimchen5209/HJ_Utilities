@@ -62,7 +62,7 @@ def on_chat_message(msg):
             dlog = dlog
         else:
             if reply_to == bot_me['id']:
-                dlog = dlog + "( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"
+                dlog = dlog + " ( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"
             else:
                 tuser= msg['reply_to_message']['from']['first_name']
                 try:
@@ -73,7 +73,7 @@ def on_chat_message(msg):
                     tuser= tuser + '@' + msg['reply_to_message']['from']['username']
                 except:
                     tuser= tuser 
-                dlog = dlog + "( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"
+                dlog = dlog + " ( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"
         if content_type == 'text':
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) : " + msg['text']
         else:
@@ -150,7 +150,7 @@ def on_chat_message(msg):
             dlog = dlog
         else:
             if reply_to == bot_me['id']:
-                dlog = dlog + "( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"
+                dlog = dlog + " ( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"
             else:
                 tuser= msg['reply_to_message']['from']['first_name']
                 try:
@@ -161,7 +161,7 @@ def on_chat_message(msg):
                     tuser= tuser + '@' + msg['reply_to_message']['from']['username']
                 except:
                     tuser= tuser 
-                dlog = dlog + "( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"
+                dlog = dlog + " ( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"
         if content_type == 'text':
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) in "+msg['chat']['title']+' ( '+str(chat_id)+ ' ): ' + msg['text']
         elif content_type == 'new_chat_member':
@@ -204,10 +204,10 @@ def on_chat_message(msg):
                 tuser= tuser 
             tmpcontent_type, tmpchat_type, tmpchat_id = telepot.glance(msg['pinned_message'])
             if tmpcontent_type == 'text':
-                dlog = dlog + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+\
+                dlog = dlog + ' ' + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+\
                     msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+ fnick + " ( "+fuserid+" ):\n"+msg['pinned_message']['text']
             else:
-                dlog = dlog + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+\
+                dlog = dlog + ' ' + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+\
                     msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+ fnick + " ( "+fuserid+" )"
                 if tmpcontent_type == 'photo':
                     flog = "[Pinned Photo]"
@@ -248,7 +248,7 @@ def on_chat_message(msg):
                     except:
                         flog = flog +"FileID:"+ msg['pinned_message']['sticker']['file_id']
         elif content_type == 'new_chat_photo':
-            dlog = dlog + "The photo of this "+chat_type+""+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick + " ( "+fuserid+" )"
+            dlog = dlog + " The photo of this "+chat_type+""+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick + " ( "+fuserid+" )"
             flog = "[New Chat Photo]"
             photo_array=msg['new_chat_photo']
             photo_array.reverse()
@@ -257,9 +257,9 @@ def on_chat_message(msg):
             except:
                 flog = flog +"FileID:"+ photo_array[0]['file_id']
         elif content_type == 'delete_chat_photo':
-            dlog = dlog + "The photo of this "+chat_type+ " was deleted by "+fnick + " ( "+fuserid+" )"
+            dlog = dlog + " The photo of this "+chat_type+ " was deleted by "+fnick + " ( "+fuserid+" )"
         elif content_type == 'new_chat_title':
-            dlog = dlog + "The title of this "+chat_type+ " was changed to "+msg['new_chat_title']+" by "+fnick + " ( "+fuserid+" )"
+            dlog = dlog + " The title of this "+chat_type+ " was changed to "+msg['new_chat_title']+" by "+fnick + " ( "+fuserid+" )"
         else:
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) in "+msg['chat']['title']+' ( '+str(chat_id)+ ' ) sent a '+ content_type
         clog(dlog)
@@ -375,6 +375,39 @@ def on_chat_message(msg):
                     clog('[Info] Imcompleted replace method.Ignoring.')
                 else:
                     replace(chat_id,msg,['/replace',tobereplaced,toreplace])
+        else:
+            try:
+                cmd = msg['caption'].split()
+                cmd[0]=cmd[0].lower()
+                sortedcmd = []
+                for i in cmd:
+                    if i not in sortedcmd:
+                        sortedcmd.append(i)
+            except:
+                time.sleep(0)
+            else:
+                for txt in sortedcmd:
+                    if txt == '@tagall':
+                        #tag(chat_id,msg,["/tag","all"],chat_type)
+                        time.sleep(0)
+                    elif txt[0:4] == '@tag':
+                        if txt == '@tag':
+                            return
+                        else:
+                            tag(chat_id,msg,["/tag","tag",txt[4:]],chat_type)
+            try:
+                repsep = msg['text'].split('/',2)
+            except:
+                time.sleep(0)
+            else:
+                if repsep[0] == "s":
+                    try:
+                        tobereplaced = repsep[1]
+                        toreplace = repsep[2]
+                    except:
+                        clog('[Info] Imcompleted replace method.Ignoring.')
+                    else:
+                        replace(chat_id,msg,['/replace',tobereplaced,toreplace])
     elif chat_type == 'channel':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         try:
@@ -382,14 +415,14 @@ def on_chat_message(msg):
         except:
             dlog = dlog
         else: 
-            dlog = dlog + "( Reply to "+str(msg['reply_to_message']['message_id'])+" )"
+            dlog = dlog + " ( Reply to "+str(msg['reply_to_message']['message_id'])+" )"
         if content_type == 'text':
             dlog = dlog+ ' ' + fnick 
             if fuserid:
                 dlog = dlog + " ( "+fuserid+" )"
-            dlog = dlog + " in channel "+msg['chat']['title']+' ( '+str(chat_id)+ ' ): ' + msg['text']
+            dlog = dlog + ' ' + " in channel "+msg['chat']['title']+' ( '+str(chat_id)+ ' ): ' + msg['text']
         elif content_type == 'new_chat_photo':
-            dlog = dlog + "The photo of this "+chat_type+""+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick 
+            dlog = dlog + " The photo of this "+chat_type+""+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick 
             if fuserid:
                 dlog = dlog+ " ( "+fuserid+" )"
             flog = "[New Chat Photo]"
@@ -400,11 +433,11 @@ def on_chat_message(msg):
             except:
                 flog = flog +"FileID:"+ photo_array[0]['file_id']
         elif content_type == 'delete_chat_photo':
-            dlog = dlog + "The photo of this "+chat_type+ " was deleted by "+fnick
+            dlog = dlog + " The photo of this "+chat_type+ " was deleted by "+fnick
             if fuserid:
                 dlog = dlog+ " ( "+fuserid+" )"
         elif content_type == 'new_chat_title':
-            dlog = dlog + "The title of this "+chat_type+ " was changed to "+msg['new_chat_title']+" by "+fnick
+            dlog = dlog + " The title of this "+chat_type+ " was changed to "+msg['new_chat_title']+" by "+fnick
             if fuserid:
                 dlog = dlog+ " ( "+fuserid+" )"
         else:
@@ -1008,7 +1041,8 @@ def getuser(chat_id,msg,txt):
         except:
             dre = bot.sendMessage(chat_id,\
                 "/getuser [user_id]\n"+\
-                "或回覆一個使用者來取得該用戶的資訊",\
+                "或回覆一個使用者來取得該用戶的資訊"+\
+                "回覆時輸入 /getuser forward 可優先查詢轉寄來源的用戶資訊",\
                 parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
@@ -1044,7 +1078,19 @@ def getuser(chat_id,msg,txt):
                     '<b>目前職位</b>: ' + user['status'],parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
     else:
-        user = bot.getChatMember(chat_id,reply_to['from']['id'])
+        try:
+            cmd = txt[1]
+        except:
+            uuserid = reply_to['from']['id']
+        else:
+            if cmd == 'forward':
+                try:
+                    uuserid = reply_to['forward_from']['id']
+                except:
+                    uuserid = reply_to['from']['id']
+            else:
+                uuserid = reply_to['from']['id']
+        user = bot.getChatMember(chat_id,uuserid)
         firstname = user['user']['first_name']
         try:
             lastname = user['user']['last_name']
@@ -1150,48 +1196,51 @@ def replace(chat_id,msg,cmd):
         try:
             rstring=reply_to['text']
         except:
-            dre = bot.sendMessage(chat_id,'請回復一個文字信息',reply_to_message_id=msg['message_id'])
+            try:
+                rstring=reply_to['caption']
+            except:
+                dre = bot.sendMessage(chat_id,'請回復一個文字信息',reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                return
+        try:
+            test=cmd[1]
+            test=cmd[2]
+        except:
+            dre = bot.sendMessage(chat_id,"/replace <要被取代的文字> <取代的文字>\n如果想要取代成空白可以使用`''`",\
+                parse_mode='Markdown',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             try:
-                test=cmd[1]
-                test=cmd[2]
-            except:
-                dre = bot.sendMessage(chat_id,"/replace <要被取代的文字> <取代的文字>\n如果想要取代成空白可以使用`''`",\
-                    parse_mode='Markdown',reply_to_message_id=msg['message_id'])
-                log("[Debug] Raw sent data:"+str(dre))
-            else:
-                try:
-                    if cmd[2] == "''" :
-                        rstring = rstring.replace(cmd[1],'')
-                    else:
-                        rstring = rstring.replace(cmd[1],cmd[2])
-                except:
-                    tp, val, tb = sys.exc_info()
-                    bot.sendChatAction(chat_id,'typing')
-                    dre = bot.sendMessage(chat_id,\
-                        '發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
-                        parse_mode = 'Markdown',\
-                        reply_to_message_id=msg['message_id'])
-                    log("[Debug] Raw sent data:"+str(dre))
-                    clog('[ERROR] ERROR when replacing '+cmd[1]+' to ' + cmd[2]+msg['chat']['title']+'('+str(chat_id)+') : '\
-                        +str(val).split(',')[0].replace('(','').replace("'",""))
+                if cmd[2] == "''" :
+                    rstring = rstring.replace(cmd[1],'')
                 else:
-                    fuser = msg['from']
-                    fnick = fuser['first_name']
-                    try:
-                        fnick = fnick + ' ' + fuser['last_name']
-                    except:
-                        fnick = fnick
-                    tuser = msg['reply_to_message']['from']
-                    tnick = tuser['first_name']
-                    try:
-                        tnick = tnick + ' ' + tuser['last_name']
-                    except:
-                        tnick = tnick
-                    smsg= '<a href="tg://user?id='+str(fuser['id'])+'">'+fnick+'</a> 認為 <a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a> 的意思是 <i>'+rstring +'</i>'
-                    dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",reply_to_message_id=msg['message_id'])
-                    log("[Debug] Raw sent data:"+str(dre))
+                    rstring = rstring.replace(cmd[1],cmd[2])
+            except:
+                tp, val, tb = sys.exc_info()
+                bot.sendChatAction(chat_id,'typing')
+                dre = bot.sendMessage(chat_id,\
+                    '發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                    parse_mode = 'Markdown',\
+                    reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                clog('[ERROR] ERROR when replacing '+cmd[1]+' to ' + cmd[2]+msg['chat']['title']+'('+str(chat_id)+') : '\
+                    +str(val).split(',')[0].replace('(','').replace("'",""))
+            else:
+                fuser = msg['from']
+                fnick = fuser['first_name']
+                try:
+                    fnick = fnick + ' ' + fuser['last_name']
+                except:
+                    fnick = fnick
+                tuser = msg['reply_to_message']['from']
+                tnick = tuser['first_name']
+                try:
+                    tnick = tnick + ' ' + tuser['last_name']
+                except:
+                    tnick = tnick
+                smsg= '<a href="tg://user?id='+str(fuser['id'])+'">'+fnick+'</a> 認為 <a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a> 的意思是 <i>'+rstring +'</i>'
+                dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
     return
 
 def getfile(chat_id,msg,cmd):
