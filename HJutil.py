@@ -256,6 +256,15 @@ def on_chat_message(msg):
                 flog = flog + "Caption = " +msg['caption'] +" ,FileID:"+ photo_array[0]['file_id']
             except:
                 flog = flog +"FileID:"+ photo_array[0]['file_id']
+        elif content_type == 'group_chat_created':
+            if msg['new_chat_member']['id'] == bot_me['id']:
+                dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) created a "+ chat_type + ' ' + msg['chat']['title']+' ( '+str(chat_id)+ ' ) and I was added into the group.'
+        elif content_type == 'migrate_to_chat_id':
+            newgp = bot.getChat(msg['migrate_to_chat_id'])
+            dlog = dlog+ ' ' + chat_type + ' ' + msg['chat']['title']+' ( '+str(chat_id)+ ' ) was migrated to '+ newgp['type'] + ' ' + newgp['title'] +' ('+str(newgp['id'])+')  by '+ fnick + " ( "+fuserid+" )"
+        elif content_type == 'migrate_from_chat_id':
+            oldgp = bot.getChat(msg['migrate_from_chat_id'])
+            dlog = dlog+ ' ' + chat_type + ' ' + msg['chat']['title']+' ( '+str(chat_id)+ ' ) was migrated from '+ oldgp['type'] + ' ' + oldgp['title'] +' ('+str(oldgp['id'])+')  by '+ fnick + " ( "+fuserid+" )"
         elif content_type == 'delete_chat_photo':
             dlog = dlog + " The photo of this "+chat_type+ " was deleted by "+fnick + " ( "+fuserid+" )"
         elif content_type == 'new_chat_title':
