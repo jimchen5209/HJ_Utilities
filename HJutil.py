@@ -26,8 +26,10 @@ pastebin_user_key = config["pastebin_user_key"]
 Debug = config["Debug"]
 OWNERID=config["OWNERID"]
 confirmsg = None
+function_list_data = None
 
 def on_chat_message(msg):
+    
     content_type, chat_type, chat_id = telepot.glance(msg)
     bot_me= bot.getMe()
     username= bot_me['username'].replace(' ','')
@@ -313,6 +315,12 @@ def on_chat_message(msg):
         if flog != "":
             clog(flog)
         #command_detect
+        global function_list_data
+        try:
+            groupfundict = function_list_data[str(chat_id)]
+        except:
+            function_default(chat_id,msg,chat_type)
+            groupfundict = function_list_data[str(chat_id)]
         if content_type == 'text':
             cmd = msg['text'].split()
             cmd[0]=cmd[0].lower()
@@ -323,47 +331,68 @@ def on_chat_message(msg):
             if cmd[0] == '/start' or cmd[0] == '/start@'+username.lower():
                 startc(chat_id,msg)
             if cmd[0] == '/cgp' or cmd[0] == '/cgp@'+username.lower():
-                cgp(chat_id,msg,chat_type)
+                if groupfundict['grouppic']:
+                    cgp(chat_id,msg,chat_type)
             if cmd[0] == '/rgp' or cmd[0] == '/rgp@'+username.lower():
-                rgp(chat_id,msg,chat_type)
+                if groupfundict['grouppic']:
+                    rgp(chat_id,msg,chat_type)
             if cmd[0] == '/echo' or cmd[0] == '/echo@'+username.lower():
-                echo(chat_id,msg)
+                if groupfundict['echo']:
+                    echo(chat_id,msg)
             if cmd[0] == '/ns' or cmd[0] == '/ns@'+username.lower():
-                ns(chat_id,msg,cmd)
+                if groupfundict['numbersystem']:
+                    ns(chat_id,msg,cmd)
             if cmd[0] == 'ping':
-                ping(chat_id,msg)
+                if groupfundict['ping']:
+                    ping(chat_id,msg)
             if cmd[0] == '/ping' or cmd[0] == '/ping@'+username.lower():
-                ping(chat_id,msg)
+                if groupfundict['ping']:
+                    ping(chat_id,msg)
             if cmd[0] == '/title' or cmd[0] == '/title@'+username.lower():
-                title(chat_id,msg,chat_type)
+                if groupfundict['title']:
+                    title(chat_id,msg,chat_type)
             if cmd[0] == '/lsadmins' or cmd[0] == '/lsadmins@'+username.lower():
-                lsadmins(chat_id,msg,cmd)
+                if groupfundict['lsadmins']:
+                    lsadmins(chat_id,msg,cmd)
             if cmd[0] == '/groupinfo' or cmd[0] == '/groupinfo@'+username.lower():
-                groupinfo(chat_id,msg,chat_type)
+                if groupfundict['groupinfo']:
+                    groupinfo(chat_id,msg,chat_type)
             if cmd[0] == '/leavegroup' or cmd[0] == '/leavegroup@'+username.lower():
                 leavegroup(chat_id,msg,chat_type)
             if cmd[0] == '/a2z' or cmd[0] == '/a2z@'+username.lower():
-                a2zc(chat_id,msg)
+                if groupfundict['a2z']:
+                    a2zc(chat_id,msg)
             if cmd[0] == '/getuser' or cmd[0] == '/getuser@'+username.lower():
-                getuser(chat_id,msg,cmd)
+                if groupfundict['user']:
+                    getuser(chat_id,msg,cmd)
             if cmd[0] == '/getme' or cmd[0] == '/getme@'+username.lower():
-                getme(chat_id,msg)
+                if groupfundict['user']:
+                    getme(chat_id,msg)
             if cmd[0] == '/pin' or cmd[0] == '/pin@'+username.lower():
-                pin(chat_id,msg,chat_type)
+                if groupfundict['pin']:
+                    pin(chat_id,msg,chat_type)
             if cmd[0] == '/replace' or cmd[0] == '/replace@'+username.lower():
-                replace(chat_id,msg,cmd)
+                if groupfundict['replace_str']:
+                    replace(chat_id,msg,cmd)
             if cmd[0] == '/getfile' or cmd[0] == '/getfile@'+username.lower():
-                getfile(chat_id,msg,cmd)
+                if groupfundict['files']:
+                    getfile(chat_id,msg,cmd)
             if cmd[0] == '/fileinfo' or cmd[0] == '/fileinfo@'+username.lower():
-                fileinfo(chat_id,msg)
+                if groupfundict['files']:
+                    fileinfo(chat_id,msg)
             if cmd[0] == '/tag' or cmd[0] == '/tag@'+username.lower():
-                tag(chat_id,msg,sortedcmd,chat_type)
+                if groupfundict['tag']:
+                    tag(chat_id,msg,sortedcmd,chat_type)
+            if cmd[0] == '/function' or cmd[0] == '/function@'+username.lower():
+                function(chat_id,msg,cmd,chat_type)
             if cmd[0] == '/tagall' or cmd[0] == '/tagall@'+username.lower():
-                tag(chat_id,msg,["/tag","all"],chat_type)
+                if groupfundict['tag']:
+                    tag(chat_id,msg,["/tag","all"],chat_type)
             if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username.lower():
                 confirm(chat_id,msg)
             if cmd[0] == '/gtts' or cmd[0] == '/gtts@'+username.lower():
-                gtts(chat_id,msg)
+                if groupfundict['google_tts']:
+                    gtts(chat_id,msg)
             if cmd[0] == '/help' or cmd[0] == '/help@'+username.lower():
                 help(chat_id,msg)
             for txt in sortedcmd:
@@ -374,16 +403,18 @@ def on_chat_message(msg):
                     if txt == '@tag':
                         return
                     else:
-                        tag(chat_id,msg,["/tag","tag",txt[4:]],chat_type)
-            repsep = msg['text'].split('/',2)
-            if repsep[0] == "s":
-                try:
-                    tobereplaced = repsep[1]
-                    toreplace = repsep[2]
-                except:
-                    clog('[Info] Imcompleted replace method.Ignoring.')
-                else:
-                    replace(chat_id,msg,['/replace',tobereplaced,toreplace])
+                        if groupfundict['tag']:
+                            tag(chat_id,msg,["/tag","tag",txt[4:]],chat_type)
+            if groupfundict['replace_str']:
+                repsep = msg['text'].split('/',2)
+                if repsep[0] == "s":
+                    try:
+                        tobereplaced = repsep[1]
+                        toreplace = repsep[2]
+                    except:
+                        clog('[Info] Imcompleted replace method.Ignoring.')
+                    else:
+                        replace(chat_id,msg,['/replace',tobereplaced,toreplace])
         else:
             try:
                 cmd = msg['caption'].split()
@@ -403,20 +434,22 @@ def on_chat_message(msg):
                         if txt == '@tag':
                             return
                         else:
-                            tag(chat_id,msg,["/tag","tag",txt[4:]],chat_type)
-            try:
-                repsep = msg['text'].split('/',2)
-            except:
-                time.sleep(0)
-            else:
-                if repsep[0] == "s":
-                    try:
-                        tobereplaced = repsep[1]
-                        toreplace = repsep[2]
-                    except:
-                        clog('[Info] Imcompleted replace method.Ignoring.')
-                    else:
-                        replace(chat_id,msg,['/replace',tobereplaced,toreplace])
+                            if groupfundict['tag']:
+                                tag(chat_id,msg,["/tag","tag",txt[4:]],chat_type)
+            if groupfundict['replace_str']:
+                try:
+                    repsep = msg['caption'].split('/',2)
+                except:
+                    time.sleep(0)
+                else:
+                    if repsep[0] == "s":
+                        try:
+                            tobereplaced = repsep[1]
+                            toreplace = repsep[2]
+                        except:
+                            clog('[Info] Imcompleted replace method.Ignoring.')
+                        else:
+                            replace(chat_id,msg,['/replace',tobereplaced,toreplace])
     elif chat_type == 'channel':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         try:
@@ -1366,7 +1399,7 @@ def exportblog(chat_id,msg):
     return
 
 def readtag():
-    clog("[Info] Reading data...")
+    clog("[Info] Reading tag data...")
     if os.path.isfile("./tagdata.json") == False:
         fs = open("./tagdata.json","w")
         fs.write("{}")
@@ -1377,7 +1410,7 @@ def readtag():
     return(data)
 
 def writetag(data):
-    clog("[Info] Writing data...")
+    clog("[Info] Writing tag data...")
     fs = open("./tagdata.json","w")
     fs.write(str(data))
     fs.close
@@ -1899,21 +1932,423 @@ def gtts(chat_id,msg):
             log("[Debug] Raw sent data:"+str(dre))
     return
 
-def help(chat_id,msg):
+def read_function_list():
+    global function_list_data
+    clog('[Info] Reading function list data...')
+    if os.path.isfile("./fctlsdata.json") == False:
+        fs = open("./fctlsdata.json","w")
+        fs.write("{}")
+        fs.close
+    fs = open("./fctlsdata.json","r")
+    function_list_data = eval(fs.read())
+    fs.close
+    clog('... Done.')
+    return
+
+def write_function_list(data):
+    clog("[Info] Writing function list data...")
+    fs = open("./fctlsdata.json","w")
+    fs.write(str(data))
+    fs.close
+    return
+
+def function(chat_id,msg,cmd,chat_type):
+    if msg['from']['id'] == OWNERID:
+        clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+        try:
+            testsubcmd = cmd[1]
+        except:
+            dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|stats|reset>",reply_to_message_id=msg["message_id"])
+            log("[Debug] Raw sent data:"+str(dre))
+        else:
+            if cmd[1] == "enable":
+                function_enable(chat_id,msg,cmd,chat_type)
+            elif cmd[1] == "disable":
+                function_disable(chat_id,msg,cmd,chat_type)
+            elif cmd[1] == "chkadminf":
+                function_admincheck(chat_id,msg,chat_type,True)
+            elif cmd[1] == "stats":
+                function_stats(chat_id,msg)
+            elif cmd[1] == "reset":
+                function_default(chat_id,msg,chat_type)
+                dre = bot.sendMessage(chat_id,'已重置功能狀態',reply_to_message_id=msg["message_id"])
+                log("[Debug] Raw sent data:"+str(dre))
+            else:
+                dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|reset>",reply_to_message_id=msg["message_id"])
+                log("[Debug] Raw sent data:"+str(dre))
+        return
+    if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+        clog('[Info] Detected a group with all members are admin enabled.')
+        dre = bot.sendMessage(chat_id,'你沒有權限更改功能設定',reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    else:
+        clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+        for admin in bot.getChatAdministrators(chat_id):
+            if msg['from']['id'] == admin['user']['id']:
+                clog('[Info] Admin Matched for \n[Info] '+ str(admin))
+                try:
+                    testsubcmd = cmd[1]
+                except:
+                    dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|stats|reset>",reply_to_message_id=msg["message_id"])
+                    log("[Debug] Raw sent data:"+str(dre))
+                else:
+                    if cmd[1] == "enable":
+                        function_enable(chat_id,msg,cmd,chat_type)
+                    elif cmd[1] == "disable":
+                        function_disable(chat_id,msg,cmd,chat_type)
+                    elif cmd[1] == "chkadminf":
+                        function_admincheck(chat_id,msg,chat_type,True)
+                    elif cmd[1] == "stats":
+                        function_stats(chat_id,msg)
+                    elif cmd[1] == "reset":
+                        function_default(chat_id,msg,chat_type)
+                        dre = bot.sendMessage(chat_id,'已重置功能狀態',reply_to_message_id=msg["message_id"])
+                        log("[Debug] Raw sent data:"+str(dre))
+                    else:
+                        dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|stats|reset>",reply_to_message_id=msg["message_id"])
+                        log("[Debug] Raw sent data:"+str(dre))
+                return
+        clog('[Info] No admins matched with' + msg['from']['username'],'('+str(msg['from']['id'])+ ')')
+        dre = bot.sendMessage(chat_id,'你沒有權限更改功能設定',reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    return
+
+def function_enable(chat_id,msg,cmd,chat_type):
+    global function_list_data
+    bot_me = bot.getMe()
+    try:
+        funct=cmd[2]
+    except:
+        dre = bot.sendMessage(chat_id,"/function <enable> <Function name|all>",reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    try:
+        groupfundict = function_list_data[str(chat_id)]
+    except:
+        function_default(chat_id,msg,chat_type)
+        dre = bot.sendMessage(chat_id,'偵測到本群組沒有設定且已初始化功能列表',reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    try:
+        currentv = groupfundict[funct]
+    except:
+        dre = bot.sendMessage(chat_id,"找不到 {0}".format('<b>'+funct+'</b>'),reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    if currentv == True:
+        dre = bot.sendMessage(chat_id,\
+                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'此功能目前為啟用狀態'+'</code>'),\
+                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    if funct == 'grouppic' or funct == 'title' or funct == 'pin':
+        if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+            clog('[Info] Detected a group with all members are admin enabled.')
+            dre = bot.sendMessage(chat_id,\
+                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'所有人都是管理員的普通群組無法執行需要管理員的指令'+'</code>'),\
+                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+            function_list_data[str(chat_id)] = groupfundict
+            write_function_list(function_list_data)
+            return
+        clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+        for admin in bot.getChatAdministrators(chat_id):
+            if bot_me['id'] == admin['user']['id']:
+                if chat_type == 'supergroup':
+                    clog('[Info] I am an admin in this chat,checking further permissions...')
+                    if funct == 'grouppic':
+                        if admin['can_change_info']:
+                            groupfundict['grouppic'] = True
+                            dre = bot.sendMessage(chat_id,\
+                                '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                        else:
+                            dre = bot.sendMessage(chat_id,\
+                                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'權限不足'+'</code>'),\
+                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                            return
+                    if funct == 'title':
+                        if admin['can_change_info']:
+                            groupfundict['grouppic'] = True
+                            dre = bot.sendMessage(chat_id,\
+                                '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                        else:
+                            dre = bot.sendMessage(chat_id,\
+                                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'權限不足'+'</code>'),\
+                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                            return
+                    if funct == 'pin':
+                        if admin['can_pin_messages']:
+                            groupfundict['pin'] = True
+                            dre = bot.sendMessage(chat_id,\
+                                '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                        else:
+                            dre = bot.sendMessage(chat_id,\
+                                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'權限不足'+'</code>'),\
+                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                            return
+                elif chat_type == 'group':
+                    clog('[Info] I am an admin in this chat,enabling admin functions without pin...')
+                    if funct == 'grouppic':
+                        groupfundict['grouppic'] = True
+                        dre = bot.sendMessage(chat_id,\
+                            '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                            parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                        log("[Debug] Raw sent data:"+str(dre))
+                    if funct == 'title':
+                        groupfundict['title'] = True
+                        dre = bot.sendMessage(chat_id,\
+                            '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                            parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                        log("[Debug] Raw sent data:"+str(dre))
+                    if funct == 'pin':
+                        dre = bot.sendMessage(chat_id,\
+                            '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'普通群組無法置頂訊息'+'</code>'),\
+                            parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                        log("[Debug] Raw sent data:"+str(dre))
+                        return
+                function_list_data[str(chat_id)] = groupfundict
+                write_function_list(function_list_data)
+                return
+        clog('[Info] I am not an admin in this chat.')
+        dre = bot.sendMessage(chat_id,\
+            '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'權限不足'+'</code>'),\
+            parse_mode='HTML',reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    else:
+        groupfundict[funct]=True
+        dre = bot.sendMessage(chat_id,\
+            '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+            parse_mode='HTML',reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        function_list_data[str(chat_id)] = groupfundict
+        write_function_list(function_list_data)
+    return
+
+def function_disable(chat_id,msg,cmd,chat_type):
+    global function_list_data
     bot_me=bot.getMe()
+    try:
+        funct=cmd[2]
+    except:
+        dre = bot.sendMessage(chat_id,"/function <enable> <Function name|all>",reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    try:
+        groupfundict = function_list_data[str(chat_id)]
+    except:
+        function_default(chat_id,msg,chat_type)
+        dre = bot.sendMessage(chat_id,'偵測到本群組沒有設定且已初始化功能列表',reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    if funct == 'all':
+        for funct in groupfundict:
+            groupfundict[funct] = False
+        function_list_data[str(chat_id)] = groupfundict
+        write_function_list(function_list_data)
+        dre = bot.sendMessage(chat_id,'已停用所有功能',reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    try:
+        currentv = groupfundict[funct]
+    except:
+        dre = bot.sendMessage(chat_id,"找不到 {0}".format('<b>'+funct+'</b>'),reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    if currentv == False:
+        dre = bot.sendMessage(chat_id,\
+                '無法停用功能{0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'此功能目前為停用狀態'+'</code>'),\
+                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    groupfundict[funct]=False
+    dre = bot.sendMessage(chat_id,\
+        '已停用 {0} 功能'.format('<b>'+funct+'</b>'),\
+        parse_mode='HTML',reply_to_message_id=msg['message_id'])
+    log("[Debug] Raw sent data:"+str(dre))
+    function_list_data[str(chat_id)] = groupfundict
+    write_function_list(function_list_data)
+    return
+
+def function_admincheck(chat_id,msg,chat_type,sendchat):
+    global function_list_data
+    bot_me=bot.getMe()
+    try:
+        groupfundict = function_list_data[str(chat_id)]
+    except:
+        groupfundict = {}
+    smsg = ''
+    if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+        clog('[Info] Detected a group with all members are admin enabled,disabling admin functions...')
+        if sendchat:
+            dre = bot.sendMessage(chat_id,\
+                '所有人都是管理員的普通群組無法執行需要管理員的指令，因此有些功能已被停用',\
+                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+        groupfundict['grouppic'] = False
+        smsg = smsg + '已停用 {0} 功能\n'.format('<b>grouppic</b>')
+        groupfundict['pin'] = False
+        smsg = smsg + '已停用 {0} 功能\n'.format('<b>pin</b>')
+        groupfundict['title'] = False
+        smsg = smsg + '已停用 {0} 功能\n'.format('<b>title</b>')
+        function_list_data[str(chat_id)] = groupfundict
+        write_function_list(function_list_data)
+        if sendchat:
+            dre = bot.sendMessage(chat_id,\
+                smsg,\
+                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+        return
+    if sendchat:
+        dre = bot.sendMessage(chat_id,"正在檢查我是否是管理員...",reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
     clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+    
     for admin in bot.getChatAdministrators(chat_id):
         if bot_me['id'] == admin['user']['id']:
-            clog('[Info] I am an admin in this chat.')
-            dre = bot.sendMessage(chat_id,\
-                '/a2z\n/cgp\n/rgp\n/ping\n/echo\n/groupinfo\n/pin\n/getme\n/title\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag\n/gtts\n/fileinfo',\
-                reply_to_message_id=msg['message_id'])
-            log("[Debug] Raw sent data:"+str(dre))
+            if chat_type == 'supergroup':
+                clog('[Info] I am an admin in this chat,checking further permissions...')
+                if admin['can_change_info']:
+                    groupfundict['grouppic'] = True
+                    smsg = smsg + '已啟用 {0} 功能\n'.format('<b>title</b>')
+                    groupfundict['title'] = True
+                    smsg = smsg + '已啟用 {0} 功能\n'.format('<b>title</b>')
+                else:
+                    groupfundict['grouppic'] = False
+                    smsg = smsg + '已停用 {0} 功能\n'.format('<b>grouppic</b>')
+                    groupfundict['title'] = False
+                    smsg = smsg + '已停用 {0} 功能\n'.format('<b>grouppic</b>')
+                if admin['can_pin_messages'] == True:
+                    groupfundict['pin'] = True
+                    smsg = smsg + '已啟用 {0} 功能\n'.format('<b>pin</b>')
+                else:
+                    groupfundict['pin'] = False
+                    smsg = smsg + '已停用 {0} 功能\n'.format('<b>pin</b>')
+            elif chat_type == 'group':
+                clog('[Info] I am an admin in this chat,enabling admin functions without pin...')
+                groupfundict['grouppic'] = True
+                smsg = smsg + '已啟用 {0} 功能\n'.format('<b>grouppic</b>')
+                groupfundict['pin'] = False
+                smsg = smsg + '已停用 {0} 功能\n'.format('<b>pin</b>')
+                groupfundict['title'] = True
+                smsg = smsg + '已啟用 {0} 功能\n'.format('<b>title</b>')
+            function_list_data[str(chat_id)] = groupfundict
+            write_function_list(function_list_data)
+            if sendchat:
+                dre = bot.sendMessage(chat_id,\
+                    smsg,\
+                    parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
             return
     clog('[Info] I am not an admin in this chat.')
-    dre = bot.sendMessage(chat_id,\
-                '/a2z\n/ping\n/echo\n/groupinfo\n/getme\n/ns\n/getuser\n/replace\n/getfile\n/lsadmins\n/tag\n/gtts\n/fileinfo',\
-                reply_to_message_id=msg['message_id'])
+    groupfundict['grouppic'] = False
+    smsg = smsg + '已停用 {0} 功能\n'.format('<b>grouppic</b>')
+    groupfundict['pin'] = False
+    smsg = smsg + '已停用 {0} 功能\n'.format('<b>pin</b>')
+    groupfundict['title'] = False
+    smsg = smsg + '已停用 {0} 功能\n'.format('<b>title</b>')
+    function_list_data[str(chat_id)] = groupfundict
+    write_function_list(function_list_data)
+    if sendchat:
+        dre = bot.sendMessage(chat_id,\
+            smsg,\
+            parse_mode='HTML',reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+    return
+
+def function_default(chat_id,msg,chat_type):
+    global function_list_data
+    bot_me=bot.getMe()
+    try:
+        groupfundict = function_list_data[str(chat_id)]
+    except:
+        groupfundict = {}
+    groupfundict['a2z'] = True
+    groupfundict['grouppic'] = True
+    groupfundict['ping'] = True
+    groupfundict['echo'] = True
+    groupfundict['groupinfo'] = True
+    groupfundict['pin'] = True
+    groupfundict['title'] = True
+    groupfundict['user'] = True
+    groupfundict['numbersystem'] = True
+    groupfundict['files'] = True
+    groupfundict['lsadmins'] = True
+    groupfundict['tag'] = True
+    groupfundict['google_tts'] = True
+    groupfundict['replace_str'] = True
+    function_list_data[str(chat_id)] = groupfundict
+    write_function_list(function_list_data)
+    function_admincheck(chat_id,msg,chat_type,False)
+
+    return
+
+def function_stats(chat_id,msg):
+    global function_list_data
+    bot_me=bot.getMe()
+    try:
+        groupfundict = function_list_data[str(chat_id)]
+    except:
+        groupfundict = {}
+    smsg = ''
+    for funct in groupfundict:
+        smsg = smsg + '<b>{0}</b> : <code>{1}</code>\n'.format(funct,str(groupfundict[funct]))
+    dre = bot.sendMessage(chat_id,smsg,parse_mode='HTML',reply_to_message_id=msg["message_id"])
+    log("[Debug] Raw sent data:"+str(dre))
+    return
+
+def help(chat_id,msg):
+    global function_list_data
+    bot_me=bot.getMe()
+    try:
+        groupfundict = function_list_data[str(chat_id)]
+    except:
+        function_default(chat_id,msg,chat_type)
+    smsg = ''
+    if groupfundict['a2z']:
+        smsg = smsg + '/a2z\n'
+    if groupfundict['grouppic']:
+        smsg = smsg + '/cgp\n/rgp\n'
+    if groupfundict['ping']:
+        smsg = smsg + '/ping\n'
+    if groupfundict['echo']:
+        smsg = smsg + '/echo\n'
+    if groupfundict['groupinfo']:
+        smsg = smsg + '/groupinfo\n'
+    if groupfundict['pin']:
+        smsg = smsg + '/pin\n'
+    if groupfundict['title']:
+        smsg = smsg + '/title\n'
+    if groupfundict['user']:
+        smsg = smsg + '/getme\n/getuser\n'
+    if groupfundict['numbersystem']:
+        smsg = smsg + '/ns\n'
+    if groupfundict['files']:
+        smsg = smsg + '/getfile\n/fileinfo\n'
+    if groupfundict['lsadmins']:
+        smsg = smsg + '/lsadmins\n'
+    if groupfundict['tag']:
+        smsg = smsg + '/tag\n'
+    if groupfundict['google_tts']:
+        smsg = smsg + '/gtts\n'
+    if groupfundict['replace_str']:
+        smsg = smsg + '/replace'
+    if smsg == '':
+        smsg = '所有功能已被停用！若需要啟用，請使用 /function 指令'
+    else:
+        smsg = smsg + '/function'
+    dre = bot.sendMessage(chat_id,smsg,reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
    
@@ -2072,6 +2507,7 @@ answerer = telepot.helper.Answerer(bot)
 
 #bot.message_loop({'chat': on_chat_message})
 MessageLoop(bot, {'chat': on_chat_message}).run_as_thread()
+read_function_list()
 clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Bot has started")
 clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Listening ...")
 
