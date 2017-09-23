@@ -1048,7 +1048,7 @@ def leavegroup(chat_id,msg,chat_type):
                 log("[Debug] Raw sent data:"+str(dre))
                 bot.leaveChat(chat_id)
                 return
-        clog('[Info] No admins matched with' + msg['from']['username'],'('+str(msg['from']['id'])+ ')')
+        clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
         dre = bot.sendMessage(chat_id,'你沒有辦法讓我離開喔',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
@@ -1611,7 +1611,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
                             confirmsg = dre
                             log("[Debug] Raw sent data:"+str(dre))
                             return
-                    clog('[Info] No admins matched with' + msg['from']['username'],'('+msg['from']['id']+ ')')
+                    clog('[Info] No admins matched with' + msg['from']['username']+'('+msg['from']['id']+ ')')
                     dre = bot.sendMessage(chat_id,'你沒有權限移除所有tag',reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
                     return
@@ -2017,7 +2017,7 @@ def function(chat_id,msg,cmd,chat_type):
                         dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|stats|reset>",reply_to_message_id=msg["message_id"])
                         log("[Debug] Raw sent data:"+str(dre))
                 return
-        clog('[Info] No admins matched with' + msg['from']['username'],'('+str(msg['from']['id'])+ ')')
+        clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
         dre = bot.sendMessage(chat_id,'你沒有權限更改功能設定',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
