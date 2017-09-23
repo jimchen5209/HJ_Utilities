@@ -382,6 +382,14 @@ def on_chat_message(msg):
                     fileinfo(chat_id,msg)
             if cmd[0] == '/tag' or cmd[0] == '/tag@'+username.lower():
                 if groupfundict['tag']:
+                    try:
+                        a = sortedcmd[2]
+                    except:
+                        try:
+                            if cmd[1] == 'list' and cmd[2] == 'list':
+                                sortedcmd.append('list')
+                        except:
+                            time.sleep(0)
                     tag(chat_id,msg,sortedcmd,chat_type)
             if cmd[0] == '/function' or cmd[0] == '/function@'+username.lower():
                 function(chat_id,msg,cmd,chat_type)
