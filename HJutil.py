@@ -617,7 +617,7 @@ def cgp(chat_id,msg,chat_type):
                         fo.close()
                         os.remove('image.jpg')
                     return
-            clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+            clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
             bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
             return
         
@@ -687,7 +687,7 @@ def cgp(chat_id,msg,chat_type):
                         fo.close()
                         os.remove('image.jpg')
                     return
-            clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+            clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
             bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
             return
     return
@@ -738,7 +738,7 @@ def rgp(chat_id,msg,chat_type):
                 else:
                     clog('[Info] Sucessfully removed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
                 return
-        clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+        clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
         bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
     
     return
@@ -926,7 +926,7 @@ def title(chat_id,msg,chat_type):
                 else:
                     clog('[Info] Sucessfully changed the Group title in '+msg['chat']['title']+'('+str(chat_id)+')')
                 return
-        clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+        clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
         bot.sendMessage(chat_id,'你沒有權限設置群組標題',reply_to_message_id=msg['message_id'])
         return
     return
@@ -1048,7 +1048,7 @@ def leavegroup(chat_id,msg,chat_type):
                 log("[Debug] Raw sent data:"+str(dre))
                 bot.leaveChat(chat_id)
                 return
-        clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+        clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
         dre = bot.sendMessage(chat_id,'你沒有辦法讓我離開喔',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
@@ -1230,7 +1230,7 @@ def pin(chat_id,msg,chat_type):
                     else:
                         clog('[Info] Sucessfully pinned the message '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+')')
                     return
-            clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+            clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
             dre = bot.sendMessage(chat_id,'你沒有權限置頂訊息',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
             return
@@ -1611,7 +1611,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
                             confirmsg = dre
                             log("[Debug] Raw sent data:"+str(dre))
                             return
-                    clog('[Info] No admins matched with' + msg['from']['username']+'('+msg['from']['id']+ ')')
+                    clog('[Info] No admins matched with ' + msg['from']['username']+'('+msg['from']['id']+ ')')
                     dre = bot.sendMessage(chat_id,'你沒有權限移除所有tag',reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
                     return
@@ -2017,7 +2017,7 @@ def function(chat_id,msg,cmd,chat_type):
                         dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|stats|reset>",reply_to_message_id=msg["message_id"])
                         log("[Debug] Raw sent data:"+str(dre))
                 return
-        clog('[Info] No admins matched with' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+        clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
         dre = bot.sendMessage(chat_id,'你沒有權限更改功能設定',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
