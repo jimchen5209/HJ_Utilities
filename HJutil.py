@@ -1847,10 +1847,10 @@ def tags(chat_id,msg,cmd):
                 smsg = smsg + "[.](tg://user?id="+str(userid)+")"
                 totalcount=totalcount+1
                 linecount=linecount+1
-                if linecount >= 50:
-                    smsg = smsg + "\n"
-                    linecount = 0
-                if totalcount >= 100:
+                #if linecount >= 50:
+                #    smsg = smsg + "\n"
+                #    linecount = 0
+                if totalcount >= 5:
                     dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
                     log("[Debug] Raw sent data:"+str(dre))
                     smsg=""
