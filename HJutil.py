@@ -143,8 +143,6 @@ def on_chat_message(msg):
                 gtts(chat_id,msg)
             if cmd[0] == '/help':
                 helpp(chat_id,msg)
-        #dre = bot.sendMessage(chat_id,'本機器人在私訊中沒有功能，請將我加入到群組',reply_to_message_id=msg['message_id'])
-        #log("[Debug] Raw sent data:"+str(dre))
     elif chat_type == 'group' or chat_type == 'supergroup':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         try:
@@ -539,7 +537,7 @@ def on_chat_message(msg):
             clog(flog)
 
 def startc(chat_id,msg):
-    dre = bot.sendMessage(chat_id,'JUST a utility bot\n/help',reply_to_message_id=msg['message_id'])
+    dre = bot.sendMessage(chat_id,'JUST an utilities bot\n/help',reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
 
