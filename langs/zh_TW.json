@@ -76,7 +76,7 @@
     "no_perm": "你沒有權限",
     "debug_off": "Debug選項是關的",
     "debug": "若要取得Debug log請輸入 /exportblog -debug "
-  }
+  },
   "tag": {
     "add": {
       "help": "/tag add <tag_name> <userid>\n或回覆該用戶以加入tag名單",

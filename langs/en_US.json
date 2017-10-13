@@ -76,7 +76,7 @@
     "no_perm": "You don't have permission.",
     "debug_off": "Debug option is off",
     "debug": "If you want to get Debug log,use /exportblog -debug "
-  }
+  },
   "tag": {
     "add": {
       "help": "/tag add <tag_name> <userid>\nor reply to a user to add this user to a list",
