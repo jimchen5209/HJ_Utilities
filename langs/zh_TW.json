@@ -34,7 +34,7 @@
   },
   "leavegroup": {
     "farewell": "Bye~",
-    "no_perm": "沒有辦法讓我離開喔"
+    "no_perm": "你沒有辦法讓我離開喔"
   },
   "a2z": {
     "help": "/a2z <string>\n或回覆一個信息來將英文字母轉成注音",
