@@ -2042,7 +2042,7 @@ def function_enable(chat_id,msg,cmd,chat_type):
     try:
         currentv = groupfundict[funct]
     except:
-        dre = bot.sendMessage(chat_id,"找不到 {0}".format('<b>'+funct+'</b>'),reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,"找不到 {0}".format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     if currentv == True:
@@ -2171,7 +2171,7 @@ def function_disable(chat_id,msg,cmd,chat_type):
     try:
         currentv = groupfundict[funct]
     except:
-        dre = bot.sendMessage(chat_id,"找不到 {0}".format('<b>'+funct+'</b>'),reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,"找不到 {0}".format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     if currentv == False:
