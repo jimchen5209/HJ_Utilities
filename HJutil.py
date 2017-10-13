@@ -29,7 +29,7 @@ confirmsg = None
 function_list_data = None
 
 def on_chat_message(msg):
-    
+    edited = False
     content_type, chat_type, chat_id = telepot.glance(msg)
     bot_me= bot.getMe()
     username= bot_me['username'].replace(' ','')
@@ -38,6 +38,7 @@ def on_chat_message(msg):
     flog = ""
     try:
         dlog=dlog+"[EDITED"+str(msg['edit_date'])+"]"
+        edited = True
     except:
         time.sleep(0)
     try:
@@ -122,7 +123,7 @@ def on_chat_message(msg):
         if flog != "":
             clog(flog)
         #command_detect
-        if content_type == 'text':
+        if content_type == 'text' and edited == False:
             cmd = msg['text'].split()
             if cmd[0] == '/start':
                 startc(chat_id,msg)
@@ -321,7 +322,7 @@ def on_chat_message(msg):
         except:
             function_default(chat_id,msg,chat_type)
             groupfundict = function_list_data[str(chat_id)]
-        if content_type == 'text':
+        if content_type == 'text' and edited == False:
             cmd = msg['text'].split()
             cmd[0]=cmd[0].lower()
             sortedcmd = []
