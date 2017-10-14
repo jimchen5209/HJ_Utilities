@@ -2350,7 +2350,7 @@ def help(chat_id,msg):
     if groupfundict['google_tts']:
         smsg = smsg + '/gtts\n'
     if groupfundict['replace_str']:
-        smsg = smsg + '/replace'
+        smsg = smsg + '/replace\n'
     if smsg == '':
         smsg = '所有功能已被停用！若需要啟用，請使用 /function 指令'
     else:
