@@ -161,5 +161,9 @@
     "help": {
       "nofunction": "All functions are disabled!Use /function if you need to enable."
     }
+  },
+  "config":{
+    "langsuccess":"Set language to {0}",
+    "langexist":"The language has already been {0}"
   }
 }

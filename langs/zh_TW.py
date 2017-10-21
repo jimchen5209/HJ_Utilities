@@ -161,5 +161,9 @@
     "help": {
       "nofunction": "所有功能已被停用！若需要啟用，請使用 /function 指令"
     }
+  },
+  "config":{
+    "langsuccess":"已將語言設置為 {0}",
+    "langexist":"語言已經是 {0}"
   }
 }
