@@ -24,6 +24,7 @@
   "lsadmins": {
     "error": "取得目標群組管理員時發生錯誤\n\n{0}\n\n將以目前群組繼續",
     "everyone_is_admin": "群組內的每個人都是管理員",
+    "creator":"創群者：{0}",
     "admin_badge": "Admin"
   },
   "groupinfo": {

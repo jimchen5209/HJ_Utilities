@@ -24,6 +24,7 @@
   "lsadmins": {
     "error": "An error occured when fetching admins list from the target group.\n\n{0}\n\nI'll continue with this group.",
     "everyone_is_admin": "All members in this group are admins.",
+    "creator":"Creator：{0}",
     "admin_badge": "Admin"
   },
   "groupinfo": {
