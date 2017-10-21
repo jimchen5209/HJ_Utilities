@@ -22,7 +22,7 @@
     "no_perm": "You don't have permission to change group title."
   },
   "lsadmins": {
-    "error": "An error occured when fetching admins list from the target group.\n\n{0}",
+    "error": "An error occured when fetching admins list from the target group.\n\n{0}\n\nI'll continue with this group.",
     "everyone_is_admin": "All members in this group are admins.",
     "admin_badge": "Admin"
   },
