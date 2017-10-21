@@ -58,7 +58,7 @@
   "replace": {
     "help_not_reply": "請回復一則訊息\n\n用法: /replace <要被取代的文字> <取代的文字>",
     "not_text": "請回復一個文字信息或有說明文字的任何檔案",
-    "help": "/replace <要被取代的文字> <取代的文字>\n如果想要取代成空白可以使用<code>''</code>",
+    "help": "/replace <要被取代的文字> <取代的文字>\n如果想要取代成空白可以使用`''`",
     "error": "發生錯誤\n\n{0}",
     "result": "{0} 認為 {1} 的意思是 {2}"
   },
@@ -158,10 +158,10 @@
       "success_enable": "已啟用 {0} 功能",
       "success_disable": "已停用 {0} 功能",
       "msg_checking_admin": "正在檢查我是否是管理員..."
-    },
-    "help": {
-      "nofunction": "所有功能已被停用！若需要啟用，請使用 /function 指令"
     }
+  },
+  "help": {
+      "nofunction": "所有功能已被停用！若需要啟用，請使用 /function 指令"
   },
   "config":{
     "langsuccess":"已將語言設置為 {0}",

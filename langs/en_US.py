@@ -58,7 +58,7 @@
   "replace": {
     "help_not_reply": "Reply to a message,please.\n\nUsage: /replace <string to be replaced> <string to replace>",
     "not_text": "Reply to a text message,please.",
-    "help": "/replace <string to be replaced> <string to replace>\nIf you want to replace with blank,use <code>''</code>",
+    "help": "/replace <string to be replaced> <string to replace>\nIf you want to replace with blank,use `''`",
     "error": "An error occured.\n\n{0}",
     "result": "{0} thinks that the meaning of {1} is {2}"
   },
@@ -89,7 +89,7 @@
       "r_success": "Successfully added {0} to {1} ."
     },
     "remove": {
-      "help": "/tag remove <tag_name> <userid>\nor reply to a user to remove this user from a list.\nor use /tag remove <tag> * 以移除這個tag",
+      "help": "/tag remove <tag_name> <userid>\nor reply to a user to remove this user from a list.\nor use /tag remove <tag> * to remove the whole tag",
       "no_list": "There is no list in this group.",
       "remove_all": {
         "warn": "This will <b>remove all</b> of the tags in this group.It cannot be undone.If you want to continue,reply to this message and type /confirm .",
@@ -158,10 +158,10 @@
       "success_enable": "{0} has been enabled.",
       "success_disable": "{0} has been disabled.",
       "msg_checking_admin": "Checking if I am an admin in this group..."
-    },
-    "help": {
-      "nofunction": "All functions are disabled!Use /function if you need to enable."
     }
+  },
+  "help": {
+    "nofunction": "All functions are disabled!Use /function if you need to enable."
   },
   "config":{
     "langsuccess":"Set language to {0}",
