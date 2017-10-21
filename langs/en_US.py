@@ -12,7 +12,7 @@
     "no_perm": "You don't have permission to change group picture."
   },
   "ns": {
-    "help": "/ns <todec|tobin|tooct|tohex> <number>\nIf the number you provided is not in Decimal,type <code>[bin:0b|oct:0o|hex:0x]</code> before the number.\nEx : <code>0xabf</code>",
+    "help": "/ns <todec|tobin|tooct|tohex> <number>\nIf the number you provided is not in Decimal,type `[bin:0b|oct:0o|hex:0x]` before the number.\nEx : `0xabf`",
     "error": "An error occured.\n\n{0}"
   },
   "title": {

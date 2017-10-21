@@ -12,7 +12,7 @@
     "no_perm": "你沒有權限設置群組圖片"
   },
   "ns": {
-    "help": "/ns <todec|tobin|tooct|tohex> <number>\n提供的數字若不是十進位請在數字前面註明 <code>[bin:0b|oct:0o|hex:0x]</code>\n例如 : <code>0xabf</code>",
+    "help": "/ns <todec|tobin|tooct|tohex> <number>\n提供的數字若不是十進位請在數字前面註明 `[bin:0b|oct:0o|hex:0x]`\n例如 : `0xabf`",
     "error": "發生錯誤\n\n{0}" 
   },
   "title": {
