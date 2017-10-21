@@ -5,10 +5,13 @@ import urllib
 import urllib.request
 from urllib.request import Request, urlopen
 import os
+import platform
 import io
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+
+HJ_Ver= "1.0.1"
 try:
     fs = open("./config.json","r")
 except:
@@ -25,8 +28,40 @@ pastebin_dev_key = config["pastebin_dev_key"]
 pastebin_user_key = config["pastebin_user_key"]
 Debug = config["Debug"]
 OWNERID=config["OWNERID"]
+
+try:
+    fs = open("./langs/list.py","r")
+except:
+    tp, val, tb = sys.exc_info()
+    print("Errored when loading list.py:"+str(val).split(',')[0].replace('(','').replace("'",""))
+    programPause = input("Press any key to stop...\n")
+    exit()
+langlist = eval(fs.read())
+fs.close()
+lang = {}
+for i in langlist:
+    fs = open(langlist[i]["file"],"r")
+    lang[i]={}
+    lang[i]["display"] = eval(fs.read())
+    lang[i]["display_name"]=langlist[i]["display_name"]
+    fs.close()
+
 confirmsg = None
 function_list_data = None
+
+class color:
+   PURPLE = '\033[95m'
+   CYAN = '\033[96m'
+   DARKCYAN = '\033[36m'
+   BLUE = '\033[94m'
+   GREEN = '\033[92m'
+   YELLOW = '\033[93m'
+   RED = '\033[91m'
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   ITALIC = '\033[3m'
+   RESET = '\033[0m'
+
 
 def on_chat_message(msg):
     edited = False
@@ -35,9 +70,11 @@ def on_chat_message(msg):
     username= bot_me['username'].replace(' ','')
     log("[Debug] Raw message:"+str(msg))
     dlog = "["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info]"
+    dlogwc = color.GREEN +"["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"]"+color.BLUE + "[Info]" +color.RESET
     flog = ""
     try:
         dlog=dlog+"[EDITED"+str(msg['edit_date'])+"]"
+        dlogwc=dlogwc+color.YELLOW+"[EDITED"+str(msg['edit_date'])+"]"+color.RESET
         edited = True
     except:
         time.sleep(0)
@@ -59,6 +96,7 @@ def on_chat_message(msg):
         fuserid = str(fuser['user']['id'])
     if chat_type == 'private':
         dlog = dlog + "[Private]["+str(msg['message_id'])+"]"
+        dlogwc = dlogwc + color.BLUE +"[Private]"+color.RESET+"["+str(msg['message_id'])+"]"
         try:
             reply_to = msg['reply_to_message']['from']['id']
         except:
@@ -66,6 +104,7 @@ def on_chat_message(msg):
         else:
             if reply_to == bot_me['id']:
                 dlog = dlog + " ( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"
+                dlogwc = dlogwc + color.PURPLE + " ( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"+color.RESET
             else:
                 tuser= msg['reply_to_message']['from']['first_name']
                 try:
@@ -77,11 +116,14 @@ def on_chat_message(msg):
                 except:
                     tuser= tuser 
                 dlog = dlog + " ( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"
+                dlogwc = dlogwc + color.PURPLE + " ( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"+color.RESET
         if content_type == 'text':
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) : " + msg['text']
+            dlogwc = dlogwc+color.CYAN+ ' ' + fnick + color.RESET+" ( "+fuserid+" )  : " + msg['text']
         else:
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) sent a "+ content_type
-        clog(dlog)
+            dlogwc = dlogwc+color.CYAN+  ' ' + fnick + color.RESET+" ( "+fuserid+" ) sent a "+ content_type
+        clog(dlog,dlogwc)
         if content_type == 'photo':
             flog = "[Photo]"
             photo_array=msg['photo']
@@ -145,6 +187,7 @@ def on_chat_message(msg):
                 helpp(chat_id,msg)
     elif chat_type == 'group' or chat_type == 'supergroup':
         dlog = dlog + "["+str(msg['message_id'])+"]"
+        dlogwc = dlogwc + "["+str(msg['message_id'])+"]"
         try:
             reply_to = msg['reply_to_message']['from']['id']
         except:
@@ -152,6 +195,7 @@ def on_chat_message(msg):
         else:
             if reply_to == bot_me['id']:
                 dlog = dlog + " ( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"
+                dlogwc = dlogwc + color.PURPLE + " ( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"+color.RESET
             else:
                 tuser= msg['reply_to_message']['from']['first_name']
                 try:
@@ -163,11 +207,14 @@ def on_chat_message(msg):
                 except:
                     tuser= tuser 
                 dlog = dlog + " ( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"
+                dlogwc = dlogwc + color.PURPLE + " ( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"+color.RESET
         if content_type == 'text':
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) in "+msg['chat']['title']+' ( '+str(chat_id)+ ' ): ' + msg['text']
+            dlogwc = dlogwc+color.CYAN+ ' ' + fnick + color.RESET+" ( "+fuserid+" ) in "+color.YELLOW +msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ): ' + msg['text']
         elif content_type == 'new_chat_member':
             if msg['new_chat_member']['id'] == bot_me['id']:
                 dlog = dlog+ ' I have been added to ' +msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+ fnick + " ( "+fuserid+" )"
+                dlogwc = dlogwc+color.GREEN +' I have been added to '+ color.YELLOW+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) '+color.GREEN +'by '+color.CYAN+ fnick + color.RESET+" ( "+fuserid+" )"
             else:
                 tuser= msg['new_chat_member']['first_name']
                 try:
@@ -179,9 +226,11 @@ def on_chat_message(msg):
                 except:
                     tuser= tuser 
                 dlog = dlog+' '+ tuser +' joined the ' + chat_type+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) '
+                dlogwc = dlogwc+color.CYAN+' '+ tuser +color.GREEN+' joined the ' + chat_type+ ' '+color.YELLOW+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) '
         elif content_type == 'left_chat_member':
             if msg['left_chat_member']['id'] == bot_me['id']:
                 dlog = dlog+ ' I have been kicked from ' +msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+ fnick + " ( "+fuserid+" )"
+                dlogwc = dlogwc+color.RED+ ' I have been kicked from ' +color.YELLOW+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) '+color.RED+'by '+color.CYAN+ fnick + color.RESET+" ( "+fuserid+" )"
             else:
                 tuser= msg['left_chat_member']['first_name']
                 try:
@@ -193,6 +242,7 @@ def on_chat_message(msg):
                 except:
                     tuser= tuser 
                 dlog = dlog+' '+ tuser +' left the ' + chat_type + ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) '
+                dlogwc = dlogwc+color.CYAN+' '+ tuser +color.RED+' left the ' + chat_type +color.YELLOW+ ' '+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) '
         elif content_type == 'pinned_message':
             tuser= msg['pinned_message']['from']['first_name']
             try:
@@ -207,9 +257,13 @@ def on_chat_message(msg):
             if tmpcontent_type == 'text':
                 dlog = dlog + ' ' + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+\
                     msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+ fnick + " ( "+fuserid+" ):\n"+msg['pinned_message']['text']
+                dlogwc = dlogwc +color.CYAN+ ' ' + tuser +color.RESET+"'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+color.YELLOW+\
+                    msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) by '+color.CYAN+ fnick +color.RESET+ " ( "+fuserid+" ):\n"+msg['pinned_message']['text']
             else:
                 dlog = dlog + ' ' + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+\
                     msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+ fnick + " ( "+fuserid+" )"
+                dlogwc = dlogwc +color.CYAN+ ' ' + tuser + color.RESET+"'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to "+color.YELLOW+\
+                    msg['chat']['title']+' ( '+str(chat_id)+ ' ) by '+color.CYAN+ fnick +color.RESET+ " ( "+fuserid+" )"
                 if tmpcontent_type == 'photo':
                     flog = "[Pinned Photo]"
                     photo_array=msg['pinned_message']['photo']
@@ -249,7 +303,8 @@ def on_chat_message(msg):
                     except:
                         flog = flog +"FileID:"+ msg['pinned_message']['sticker']['file_id']
         elif content_type == 'new_chat_photo':
-            dlog = dlog + " The photo of this "+chat_type+""+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick + " ( "+fuserid+" )"
+            dlog = dlog + " The photo of this "+chat_type+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick + " ( "+fuserid+" )"
+            dlogwc = dlogwc + " The photo of this "+chat_type+""+color.YELLOW+ ' '+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) was changed by '+color.CYAN+fnick + color.RESET+" ( "+fuserid+" )"
             flog = "[New Chat Photo]"
             photo_array=msg['new_chat_photo']
             photo_array.reverse()
@@ -259,20 +314,26 @@ def on_chat_message(msg):
                 flog = flog +"FileID:"+ photo_array[0]['file_id']
         elif content_type == 'group_chat_created':
             if msg['new_chat_member']['id'] == bot_me['id']:
-                dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) created a "+ chat_type + ' ' + msg['chat']['title']+' ( '+str(chat_id)+ ' ) and I was added into the group.'
+                dlog = dlog+ ' ' + fnick +" ( "+fuserid+" ) created a "+ chat_type + ' '+ msg['chat']['title']+' ( '+str(chat_id)+ ' ) and I was added into the group.'
+                dlogwc = dlogwc+color.CYAN +' ' + fnick +color.RESET+ " ( "+fuserid+" )"+color.GREEN+" created a "+ chat_type + ' ' +color.YELLOW+ msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' )'+color.GREEN+' and I was added into the group.'
         elif content_type == 'migrate_to_chat_id':
             newgp = bot.getChat(msg['migrate_to_chat_id'])
             dlog = dlog+ ' ' + chat_type + ' ' + msg['chat']['title']+' ( '+str(chat_id)+ ' ) was migrated to '+ newgp['type'] + ' ' + newgp['title'] +' ('+str(newgp['id'])+')  by '+ fnick + " ( "+fuserid+" )"
+            dlogwc = dlogwc+ ' ' + chat_type + ' '+color.YELLOW + msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) was migrated to '+ newgp['type'] + ' ' +color.YELLOW+ newgp['title'] +color.RESET+' ('+str(newgp['id'])+')  by '+color.CYAN+ fnick +color.RESET+ " ( "+fuserid+" )"
         elif content_type == 'migrate_from_chat_id':
             oldgp = bot.getChat(msg['migrate_from_chat_id'])
             dlog = dlog+ ' ' + chat_type + ' ' + msg['chat']['title']+' ( '+str(chat_id)+ ' ) was migrated from '+ oldgp['type'] + ' ' + oldgp['title'] +' ('+str(oldgp['id'])+')  by '+ fnick + " ( "+fuserid+" )"
+            dlogwc = dlogwc+ ' ' + chat_type + ' ' +color.YELLOW+ msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) was migrated from '+ oldgp['type'] + ' '+color.YELLOW + oldgp['title'] +color.RESET+' ('+str(oldgp['id'])+')  by '+color.CYAN+ fnick +color.RESET+ " ( "+fuserid+" )"
         elif content_type == 'delete_chat_photo':
-            dlog = dlog + " The photo of this "+chat_type+ " was deleted by "+fnick + " ( "+fuserid+" )"
+            dlog = dlog + " The photo of this "+chat_type+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was deleted by '+fnick +" ( "+fuserid+" )"
+            dlogwc = dlogwc + " The photo of this "+chat_type+color.YELLOW+ ' '+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) was deleted by '+color.CYAN+fnick +color.RESET+ " ( "+fuserid+" )"
         elif content_type == 'new_chat_title':
             dlog = dlog + " The title of this "+chat_type+ " was changed to "+msg['new_chat_title']+" by "+fnick + " ( "+fuserid+" )"
+            dlogwc = dlogwc + " The title of this "+chat_type+ " was changed to "+color.YELLOW+msg['new_chat_title']+color.RESET+" by "+color.CYAN+fnick +color.RESET+ " ( "+fuserid+" )"
         else:
             dlog = dlog+ ' ' + fnick + " ( "+fuserid+" ) in "+msg['chat']['title']+' ( '+str(chat_id)+ ' ) sent a '+ content_type
-        clog(dlog)
+            dlogwc = dlogwc+ ' ' + color.CYAN+fnick + color.RESET+" ( "+fuserid+" ) in "+color.YELLOW+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) sent a '+ content_type
+        clog(dlog,dlogwc)
         if content_type == 'photo':
             flog = "[Photo]"
             photo_array=msg['photo']
@@ -459,19 +520,26 @@ def on_chat_message(msg):
                             replace(chat_id,msg,['/replace',tobereplaced,toreplace])
     elif chat_type == 'channel':
         dlog = dlog + "["+str(msg['message_id'])+"]"
+        dlogwc = dlogwc + "["+str(msg['message_id'])+"]"
         try:
             reply_to = msg['reply_to_message']
         except:
             dlog = dlog
         else: 
             dlog = dlog + " ( Reply to "+str(msg['reply_to_message']['message_id'])+" )"
+            dlogwc = dlogwc+color.PURPLE + " ( Reply to "+str(msg['reply_to_message']['message_id'])+" )"+color.RESET
         if content_type == 'text':
             dlog = dlog+ ' ' + fnick 
+            dlogwc = dlogwc+color.CYAN+ ' ' + fnick +color.RESET
             if fuserid:
                 dlog = dlog + " ( "+fuserid+" )"
+                dlogwc = dlogwc + " ( "+fuserid+" )"
             dlog = dlog + ' ' + " in channel "+msg['chat']['title']+' ( '+str(chat_id)+ ' ): ' + msg['text']
+            dlogwc = dlogwc + ' ' + " in channel "+color.YELLOW+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ): ' + msg['text']
         elif content_type == 'new_chat_photo':
             dlog = dlog + " The photo of this "+chat_type+""+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was changed by '+fnick 
+            dlogwc = dlogwc + " The photo of this "+chat_type+""+ ' '+color.YELLOW+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) was changed by '+color.CYAN+fnick +color.RESET
+
             if fuserid:
                 dlog = dlog+ " ( "+fuserid+" )"
             flog = "[New Chat Photo]"
@@ -482,18 +550,21 @@ def on_chat_message(msg):
             except:
                 flog = flog +"FileID:"+ photo_array[0]['file_id']
         elif content_type == 'delete_chat_photo':
-            dlog = dlog + " The photo of this "+chat_type+ " was deleted by "+fnick
+            dlog = dlog + " The photo of this "+chat_type+ ' '+msg['chat']['title']+' ( '+str(chat_id)+ ' ) was deleted by '+fnick
+            dlogwc = dlogwc + " The photo of this "+chat_type+ ' '+color.YELLOW+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) was deleted by '+color.BLUE+fnick+color.RESET
             if fuserid:
                 dlog = dlog+ " ( "+fuserid+" )"
         elif content_type == 'new_chat_title':
-            dlog = dlog + " The title of this "+chat_type+ " was changed to "+msg['new_chat_title']+" by "+fnick
+            dlog = dlog + " The title of this "+chat_type+ " was changed to "+color.yellow+msg['new_chat_title']+color.RESET+" by "+color.CYAN+fnick+color.RESET
             if fuserid:
                 dlog = dlog+ " ( "+fuserid+" )"
         else:
             dlog = dlog + ' ' + fnick 
+            dlogwc = dlogwc + ' ' +color.CYAN+ fnick+color.RESET
             if fuserid:
                 dlog = dlog + " ( "+fuserid+" )"
             dlog = dlog +" in channel"+msg['chat']['title']+' ( '+str(chat_id)+ ' ) sent a '+ content_type
+            dlogwc = dlogwc +" in channel"+color.YELLOW+msg['chat']['title']+color.RESET+' ( '+str(chat_id)+ ' ) sent a '+ content_type
         clog(dlog)
         if content_type == 'photo':
             flog = "[Photo]"
@@ -1944,7 +2015,7 @@ def read_function_list():
     clog('[Info] Reading function list data...')
     if os.path.isfile("./fctlsdata.json") == False:
         fs = open("./fctlsdata.json","w")
-        fs.write("{}")
+        fs.write('{"config_ver":'+HJ_Ver+'}')
         fs.close
     fs = open("./fctlsdata.json","r")
     function_list_data = eval(fs.read())
@@ -2482,11 +2553,15 @@ def a2z(textLine):
     zh = zh.replace('/','ㄥ')
     return zh
 
-def clog(text):
-    print(text)
+def clog(text,colored_text = ""):
+    if colored_text == "":
+        colored_text = text
+    if platform.system() == "Linux":
+        print(colored_text+color.RESET)
+    else:
+        print(text)
     log(text)
     return
-
 def log(text):
     if text[0:7] == "[Debug]":
         if Debug == True:
@@ -2515,8 +2590,10 @@ answerer = telepot.helper.Answerer(bot)
 #bot.message_loop({'chat': on_chat_message})
 MessageLoop(bot, {'chat': on_chat_message}).run_as_thread()
 read_function_list()
-clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Bot has started")
-clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Listening ...")
+clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Bot has started",\
+    color.GREEN+"["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"]"+color.BLUE+"[Info]"+color.GREEN+" Bot has started")
+clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Listening ...",\
+    color.GREEN+"["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"]"+color.BLUE+"[Info] Listening...")
 
 # Keep the program running.
 while 1:
