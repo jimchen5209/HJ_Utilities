@@ -48,6 +48,7 @@ for i in langlist:
 
 confirmsg = None
 function_list_data = None
+chat_config = {}
 
 class color:
    PURPLE = '\033[95m'
@@ -165,6 +166,10 @@ def on_chat_message(msg):
         if flog != "":
             clog(flog)
         #command_detect
+        try:
+            chat_config[chat_id]
+        except:
+            default_lang(chat_id)
         if content_type == 'text' and edited == False:
             cmd = msg['text'].split()
             if cmd[0] == '/start':
@@ -185,6 +190,8 @@ def on_chat_message(msg):
                 gtts(chat_id,msg)
             if cmd[0] == '/help':
                 helpp(chat_id,msg)
+            if cmd[0] == '/setlang':
+                set_lang(chat_id,msg,cmd)
     elif chat_type == 'group' or chat_type == 'supergroup':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         dlogwc = dlogwc + "["+str(msg['message_id'])+"]"
@@ -381,6 +388,10 @@ def on_chat_message(msg):
         except:
             function_default(chat_id,msg,chat_type)
             groupfundict = function_list_data[str(chat_id)]
+        try:
+            chat_config[chat_id]
+        except:
+            default_lang(chat_id)
         if content_type == 'text' and edited == False:
             cmd = msg['text'].split()
             cmd[0]=cmd[0].lower()
@@ -463,6 +474,8 @@ def on_chat_message(msg):
                     gtts(chat_id,msg)
             if cmd[0] == '/help' or cmd[0] == '/help@'+username.lower():
                 help(chat_id,msg)
+            if cmd[0] == '/setlang':
+                set_lang(chat_id,msg,cmd)
             for txt in sortedcmd:
                 if txt == '@tagall':
                     #tag(chat_id,msg,["/tag","all"],chat_type)
@@ -613,9 +626,10 @@ def startc(chat_id,msg):
     return
 
 def cgp(chat_id,msg,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['cgp']
     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
         dre = bot.sendMessage(chat_id,\
-            '所有人都是管理員的普通群組無法透過我來設置群組圖片',\
+            langport['all_member_are_admin'],\
             reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
@@ -629,7 +643,7 @@ def cgp(chat_id,msg,chat_type):
                 log("[Debug] Attemping to download "+url[1])
                 urllib.request.urlretrieve (url[1],"image.jpg")
             except:
-                dre = bot.sendMessage(chat_id,'/cgp <PIC URL>\n或回覆一個圖片以更改群組圖片',reply_to_message_id=msg['message_id'])
+                dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
             else:
                 fo=open(os.getcwd()+"/image.jpg", 'rb')
@@ -642,7 +656,7 @@ def cgp(chat_id,msg,chat_type):
                     sval=str(val)
                     bot.sendChatAction(chat_id,'typing')
                     dre = bot.sendMessage(chat_id,\
-                        '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                         parse_mode = 'Markdown',\
                         reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
@@ -663,7 +677,7 @@ def cgp(chat_id,msg,chat_type):
                     try:
                         urllib.request.urlretrieve (url[1],"image.jpg")
                     except:
-                        dre = bot.sendMessage(chat_id,'/cgp <PIC URL>\n或回覆一個圖片以更改群組圖片',reply_to_message_id=msg['message_id'])
+                        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg['message_id'])
                         log("[Debug] Raw sent data:"+str(dre))
                     else:
                         fo=open(os.getcwd()+"/image.jpg", 'rb')
@@ -676,7 +690,7 @@ def cgp(chat_id,msg,chat_type):
                             sval=str(val)
                             bot.sendChatAction(chat_id,'typing')
                             dre = bot.sendMessage(chat_id,\
-                                '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                                langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                                 parse_mode = 'Markdown',\
                                 reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
@@ -688,7 +702,7 @@ def cgp(chat_id,msg,chat_type):
                         os.remove('image.jpg')
                     return
             clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
-            bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
+            bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
             return
         
     else:
@@ -698,7 +712,7 @@ def cgp(chat_id,msg,chat_type):
                 photo_array=msg['reply_to_message']['photo']
                 log("[Debug] File_id to set:"+str(photo_array))
             except:
-                dre = bot.sendMessage(chat_id,'請回覆一個圖片信息',reply_to_message_id=msg['message_id'])
+                dre = bot.sendMessage(chat_id,langport['reply_not_pic'],reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
             else:
                 bot.sendChatAction(chat_id,'upload_photo')
@@ -713,7 +727,7 @@ def cgp(chat_id,msg,chat_type):
                     sval=str(val)
                     bot.sendChatAction(chat_id,'typing')
                     dre = bot.sendMessage(chat_id,\
-                        '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                         parse_mode = 'Markdown',\
                         reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
@@ -732,7 +746,7 @@ def cgp(chat_id,msg,chat_type):
                         photo_array=msg['reply_to_message']['photo']
                         log("[Debug] File_id to set:"+str(photo_array))
                     except:
-                        dre = bot.sendMessage(chat_id,'請回覆一個圖片信息',reply_to_message_id=msg['message_id'])
+                        dre = bot.sendMessage(chat_id,langport['reply_not_pic'],reply_to_message_id=msg['message_id'])
                         log("[Debug] Raw sent data:"+str(dre))
                     else:
                         bot.sendChatAction(chat_id,'upload_photo')
@@ -747,7 +761,7 @@ def cgp(chat_id,msg,chat_type):
                             sval=str(val)
                             bot.sendChatAction(chat_id,'typing')
                             dre = bot.sendMessage(chat_id,\
-                                '設置群組圖片時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                                langport['error'].format(+str(val).split(',')[0].replace('(','').replace("'","`")),\
                                 parse_mode = 'Markdown',\
                                 reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
@@ -758,14 +772,15 @@ def cgp(chat_id,msg,chat_type):
                         os.remove('image.jpg')
                     return
             clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
-            bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
+            bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
             return
     return
 
 def rgp(chat_id,msg,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['rgp']
     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
         dre = bot.sendMessage(chat_id,\
-            '所有人都是管理員的普通群組無法透過我來設置群組圖片',\
+            langport['all_member_are_admin'],\
             reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
@@ -778,7 +793,7 @@ def rgp(chat_id,msg,chat_type):
             sval=str(val)
             bot.sendChatAction(chat_id,'typing')
             dre = bot.sendMessage(chat_id,\
-                '移除群組圖片時發生錯誤 :(\n\n' +str(val).split(',')[0].replace('(','').replace("'","`"),\
+                langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                 parse_mode = 'Markdown',\
                 reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
@@ -799,7 +814,7 @@ def rgp(chat_id,msg,chat_type):
                     sval=str(val)
                     bot.sendChatAction(chat_id,'typing')
                     dre = bot.sendMessage(chat_id,\
-                        '移除群組圖片時發生錯誤 :(\n\n' +str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                         parse_mode = 'Markdown',\
                         reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
@@ -809,7 +824,7 @@ def rgp(chat_id,msg,chat_type):
                     clog('[Info] Sucessfully removed the Group photo in '+msg['chat']['title']+'('+str(chat_id)+')')
                 return
         clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
-        bot.sendMessage(chat_id,'你沒有權限設置群組圖片',reply_to_message_id=msg['message_id'])
+        bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
     
     return
 
@@ -824,14 +839,11 @@ def echo(chat_id,msg):
     return
 
 def ns(chat_id,msg,txt):     
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['ns']
     try:
         log("[Info] Number to transfer :"+txt[2])
     except:
-        dre = bot.sendMessage(chat_id,\
-            "/ns <todec|tobin|tooct|tohex> <number>\n"+\
-            "提供的數字若不是十進位請在數字前面註明 `[bin:0b|oct:0o|hex:0x]`\n"+\
-            "例如 : `0xabf`",\
-            parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['help'],parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
     if txt[1] == "todec":
@@ -841,7 +853,7 @@ def ns(chat_id,msg,txt):
             tp, val, tb = sys.exc_info()
             bot.sendChatAction(chat_id,'typing')
             dre = bot.sendMessage(chat_id,\
-                '發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                 parse_mode = 'Markdown',\
                 reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
@@ -864,7 +876,7 @@ def ns(chat_id,msg,txt):
             tp, val, tb = sys.exc_info()
             bot.sendChatAction(chat_id,'typing')
             dre = bot.sendMessage(chat_id,\
-                '發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                 parse_mode = 'Markdown',\
                 reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
@@ -887,7 +899,7 @@ def ns(chat_id,msg,txt):
             tp, val, tb = sys.exc_info()
             bot.sendChatAction(chat_id,'typing')
             dre = bot.sendMessage(chat_id,\
-                '發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                langport['error'].format(str(val).split(',')[0].replace('(','')).replace("'","`"),\
                 parse_mode = 'Markdown',\
                 reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
@@ -910,7 +922,7 @@ def ns(chat_id,msg,txt):
             tp, val, tb = sys.exc_info()
             bot.sendChatAction(chat_id,'typing')
             dre = bot.sendMessage(chat_id,\
-                '發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                 parse_mode = 'Markdown',\
                 reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
@@ -927,9 +939,7 @@ def ns(chat_id,msg,txt):
                     parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
     else:
-        dre = bot.sendMessage(chat_id,\
-            "/ns <todec|tobin|tooct|tohex> <number>\n提供的數字若不是十進位請在數字前面註明 `[bin:0b|oct:0o|hex:0x]`\n例如 : `0xabf`",\
-            parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['help'],parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     return
   
@@ -939,23 +949,20 @@ def ping(chat_id,msg):
     return
 
 def title(chat_id,msg,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['title']
     cmd=msg['text'].split(' ',1)
     try:
         title=cmd[1]
     except:
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
-            dre = bot.sendMessage(chat_id,\
-                '所有人都是管理員的普通群組無法透過我來設置群組標題',\
-                reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['all_member_are_admin'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
-            dre = bot.sendMessage(chat_id,'/title <String>',reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         return
     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
-        dre = bot.sendMessage(chat_id,\
-            '所有人都是管理員的普通群組無法透過我來設置群組標題',\
-            reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['all_member_are_admin'],reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         if msg['from']['id'] == OWNERID:
@@ -967,7 +974,7 @@ def title(chat_id,msg,chat_type):
                 sval=str(val)
                 bot.sendChatAction(chat_id,'typing')
                 dre = bot.sendMessage(chat_id,\
-                    '設置群組標題時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                    langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                     parse_mode = 'Markdown',\
                     reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
@@ -987,7 +994,7 @@ def title(chat_id,msg,chat_type):
                     sval=str(val)
                     bot.sendChatAction(chat_id,'typing')
                     dre = bot.sendMessage(chat_id,\
-                        '設置群組標題時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                         parse_mode = 'Markdown',\
                         reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
@@ -997,11 +1004,12 @@ def title(chat_id,msg,chat_type):
                     clog('[Info] Sucessfully changed the Group title in '+msg['chat']['title']+'('+str(chat_id)+')')
                 return
         clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
-        bot.sendMessage(chat_id,'你沒有權限設置群組標題',reply_to_message_id=msg['message_id'])
+        bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
         return
     return
 
 def lsadmins(chat_id,msg,cmd):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['lsadmins']
     bot.sendChatAction(chat_id,"typing")
     try:
         group=cmd[1]
@@ -1014,7 +1022,7 @@ def lsadmins(chat_id,msg,cmd):
             tp, val, tb = sys.exc_info()
             bot.sendChatAction(chat_id,'typing')
             dre = bot.sendMessage(chat_id,\
-                '取得目標群組管理員時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`")+'\n\n將以目前群組繼續',\
+                langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                 parse_mode = 'Markdown',\
                 reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
@@ -1037,9 +1045,9 @@ def lsadmins(chat_id,msg,cmd):
                 nickname = '<a href="https://t.me/' + admin['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
             except:
                 nickname = firstname + ' ' + lastname
-            adminmsg=adminmsg + "\n創群者："+nickname+"\n"
+            adminmsg=adminmsg + "\n"+langport['creator'].format(nickname)+"\n"
             if group_type == 'group' and target_group['all_members_are_administrators'] == True:
-                adminmsg = adminmsg + '\n群組內的每個人都是管理員:D'
+                adminmsg = adminmsg + '\n'+langport['everyone_is_admin']
     for admin in bot.getChatAdministrators(group):
         adminmsg = adminmsg + '\n'
         if admin['status'] == "administrator":
@@ -1078,7 +1086,7 @@ def lsadmins(chat_id,msg,cmd):
                 else:
                     adminmsg = adminmsg + "🌚 "
             else:
-                adminmsg = adminmsg + "Admin - "
+                adminmsg = adminmsg + langport['admin_badge']+" - "
             adminmsg = adminmsg +nickname
     dre = bot.sendMessage(chat_id,adminmsg,parse_mode = 'HTML',disable_web_page_preview=True,reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
@@ -1088,25 +1096,27 @@ def lsadmins(chat_id,msg,cmd):
     return
 
 def groupinfo(chat_id,msg,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['groupinfo']
     dre = bot.sendMessage(chat_id,\
-        "<b>群組類型</b>: "+chat_type+"\n"+\
-        "<b>群組名稱</b>: "+msg['chat']['title']+"\n"+\
-        "<b>群組人數</b>: " + str(bot.getChatMembersCount(chat_id)) +"\n"+\
-        "<b>群組ID</b>: <code>" +str(chat_id) + "</code>",\
+        langport['grouptype'].format(chat_type)+"\n"+\
+        langport['groupname'].format(msg['chat']['title'])+"\n"+\
+        langport['groupcount'].format(str(bot.getChatMembersCount(chat_id))) +"\n"+\
+        langport['groupid'].format("<code>"+str(chat_id) + "</code>"),\
         parse_mode = 'HTML',\
         reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
 
 def leavegroup(chat_id,msg,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['leavegroup']
     if msg['from']['id'] == OWNERID:
         clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
-        dre = bot.sendMessage(chat_id,'Bye~',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['farewell'],reply_to_message_id=msg['message_id'])
         bot.leaveChat(chat_id)
         log("[Debug] Raw sent data:"+str(dre))
         return
     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
-        dre = bot.sendMessage(chat_id,'Bye~',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['farewell'],reply_to_message_id=msg['message_id'])
         bot.leaveChat(chat_id)
         log("[Debug] Raw sent data:"+str(dre))
     else:
@@ -1114,17 +1124,18 @@ def leavegroup(chat_id,msg,chat_type):
         for admin in bot.getChatAdministrators(chat_id):
             if msg['from']['id'] == admin['user']['id']:
                 clog('[Info] Admin Matched for \n[Info] '+ str(admin))
-                dre = bot.sendMessage(chat_id,'Bye~',reply_to_message_id=msg['message_id'])
+                dre = bot.sendMessage(chat_id,langport['farewell'],reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
                 bot.leaveChat(chat_id)
                 return
         clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
-        dre = bot.sendMessage(chat_id,'你沒有辦法讓我離開喔',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
     return
 
 def a2zc(chat_id,msg):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['a2z']
     try:
         reply_to = msg['reply_to_message']
     except:
@@ -1132,7 +1143,7 @@ def a2zc(chat_id,msg):
         try:
             tcm=alpt[1]
         except:
-            dre = bot.sendMessage(chat_id,'/a2z <string>\n或回覆一個信息來將英文字母轉成注音',reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             string=a2z(tcm)
@@ -1143,7 +1154,7 @@ def a2zc(chat_id,msg):
         try:
             tcm = reply_to['text']
         except:
-            dre = bot.sendMessage(chat_id,'請回復一個文字信息',reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['not_text'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             string=a2z(tcm)
@@ -1153,17 +1164,14 @@ def a2zc(chat_id,msg):
     return
 
 def getuser(chat_id,msg,txt):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['getuser']
     try:
         reply_to = msg['reply_to_message']
     except:
         try:
             uuser_id = int(txt[1])
         except:
-            dre = bot.sendMessage(chat_id,\
-                "/getuser [user_id]\n"+\
-                "或回覆一個使用者來取得該用戶的資訊"+\
-                "回覆時輸入 /getuser forward 可優先查詢轉寄來源的用戶資訊",\
-                parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['help'],parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             try:
@@ -1172,7 +1180,7 @@ def getuser(chat_id,msg,txt):
                 tp, val, tb = sys.exc_info()
                 bot.sendChatAction(chat_id,'typing')
                 dre = bot.sendMessage(chat_id,\
-                    '取得該用戶資訊時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                    langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                     parse_mode = 'Markdown',\
                     reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
@@ -1192,10 +1200,10 @@ def getuser(chat_id,msg,txt):
                     nickname = firstname + ' ' + lastname
                 userid = str(user['user']['id'])
                 dre = bot.sendMessage(chat_id, \
-                    '<b>暱稱</b>: ' + nickname + '\n'+\
-                    '<b>Username</b>: ' + uusername + '\n' +\
-                    '<b>User id</b>: <code>' + userid +'</code>'+ '\n' +\
-                    '<b>目前職位</b>: ' + user['status'],parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
+                    langport['nick'].format(nickname) + '\n'+\
+                    langport['userame'].format(uusername)  + '\n' +\
+                    langport['userid'].format('<code>' + userid +'</code>')+ '\n' +\
+                    langport['status'].format(user['status']),parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
     else:
         try:
@@ -1224,14 +1232,15 @@ def getuser(chat_id,msg,txt):
             nickname = firstname + ' ' + lastname
         userid = str(user['user']['id'])
         dre = bot.sendMessage(chat_id, \
-            '<b>暱稱</b>: ' + nickname + '\n'+\
-            '<b>Username</b>: ' + uusername + '\n' +\
-            '<b>User id</b>: <code>' + userid +'</code>'+ '\n' +\
-            '<b>目前職位</b>: ' + user['status'],parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
+            langport['nick'].format(nickname) + '\n'+\
+            langport['userame'].format(uusername)  + '\n' +\
+            langport['userid'].format('<code>' + userid +'</code>')+ '\n' +\
+            langport['status'].format(user['status']),parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     return
 
 def getme(chat_id,msg):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['getuser']
     user= bot.getChatMember(chat_id,msg['from']['id'])
     firstname = user['user']['first_name']
     try:
@@ -1246,22 +1255,23 @@ def getme(chat_id,msg):
         nickname = firstname + ' ' + lastname
     userid = str(user['user']['id'])
     dre = bot.sendMessage(chat_id, \
-        '<b>暱稱</b>: ' + nickname + '\n'+\
-        '<b>Username</b>: ' + uusername + '\n' +\
-        '<b>User id</b>: <code>' + userid +'</code>'+ '\n' +\
-        '<b>目前職位</b>: ' + user['status'],parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
+        langport['nick'].format(nickname) + '\n'+\
+        langport['userame'].format(uusername)  + '\n' +\
+        langport['userid'].format('<code>' + userid +'</code>')+ '\n' +\
+        langport['status'].format(user['status']),parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
 
 def pin(chat_id,msg,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['pin']
     try:
         reply_to = msg['reply_to_message']
     except:
-        dre = bot.sendMessage(chat_id,'請回復一則訊息以將此訊息至頂',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['reply_help'],reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         if chat_type == 'group':
-            dre = bot.sendMessage(chat_id,'普通群組無法置頂訊息',reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['group'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             if msg['from']['id'] == OWNERID:
@@ -1273,7 +1283,7 @@ def pin(chat_id,msg,chat_type):
                     sval=str(val)
                     bot.sendChatAction(chat_id,'typing')
                     dre = bot.sendMessage(chat_id,\
-                        '置頂時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                        langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                         parse_mode = 'Markdown',\
                         reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
@@ -1292,7 +1302,7 @@ def pin(chat_id,msg,chat_type):
                         sval=str(val)
                         bot.sendChatAction(chat_id,'typing')
                         dre = bot.sendMessage(chat_id,\
-                            '置頂時發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                            langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                             parse_mode = 'Markdown',\
                             reply_to_message_id=msg['message_id'])
                         log("[Debug] Raw sent data:"+str(dre))
@@ -1301,16 +1311,17 @@ def pin(chat_id,msg,chat_type):
                         clog('[Info] Sucessfully pinned the message '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+')')
                     return
             clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
-            dre = bot.sendMessage(chat_id,'你沒有權限置頂訊息',reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
             return
     return
 
 def replace(chat_id,msg,cmd):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['replace']
     try:
         reply_to = msg['reply_to_message']
     except:
-        dre = bot.sendMessage(chat_id,'請回復一則訊息\n\n用法: /replace <要被取代的文字> <取代的文字>',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['help_not_reply'],reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         try:
@@ -1319,14 +1330,14 @@ def replace(chat_id,msg,cmd):
             try:
                 rstring=reply_to['caption']
             except:
-                dre = bot.sendMessage(chat_id,'請回復一個文字信息',reply_to_message_id=msg['message_id'])
+                dre = bot.sendMessage(chat_id,langport['not_text'],reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
                 return
         try:
             test=cmd[1]
             test=cmd[2]
         except:
-            dre = bot.sendMessage(chat_id,"/replace <要被取代的文字> <取代的文字>\n如果想要取代成空白可以使用`''`",\
+            dre = bot.sendMessage(chat_id,langport['help'],\
                 parse_mode='Markdown',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
@@ -1339,7 +1350,7 @@ def replace(chat_id,msg,cmd):
                 tp, val, tb = sys.exc_info()
                 bot.sendChatAction(chat_id,'typing')
                 dre = bot.sendMessage(chat_id,\
-                    '發生錯誤 :(\n\n'+str(val).split(',')[0].replace('(','').replace("'","`"),\
+                    langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
                     parse_mode = 'Markdown',\
                     reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
@@ -1358,17 +1369,18 @@ def replace(chat_id,msg,cmd):
                     tnick = tnick + ' ' + tuser['last_name']
                 except:
                     tnick = tnick
-                smsg= '<a href="tg://user?id='+str(fuser['id'])+'">'+fnick+'</a> 認為 <a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a> 的意思是 <i>'+rstring +'</i>'
+                smsg= langport['result'].format('<a href="tg://user?id='+str(fuser['id'])+'">'+fnick+'</a>','<a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a>','<i>'+rstring +'</i>')
                 dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
     return
 
 def getfile(chat_id,msg,cmd):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['getfile']
     bot.sendChatAction(chat_id,"upload_document")
     try:
         file_id = cmd[1]
     except:
-        dre = bot.sendMessage(chat_id,"/getfile <file_id>",reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         try:
@@ -1377,7 +1389,7 @@ def getfile(chat_id,msg,cmd):
         except:
             tp, val, tb = sys.exc_info()
             dre = bot.sendMessage(chat_id,\
-                '無法取得檔案\n\n<code>'+str(val).split(',')[0].replace('(','').replace("'","")+"</code>",\
+                langport['error'].format("<code>"+str(val).split(',')[0].replace('(','').replace("'","")+"</code>"),\
                 parse_mode = 'HTML',\
                 reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
@@ -1400,7 +1412,7 @@ def getfile(chat_id,msg,cmd):
             except:
                 tp, val, tb = sys.exc_info()
                 dre = bot.sendMessage(chat_id,\
-                    '傳送檔案時發生問題\n\n<code>'+str(val).split(',')[0].replace('(','').replace("'","")+"</code>",\
+                    langport['senderror'].format('<code>'+str(val).split(',')[0].replace('(','').replace("'","")+"</code>"),\
                     parse_mode = 'HTML',\
                     reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
@@ -1408,15 +1420,16 @@ def getfile(chat_id,msg,cmd):
     return
 
 def fileinfo(chat_id,msg):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['fileinfo']
     try:
         reply_to = msg['reply_to_message']
     except:
-        dre = bot.sendMessage(chat_id,'回覆一個信息以取得檔案資訊',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         tcontent_type, tchat_type, tchat_id = telepot.glance(reply_to)
         if tcontent_type == 'text':
-            dre = bot.sendMessage(chat_id,'這是文字訊息',reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,lang['istext'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
             return
         elif tcontent_type == 'photo':
@@ -1434,13 +1447,14 @@ def fileinfo(chat_id,msg):
         elif tcontent_type == 'sticker':
             fileid = reply_to['sticker']['file_id']
         dre = bot.sendMessage(chat_id,\
-            '<b>檔案類型</b> : '+tcontent_type+"\n"+\
-            '<b>File id</b> : <code>'+fileid+"</code>",\
+            langport['filetype'].format(tcontent_type)+"\n"+\
+            langport['fileid'].format('<code>'+fileid+"</code>"),\
             parse_mode="HTML",reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
     return
 
 def exportblog(chat_id,msg):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['exportblog']
     cmd = msg['text'].split(" ",1)
     try:
         debugs = cmd[1]
@@ -1451,7 +1465,7 @@ def exportblog(chat_id,msg):
             log("[Debug] Raw sent data:"+str(dre))
             f.close()
         else:
-            dre = bot.sendMessage(chat_id,"你沒有權限",reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
     else:
         if msg['from']['id'] == OWNERID:
@@ -1462,22 +1476,22 @@ def exportblog(chat_id,msg):
                 f.close()
             else:
                 if Debug == False and debugs == "-debug":
-                    dre = bot.sendMessage(chat_id,"Debug選項是關的",reply_to_message_id=msg['message_id'])
+                    dre = bot.sendMessage(chat_id,langport['debug_off'],reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
                 elif Debug == True and debugs != "-debug":
-                    dre = bot.sendMessage(chat_id,"若要取得Debug log請輸入 /exportblog -debug ",reply_to_message_id=msg['message_id'])
+                    dre = bot.sendMessage(chat_id,langport['debug'],reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
                 f = open(logpath+".log","rb")
                 dre = bot.sendDocument(chat_id,f,reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
                 f.close()
         else:
-            dre = bot.sendMessage(chat_id,"你沒有權限",reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
     return
 
 def readtag():
-    clog("[Info] Reading tag data...")
+    clog("[Info] Reading tag data...",color.BLUE+"[Info]"+color.RESET+" Reading tag data...")
     if os.path.isfile("./tagdata.json") == False:
         fs = open("./tagdata.json","w")
         fs.write("{}")
@@ -1488,13 +1502,14 @@ def readtag():
     return(data)
 
 def writetag(data):
-    clog("[Info] Writing tag data...")
+    clog("[Info] Writing tag data...",color.BLUE+"[Info]"+color.RESET+" Writing tag data...")
     fs = open("./tagdata.json","w")
     fs.write(str(data))
     fs.close
     return
 
 def addtag(chat_id,msg,cmd):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['tag']['add']
     try:
         reply_to = msg['reply_to_message']
     except:
@@ -1510,23 +1525,21 @@ def addtag(chat_id,msg,cmd):
         try:
             tagname = cmd[2]
         except:
-            dre = bot.sendMessage(chat_id,"/tag add <tag_name> <userid>\n或回覆該用戶以加入tag名單",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             try:
                 testcmduser = cmd[3]
             except:
-                dre = bot.sendMessage(chat_id,"/tag add <tag_name> <userid>\n或回覆該用戶以加入tag名單",reply_to_message_id=msg["message_id"])
+                dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
             else:
-                successmsg = "已將下列用戶加到 <b>" + cmd[2] + "</b> 清單:\n"
+                successmsg = langport['b_success'].format("<b>" + cmd[2] + "</b>")+"\n"
                 successcount = 0
-                errmsg = "將下列用戶加到 <b>" + cmd[2] + "</b> 時發生問題:\n"
+                errmsg = langport['b_error'].format("<b>" + cmd[2] + "</b>")+"\n"
                 errcount = 0
-                nousername = "下列用戶沒有設置 username ,屆時無法tag他們:\n"
-                nousernamecount = 0
                 if len(cmd) >= 54:
-                    dre = bot.sendMessage(chat_id,"請不要一次傳太多user,為避免卡死我只處理前50個",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                    dre = bot.sendMessage(chat_id,langport['too_many'],parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
                     cmd = cmd[0:53]
                 bot.sendChatAction(chat_id,"typing")
@@ -1546,7 +1559,7 @@ def addtag(chat_id,msg,cmd):
                             temptaglist.append(int(a))
                         else:
                             clog("[ERROR] Errored when adding user " + a + " to "+cmd[2]+" :The user is already in the list")
-                            errmsg = errmsg +"<b>"+ a + "</b> : <code>此用戶已經在清單中了</code>\n"
+                            errmsg = errmsg +"<b>"+ a + "</b> : <code>"+langport['already_exist']+"</code>\n"
                             errcount = errcount + 1
                             continue
                         adduser = bot.getChatMember(chat_id,int(a))
@@ -1559,9 +1572,6 @@ def addtag(chat_id,msg,cmd):
                             nickname = '<a href="https://t.me/' + adduser['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
                         except:
                             nickname = firstname + ' ' + lastname
-                            nousername = nousername + "<b>" + nickname + "</b> (<i>"+a+"</i>) \n"
-                            nousernamecount = nousernamecount + 1
-                            clog("[WARN] " +firstname + ' ' + lastname+ " ( " + str(userid)+ ") has no username!")
                         successmsg = successmsg + nickname + "\n"
                         successcount = successcount + 1
                         clog("[Info] " + firstname + ' ' + lastname + " was added to "+cmd[2])
@@ -1576,8 +1586,6 @@ def addtag(chat_id,msg,cmd):
                     successmsg = ""
                 if errcount == 0:
                     errmsg = ""
-                if nousernamecount == 0:
-                    nousername = ""
                 dre = bot.sendMessage(chat_id,successmsg+errmsg+nousername,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
     else:
@@ -1597,7 +1605,7 @@ def addtag(chat_id,msg,cmd):
         except:
             tp, val, tb = sys.exc_info()
             clog("[ERROR] Errored when getting user " + str(userid) + " :"+str(val).split(',')[0].replace('(','').replace("'",""))
-            smsg = "將 <b>" + str(userid) + "</b> 加入 <b>" + cmd[2] +"</b> 時發生問題: <code>"+str(val).split(',')[0].replace('(','').replace("'","")+"</code>\n"
+            smsg = langport['r_error'].format("<b>" + str(userid) + "</b>","<b>" + cmd[2] +"</b>","<code>"+str(val).split(',')[0].replace('(','').replace("'","")+"</code>")+"\n"
             dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
             return
@@ -1608,7 +1616,7 @@ def addtag(chat_id,msg,cmd):
                 temptaglist.append(userid)
             else:
                 clog("[ERROR] Errored when adding user " + str(userid) + " to "+cmd[2]+" :The user is already in the list")
-                smsg = "將 <b>" + str(userid) + "</b> 加入 <b>" + cmd[2] +"</b> 時發生問題: <code>此用戶已經在清單中了</code>\n"
+                smsg = langport['r_error'].format("<b>" + str(userid) + "</b>","<b>" + cmd[2] +"</b>","<code>"+langport['already_exist']+"</code>")+"\n"
                 dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
                 return
@@ -1622,9 +1630,7 @@ def addtag(chat_id,msg,cmd):
                 nickname = '<a href="https://t.me/' + adduser['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
             except:
                 nickname = firstname + ' ' + lastname
-                smsg= "用戶 <b>" + nickname + "</b> (<i>"+str(userid)+"</i>) 沒有設置 username ,屆時無法tag他\n\n"
-                clog("[WARN] " +firstname + ' ' + lastname+ " ( " + str(userid)+ ") has no username!")
-            smsg = smsg + "已將 " + nickname + " 加到 <b>" + cmd[2] + "</b>清單"
+            smsg = smsg +langport['r_success'].format(nickname,"<b>" + cmd[2] + "</b>")
             clog("[Info] " + firstname + ' ' + lastname + " was added to "+cmd[2])
         grouptagdict[cmd[2]]=temptaglist
         if len(grouptagdict[cmd[2]]) == 0:
@@ -1636,6 +1642,7 @@ def addtag(chat_id,msg,cmd):
     return
 
 def rmtag(chat_id,msg,cmd,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['tag']['remove']
     try:
         reply_to = msg['reply_to_message']
     except:
@@ -1651,25 +1658,24 @@ def rmtag(chat_id,msg,cmd,chat_type):
         try:
             tagname = cmd[2]
         except:
-            dre = bot.sendMessage(chat_id,"/tag remove <tag_name> <userid>\n或回覆該用戶以將該用戶從指定名單移除\n"+\
-                "或 /tag remove <tag> * 以移除這個tag",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             if tagname == "*":
                 global confirmsg
                 if grouptagdict == {}:
-                    dre = bot.sendMessage(chat_id,"本群沒有任何清單",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                    dre = bot.sendMessage(chat_id,langport['no_list'],parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
                     return
                 if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
-                    dre = bot.sendMessage(chat_id,"將移除本群組中的所有tag,此操作無法復原,確認執行請回復這則訊息並輸入 /confirm",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                    dre = bot.sendMessage(chat_id,langport['remove_all']['warn'],parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
                     confirmsg = dre
                     return
                 else:
                     if msg['from']['id'] == OWNERID:
                         clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
-                        dre = bot.sendMessage(chat_id,"將移除本群組中的所有tag,此操作無法復原,確認執行請回復這則訊息並輸入 /confirm",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                        dre = bot.sendMessage(chat_id,langport['remove_all']['warn'],parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                         confirmsg = dre
                         log("[Debug] Raw sent data:"+str(dre))
                         return
@@ -1677,40 +1683,39 @@ def rmtag(chat_id,msg,cmd,chat_type):
                     for admin in bot.getChatAdministrators(chat_id):
                         if msg['from']['id'] == admin['user']['id']:
                             clog('[Info] Admin Matched for \n[Info] '+ str(admin))
-                            dre = bot.sendMessage(chat_id,"將移除本群組中的所有tag,此操作無法復原,確認執行請回復這則訊息並輸入 /confirm",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                            dre = bot.sendMessage(chat_id,langport['remove_all']['warn'],parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                             confirmsg = dre
                             log("[Debug] Raw sent data:"+str(dre))
                             return
                     clog('[Info] No admins matched with ' + msg['from']['username']+'('+msg['from']['id']+ ')')
-                    dre = bot.sendMessage(chat_id,'你沒有權限移除所有tag',reply_to_message_id=msg['message_id'])
+                    dre = bot.sendMessage(chat_id,langport['remove_all']['no_perm'],reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
                     return
             try:
                 testcmduser = cmd[3]
             except:
-                dre = bot.sendMessage(chat_id,"/tag remove <tag_name> <userid>\n或回覆該用戶以將該用戶從指定名單移除\n"+\
-                "或 /tag remove <tag> * 以移除這個tag",reply_to_message_id=msg["message_id"])
+                dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
             else:
                 if cmd[3] == "*":
                     if temptaglist == []:
                         clog("[ERROR] List "+cmd[2]+ "not found.")
-                        dre = bot.sendMessage(chat_id,"清單"+cmd[2]+"不存在",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                        dre = bot.sendMessage(chat_id,langport['list_not_exist'].format("<b>"+cmd[2]+"</b>"),parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                         log("[Debug] Raw sent data:"+str(dre))
                         return
                     del grouptagdict[cmd[2]]
                     clog("[Info] Cleared the list "+cmd[2])
                     data[str(chat_id)]=grouptagdict
                     writetag(data)
-                    dre = bot.sendMessage(chat_id,"已移除清單 <b>"+cmd[2]+"</b>",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                    dre = bot.sendMessage(chat_id,langport['list_removed'].format("<b>"+cmd[2]+"</b>"),parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
                     return
-                successmsg = "已將下列用戶從 <b>" + cmd[2] + "</b> 清單中移除:\n"
+                successmsg = langport['b_success'].format("<b>" + cmd[2] + "</b>")+"\n"
                 successcount = 0
-                errmsg = "將下列用戶從 <b>" + cmd[2] + "</b> 移除時發生問題:\n"
+                errmsg = langport['b_error'].format("<b>" + cmd[2] + "</b>")+":\n"
                 errcount = 0
                 if len(cmd) >= 54:
-                    dre = bot.sendMessage(chat_id,"請不要一次傳太多user,為避免卡死我只處理前50個",parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                    dre = bot.sendMessage(chat_id,langport['too_many'],parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
                     cmd = cmd[0:53]
                 bot.sendChatAction(chat_id,"typing")
@@ -1727,7 +1732,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
                             temptaglist.index(int(a))
                         except:
                             clog("[ERROR] Errored when removing user " + a + " from "+cmd[2]+" :The user is not in the list")
-                            errmsg = errmsg +"<b>"+ a + "</b> : <code>此用戶不在清單中</code>\n"
+                            errmsg = errmsg +"<b>"+ a + "</b> : <code>"+langport['not_in_list']+"</code>\n"
                             errcount = errcount + 1
                             continue
                         else:
@@ -1775,7 +1780,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
         except:
             tp, val, tb = sys.exc_info()
             clog("[ERROR] Errored when getting user " + str(userid) + " :"+str(val).split(',')[0].replace('(','').replace("'",""))
-            smsg = "將 <b>" + userid + "</b> 從 <b>" + cmd[2] +"</b> 移除時發生問題: <code>"+str(val).split(',')[0].replace('(','').replace("'","")+"</code>\n"
+            smsg = langport['r_error'].format("<b>" + userid + "</b>","<b>" + cmd[2] +"</b>","<code>"+str(val).split(',')[0].replace('(','').replace("'","")+"</code>")+"\n"
             dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
             return
@@ -1784,7 +1789,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
                 temptaglist.index(userid)
             except:
                 clog("[ERROR] Errored when remving user " + str(userid) + " from "+cmd[2]+" :The user is not in the list")
-                smsg = "將 <b>" + str(userid) + "</b> 從 <b>" + cmd[2] +"</b> 移除時發生問題: <code>此用戶不在清單中了</code>\n"
+                smsg = langport['r_error'].format("<b>" + str(userid) + "</b>","<b>" + cmd[2] +"</b>","<code>"+langport['not_in_list']+"</code>")+"\n"
                 dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
                 return
@@ -1800,7 +1805,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
                 nickname = '<a href="https://t.me/' + adduser['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
             except:
                 nickname = firstname + ' ' + lastname
-            smsg = smsg + "已將 " + nickname + " 從 <b>" + cmd[2] + "</b>移除"
+            smsg = smsg + langport['r_success'].format("<b>" + nickname + "</b>"+"<b>" + cmd[2] + "</b>")
             clog("[Info] " + firstname + ' ' + lastname + " was removed from "+cmd[2])
         grouptagdict[cmd[2]]=temptaglist
         if len(grouptagdict[cmd[2]]) == 0:
@@ -1812,22 +1817,23 @@ def rmtag(chat_id,msg,cmd,chat_type):
     return
 
 def confirm(chat_id,msg):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['tag']['confirm']
     bot_me= bot.getMe()
     username= bot_me['username'].replace(' ','')
     try:
         reply_to = msg['reply_to_message']
     except:
-        dre = bot.sendMessage(chat_id,"我不知道你是在確認甚麼",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['donotknow_confirmabout'],disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         global confirmsg
         if confirmsg == None:
-            dre = bot.sendMessage(chat_id,"我不知道你是在確認甚麼",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['donotknow_confirmabout'],disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
             return
         if reply_to["message_id"] == confirmsg["message_id"]:
             if msg['from']['id'] != confirmsg['reply_to_message']['from']['id']:
-                dre = bot.sendMessage(chat_id,"我不知道你是在確認甚麼",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                dre = bot.sendMessage(chat_id,langport['donotknow_confirmabout'],disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
                 return
             ccmd = confirmsg['reply_to_message']['text'].split()
@@ -1836,23 +1842,24 @@ def confirm(chat_id,msg):
                     data=readtag()
                     del data[str(chat_id)]
                     writetag(data)
-                    dre = bot.sendMessage(chat_id,"已移除本群組的所有tag",disable_web_page_preview=True,reply_to_message_id=confirmsg['reply_to_message']["message_id"])
+                    dre = bot.sendMessage(chat_id,langport['remove_all_success'],disable_web_page_preview=True,reply_to_message_id=confirmsg['reply_to_message']["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
                     confirmsg = None
         else:
-            dre = bot.sendMessage(chat_id,"我不知道你是在確認甚麼",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['donotknow_confirmabout'],disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
             return
 
     return
 
 def lstag(chat_id,msg,cmd):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['tag']['lstag']
     data=readtag()
     smsg = ""
     try:
         grouptagdict = data[str(chat_id)]
     except:
-        dre = bot.sendMessage(chat_id,"此群組沒有任何 Tag 清單",reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['no_list'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     try:
@@ -1860,15 +1867,15 @@ def lstag(chat_id,msg,cmd):
     except:
         for ttag in data[str(chat_id)]:
             temptaglist = data[str(chat_id)][ttag]
-            smsg = smsg + "清單 <b>"+ttag+"</b> ,有 <b>" + str(len(temptaglist)) +"</b> 人\n"
+            smsg = smsg +langport['all'].format("<b>"+ttag+"</b>","<b>" + str(len(temptaglist)) +"</b>")+"\n"
     else:
         try:
             temptaglist = data[str(chat_id)][listname]
         except:
-            dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",parse_mode="HTML",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['list_not_exist'].format("<b>"+listname+"</b>"),parse_mode="HTML",reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
         else:
-            smsg = smsg +"清單 <b>"+listname+"</b> ,共 <b>" + str(len(temptaglist)) +"</b> 人\n"
+            smsg = smsg +langport['list_prefix'].format("<b>"+listname+"</b>","<b>" + str(len(temptaglist)) +"</b>")+"\n"
             count = 0
             for userid in temptaglist:
                 adduser = bot.getChatMember(chat_id,int(userid))
@@ -1891,25 +1898,26 @@ def lstag(chat_id,msg,cmd):
     return
 
 def tags(chat_id,msg,cmd):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['tag']['tag']
     data=readtag()
     smsg = ""
     try:
         listname = cmd[2]
     except:
-        dre = bot.sendMessage(chat_id,"/tag tag <tag_name>",reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         try:
             temptaglist = data[str(chat_id)][listname]
         except:
-            dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",parse_mode="HTML",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['list_not_exist'].format("<b>"+listname+"</b>"),parse_mode="HTML",reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             if temptaglist == []:
-                dre = bot.sendMessage(chat_id,"清單 <b>"+listname+"</b> 不存在",parse_mode="HTML",reply_to_message_id=msg["message_id"])
+                dre = bot.sendMessage(chat_id,langport['list_not_exist'].format("<b>"+listname+"</b>"),parse_mode="HTML",reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
                 return
-            dre = bot.sendMessage(chat_id,"正在提及清單 <b>"+listname+"</b> 的 <b>"+str(len(temptaglist))+"</b> 個人",parse_mode="HTML",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['tag_prefix'].format("<b>"+listname+"</b>","<b>"+str(len(temptaglist))+"</b>"),parse_mode="HTML",reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
             totalcount=0
             linecount=0
@@ -1965,10 +1973,11 @@ def tags(chat_id,msg,cmd):
 #            log("[Debug] Raw sent data:"+str(dre))
         
 def tag(chat_id,msg,cmd,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['tag']['general']
     try:
         testsubcmd = cmd[1]
     except:
-        dre = bot.sendMessage(chat_id,"/tag <add|remove|list|tag>",reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
     else:
         if cmd[1] == "add":
@@ -1981,62 +1990,132 @@ def tag(chat_id,msg,cmd,chat_type):
             tags(chat_id,msg,cmd)
         elif cmd[1] == "all":
             #tagall(chat_id,msg)
-            dre = bot.sendMessage(chat_id,"此功能因為API終止服務暫時停用，詳情請到[pwrtelegram](https://t.me/pwrtelegram)",parse_mode='Markdown',reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['PWRAPI'],parse_mode='Markdown',reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
         else:
-            dre = bot.sendMessage(chat_id,"/tag <add|remove|list|tag>",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
 
     return
 
 def gtts(chat_id,msg):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['gtts']
     cmd = msg['text'].split(' ',2)
     try:
-        lang = cmd[1]
+        clang = cmd[1]
     except:
-        dre = bot.sendMessage(chat_id,"/gtts <lang_code> <txt>\nEx: /gtts en-GB Hello World!",reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     else:
         try:
             txt = cmd[2]
         except:
-            dre = bot.sendMessage(chat_id,"/gtts <lang_code> <txt>\nEx: /gtts en-GB Hello World!",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
             return
         else:
-            smsg = '[Link](https://translate.google.com.tw/translate_tts?ie=UTF-8&q='+txt+'&tl='+lang+'&client=tw-ob)'
+            smsg = '[Link](https://translate.google.com.tw/translate_tts?ie=UTF-8&q='+txt+'&tl='+clang+'&client=tw-ob)'
             dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown",reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
     return
 
+def read_chatconfig():
+    global chat_config
+    clog('[Info] Reading chat config data...',color.BLUE+'[Info]'+color.RESET+' Reading chat config data...')
+    if os.path.isfile("./chatconfig.json") == False:
+        fs = open("./chatconfig.json","w")
+        fs.write("{'config_ver':'"+HJ_Ver+"'}")
+        fs.close
+    fs = open("./chatconfig.json","r")
+    chat_config = eval(fs.read())
+    fs.close
+    clog('... Done.','...'+color.GREEN+'Done.')
+    return
+
+def write_chatconfig(data):
+    clog("[Info] Writing chat config data...",color.BLUE+"[Info]"+color.RESET+" Writing chat config data...")
+    fs = open("./chatconfig.json","w")
+    fs.write(str(data))
+    fs.close
+    return
+
+def default_lang(chat_id):
+    chat_config[chat_id]={"lang":"en_US"}
+    write_chatconfig(chat_config)
+    return
+
+def set_lang(chat_id,msg,cmd):
+    global chat_config
+    bot_me = bot.getMe()
+    try:
+        slang=cmd[1]
+    except:
+        dre = bot.sendMessage(chat_id,"/setlang <language>",reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    else:
+        try:
+            tmp = chat_config[chat_id]
+        except:
+            try:
+                tmp = lang[slang]
+            except:
+                dre = bot.sendMessage(chat_id,"Language {0} not exist.".format(slang),reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                return
+            else:
+                chat_config[chat_id]={"lang":slang}
+                write_chatconfig(chat_config)
+                dre = bot.sendMessage(chat_id,\
+                    lang[chat_config[chat_id]["lang"]]["display"]["config"]["langsuccess"].format(lang[chat_config[chat_id]["lang"]]["display_name"]),reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+        else:
+            if slang != chat_config[chat_id]["lang"]:
+                try:
+                    tmp = lang[slang]
+                except:
+                    dre = bot.sendMessage(chat_id,"Language {0} not exist.".format(slang),reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                else:
+                    chat_config[chat_id]["lang"] = slang
+                    write_chatconfig(chat_config)
+                    dre = bot.sendMessage(chat_id,\
+                        lang[chat_config[chat_id]["lang"]]["display"]["config"]["langsuccess"].format(lang[chat_config[chat_id]["lang"]]["display_name"]),reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+            else:
+                dre = bot.sendMessage(chat_id,lang[chat_config[chat_id]["lang"]]["display"]["config"]["langexist"].format(lang[chat_config[chat_id]["lang"]]["display_name"]),reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+    return
+
 def read_function_list():
     global function_list_data
-    clog('[Info] Reading function list data...')
+    clog('[Info] Reading function list data...',color.BLUE+'[Info]'+color.RESET+' Reading function list data...')
     if os.path.isfile("./fctlsdata.json") == False:
         fs = open("./fctlsdata.json","w")
-        fs.write('{"config_ver":'+HJ_Ver+'}')
+        fs.write("{'config_ver':'"+HJ_Ver+"'}")
         fs.close
     fs = open("./fctlsdata.json","r")
     function_list_data = eval(fs.read())
     fs.close
-    clog('... Done.')
+    clog('... Done.','...'+color.GREEN+'Done.')
     return
 
 def write_function_list(data):
-    clog("[Info] Writing function list data...")
+    clog("[Info] Writing function list data...",color.BLUE+"[Info]"+color.RESET+" Writing function list data...")
     fs = open("./fctlsdata.json","w")
     fs.write(str(data))
     fs.close
     return
 
 def function(chat_id,msg,cmd,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['function']['general']
     if msg['from']['id'] == OWNERID:
         clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
         try:
             testsubcmd = cmd[1]
         except:
-            dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|stats|reset>",reply_to_message_id=msg["message_id"])
+            dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             if cmd[1] == "enable":
@@ -2049,15 +2128,15 @@ def function(chat_id,msg,cmd,chat_type):
                 function_stats(chat_id,msg)
             elif cmd[1] == "reset":
                 function_default(chat_id,msg,chat_type)
-                dre = bot.sendMessage(chat_id,'已重置功能狀態',reply_to_message_id=msg["message_id"])
+                dre = bot.sendMessage(chat_id,langport['reset_complete'],reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
             else:
-                dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|reset>",reply_to_message_id=msg["message_id"])
+                dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
         return
     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
         clog('[Info] Detected a group with all members are admin enabled.')
-        dre = bot.sendMessage(chat_id,'你沒有權限更改功能設定',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
     else:
@@ -2068,7 +2147,7 @@ def function(chat_id,msg,cmd,chat_type):
                 try:
                     testsubcmd = cmd[1]
                 except:
-                    dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|stats|reset>",reply_to_message_id=msg["message_id"])
+                    dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
                 else:
                     if cmd[1] == "enable":
@@ -2081,43 +2160,44 @@ def function(chat_id,msg,cmd,chat_type):
                         function_stats(chat_id,msg)
                     elif cmd[1] == "reset":
                         function_default(chat_id,msg,chat_type)
-                        dre = bot.sendMessage(chat_id,'已重置功能狀態',reply_to_message_id=msg["message_id"])
+                        dre = bot.sendMessage(chat_id,langport['reset_complete'],reply_to_message_id=msg["message_id"])
                         log("[Debug] Raw sent data:"+str(dre))
                     else:
-                        dre = bot.sendMessage(chat_id,"/function <enable|disable|chkadminf|stats|reset>",reply_to_message_id=msg["message_id"])
+                        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
                         log("[Debug] Raw sent data:"+str(dre))
                 return
         clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
-        dre = bot.sendMessage(chat_id,'你沒有權限更改功能設定',reply_to_message_id=msg['message_id'])
+        dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
     return
 
 def function_enable(chat_id,msg,cmd,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['function']['enable']
     global function_list_data
     bot_me = bot.getMe()
     try:
         funct=cmd[2]
     except:
-        dre = bot.sendMessage(chat_id,"/function <enable> <Function name|all>",reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     try:
         groupfundict = function_list_data[str(chat_id)]
     except:
         function_default(chat_id,msg,chat_type)
-        dre = bot.sendMessage(chat_id,'偵測到本群組沒有設定且已初始化功能列表',reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['deploy'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     try:
         currentv = groupfundict[funct]
     except:
-        dre = bot.sendMessage(chat_id,"找不到 {0}".format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['funct_not_exist'].format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     if currentv == True:
         dre = bot.sendMessage(chat_id,\
-                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'此功能目前為啟用狀態'+'</code>'),\
+                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['already_true']+'</code>'),\
                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
@@ -2125,7 +2205,7 @@ def function_enable(chat_id,msg,cmd,chat_type):
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
             clog('[Info] Detected a group with all members are admin enabled.')
             dre = bot.sendMessage(chat_id,\
-                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'所有人都是管理員的普通群組無法執行需要管理員的指令'+'</code>'),\
+                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['all_member_are_admin']+'</code>'),\
                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
             function_list_data[str(chat_id)] = groupfundict
@@ -2140,12 +2220,12 @@ def function_enable(chat_id,msg,cmd,chat_type):
                         if admin['can_change_info']:
                             groupfundict['grouppic'] = True
                             dre = bot.sendMessage(chat_id,\
-                                '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                                langport['success'].format('<b>'+funct+'</b>'),\
                                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
                         else:
                             dre = bot.sendMessage(chat_id,\
-                                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'權限不足'+'</code>'),\
+                                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
                                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
                             return
@@ -2153,12 +2233,12 @@ def function_enable(chat_id,msg,cmd,chat_type):
                         if admin['can_change_info']:
                             groupfundict['grouppic'] = True
                             dre = bot.sendMessage(chat_id,\
-                                '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                                langport['success'].format('<b>'+funct+'</b>'),\
                                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
                         else:
                             dre = bot.sendMessage(chat_id,\
-                                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'權限不足'+'</code>'),\
+                                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
                                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
                             return
@@ -2166,12 +2246,12 @@ def function_enable(chat_id,msg,cmd,chat_type):
                         if admin['can_pin_messages']:
                             groupfundict['pin'] = True
                             dre = bot.sendMessage(chat_id,\
-                                '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                                langport['success'].format('<b>'+funct+'</b>'),\
                                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
                         else:
                             dre = bot.sendMessage(chat_id,\
-                                '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'權限不足'+'</code>'),\
+                                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
                                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
                             return
@@ -2180,18 +2260,18 @@ def function_enable(chat_id,msg,cmd,chat_type):
                     if funct == 'grouppic':
                         groupfundict['grouppic'] = True
                         dre = bot.sendMessage(chat_id,\
-                            '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                            langport['success'].format('<b>'+funct+'</b>'),\
                             parse_mode='HTML',reply_to_message_id=msg['message_id'])
                         log("[Debug] Raw sent data:"+str(dre))
                     if funct == 'title':
                         groupfundict['title'] = True
                         dre = bot.sendMessage(chat_id,\
-                            '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+                            langport['success'].format('<b>'+funct+'</b>'),\
                             parse_mode='HTML',reply_to_message_id=msg['message_id'])
                         log("[Debug] Raw sent data:"+str(dre))
                     if funct == 'pin':
                         dre = bot.sendMessage(chat_id,\
-                            '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'普通群組無法置頂訊息'+'</code>'),\
+                            langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_pin']+'</code>'),\
                             parse_mode='HTML',reply_to_message_id=msg['message_id'])
                         log("[Debug] Raw sent data:"+str(dre))
                         return
@@ -2200,14 +2280,14 @@ def function_enable(chat_id,msg,cmd,chat_type):
                 return
         clog('[Info] I am not an admin in this chat.')
         dre = bot.sendMessage(chat_id,\
-            '無法啟用功能 {0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'權限不足'+'</code>'),\
+            langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
             parse_mode='HTML',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
     else:
         groupfundict[funct]=True
         dre = bot.sendMessage(chat_id,\
-            '已啟用 {0} 功能'.format('<b>'+funct+'</b>'),\
+            langport['success'].format('<b>'+funct+'</b>'),\
             parse_mode='HTML',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         function_list_data[str(chat_id)] = groupfundict
@@ -2215,19 +2295,20 @@ def function_enable(chat_id,msg,cmd,chat_type):
     return
 
 def function_disable(chat_id,msg,cmd,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['function']['disable']
     global function_list_data
     bot_me=bot.getMe()
     try:
         funct=cmd[2]
     except:
-        dre = bot.sendMessage(chat_id,"/function <enable> <Function name|all>",reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     try:
         groupfundict = function_list_data[str(chat_id)]
     except:
         function_default(chat_id,msg,chat_type)
-        dre = bot.sendMessage(chat_id,'偵測到本群組沒有設定且已初始化功能列表',reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['deploy'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     if funct == 'all':
@@ -2235,24 +2316,24 @@ def function_disable(chat_id,msg,cmd,chat_type):
             groupfundict[funct] = False
         function_list_data[str(chat_id)] = groupfundict
         write_function_list(function_list_data)
-        dre = bot.sendMessage(chat_id,'已停用所有功能',reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['success_all'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     try:
         currentv = groupfundict[funct]
     except:
-        dre = bot.sendMessage(chat_id,"找不到 {0}".format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['funct_not_exist'].format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     if currentv == False:
         dre = bot.sendMessage(chat_id,\
-                '無法停用功能{0}\n\n{1}'.format('<b>'+funct+'</b>','<code>'+'此功能目前為停用狀態'+'</code>'),\
+                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['already_false']+'</code>'),\
                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
     groupfundict[funct]=False
     dre = bot.sendMessage(chat_id,\
-        '已停用 {0} 功能'.format('<b>'+funct+'</b>'),\
+        langport['success'].format('<b>'+funct+'</b>'),\
         parse_mode='HTML',reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     function_list_data[str(chat_id)] = groupfundict
@@ -2260,6 +2341,7 @@ def function_disable(chat_id,msg,cmd,chat_type):
     return
 
 def function_admincheck(chat_id,msg,chat_type,sendchat):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['function']['admin_check']
     global function_list_data
     bot_me=bot.getMe()
     try:
@@ -2271,15 +2353,15 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
         clog('[Info] Detected a group with all members are admin enabled,disabling admin functions...')
         if sendchat:
             dre = bot.sendMessage(chat_id,\
-                '所有人都是管理員的普通群組無法執行需要管理員的指令，因此有些功能已被停用',\
+                langport['all_member_are_admin'],\
                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         groupfundict['grouppic'] = False
-        smsg = smsg + '已停用 {0} 功能\n'.format('<b>grouppic</b>')
+        smsg = smsg + langport['success_disable'].format('<b>grouppic</b>')+'\n'
         groupfundict['pin'] = False
-        smsg = smsg + '已停用 {0} 功能\n'.format('<b>pin</b>')
+        smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
         groupfundict['title'] = False
-        smsg = smsg + '已停用 {0} 功能\n'.format('<b>title</b>')
+        smsg = smsg + langport['success_disable'].format('<b>title</b>')+'\n'
         function_list_data[str(chat_id)] = groupfundict
         write_function_list(function_list_data)
         if sendchat:
@@ -2289,7 +2371,7 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
             log("[Debug] Raw sent data:"+str(dre))
         return
     if sendchat:
-        dre = bot.sendMessage(chat_id,"正在檢查我是否是管理員...",reply_to_message_id=msg["message_id"])
+        dre = bot.sendMessage(chat_id,langport['msg_checking_admin'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
     clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
     
@@ -2299,28 +2381,28 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
                 clog('[Info] I am an admin in this chat,checking further permissions...')
                 if admin['can_change_info']:
                     groupfundict['grouppic'] = True
-                    smsg = smsg + '已啟用 {0} 功能\n'.format('<b>title</b>')
+                    smsg = smsg + langport['success_enable'].format('<b>grouppic</b>')+'\n'
                     groupfundict['title'] = True
-                    smsg = smsg + '已啟用 {0} 功能\n'.format('<b>title</b>')
+                    smsg = smsg + langport['success_enable'].format('<b>title</b>')+'\n'
                 else:
                     groupfundict['grouppic'] = False
-                    smsg = smsg + '已停用 {0} 功能\n'.format('<b>grouppic</b>')
+                    smsg = smsg + langport['success_disable'].format('<b>grouppic</b>')+'\n'
                     groupfundict['title'] = False
-                    smsg = smsg + '已停用 {0} 功能\n'.format('<b>grouppic</b>')
+                    smsg = smsg + langport['success_disable'].format('<b>title</b>')+'\n'
                 if admin['can_pin_messages'] == True:
                     groupfundict['pin'] = True
-                    smsg = smsg + '已啟用 {0} 功能\n'.format('<b>pin</b>')
+                    smsg = smsg + langport['success_enable'].format('<b>pin</b>')+'\n'
                 else:
                     groupfundict['pin'] = False
-                    smsg = smsg + '已停用 {0} 功能\n'.format('<b>pin</b>')
+                    smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
             elif chat_type == 'group':
                 clog('[Info] I am an admin in this chat,enabling admin functions without pin...')
                 groupfundict['grouppic'] = True
-                smsg = smsg + '已啟用 {0} 功能\n'.format('<b>grouppic</b>')
+                smsg = smsg + langport['success_enable'].format('<b>grouppic</b>')+'\n'
                 groupfundict['pin'] = False
-                smsg = smsg + '已停用 {0} 功能\n'.format('<b>pin</b>')
+                smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
                 groupfundict['title'] = True
-                smsg = smsg + '已啟用 {0} 功能\n'.format('<b>title</b>')
+                smsg = smsg + langport['success_enable'].format('<b>title</b>')+'\n'
             function_list_data[str(chat_id)] = groupfundict
             write_function_list(function_list_data)
             if sendchat:
@@ -2331,11 +2413,11 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
             return
     clog('[Info] I am not an admin in this chat.')
     groupfundict['grouppic'] = False
-    smsg = smsg + '已停用 {0} 功能\n'.format('<b>grouppic</b>')
+    smsg = smsg + langport['success_disable'].format('<b>grouppic</b>')+'\n'
     groupfundict['pin'] = False
-    smsg = smsg + '已停用 {0} 功能\n'.format('<b>pin</b>')
+    smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
     groupfundict['title'] = False
-    smsg = smsg + '已停用 {0} 功能\n'.format('<b>title</b>')
+    smsg = smsg + langport['success_disable'].format('<b>title</b>')+'\n'
     function_list_data[str(chat_id)] = groupfundict
     write_function_list(function_list_data)
     if sendchat:
@@ -2387,6 +2469,7 @@ def function_stats(chat_id,msg):
     return
 
 def help(chat_id,msg):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['help']
     global function_list_data
     bot_me=bot.getMe()
     try:
@@ -2423,16 +2506,16 @@ def help(chat_id,msg):
     if groupfundict['replace_str']:
         smsg = smsg + '/replace\n'
     if smsg == '':
-        smsg = '所有功能已被停用！若需要啟用，請使用 /function 指令'
+        smsg = langport['nofunction']+'\n/setlang'
     else:
-        smsg = smsg + '/function'
+        smsg = smsg + '/function\n/setlang'
     dre = bot.sendMessage(chat_id,smsg,reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
    
 def helpp(chat_id,msg):
     dre = bot.sendMessage(chat_id,\
-        '/ping\n/echo\n/getme\n/ns\n/getfile\n/gtts\n/exportblog',\
+        '/ping\n/echo\n/getme\n/ns\n/getfile\n/gtts\n/exportblog\n/setlang',\
         reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
@@ -2562,6 +2645,7 @@ def clog(text,colored_text = ""):
         print(text)
     log(text)
     return
+
 def log(text):
     if text[0:7] == "[Debug]":
         if Debug == True:
@@ -2590,6 +2674,7 @@ answerer = telepot.helper.Answerer(bot)
 #bot.message_loop({'chat': on_chat_message})
 MessageLoop(bot, {'chat': on_chat_message}).run_as_thread()
 read_function_list()
+read_chatconfig()
 clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Bot has started",\
     color.GREEN+"["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"]"+color.BLUE+"[Info]"+color.GREEN+" Bot has started")
 clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Listening ...",\
