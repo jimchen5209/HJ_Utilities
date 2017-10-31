@@ -1586,7 +1586,7 @@ def addtag(chat_id,msg,cmd):
                     successmsg = ""
                 if errcount == 0:
                     errmsg = ""
-                dre = bot.sendMessage(chat_id,successmsg+errmsg+nousername,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
+                dre = bot.sendMessage(chat_id,successmsg+errmsg,parse_mode="HTML",disable_web_page_preview=True,reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
     else:
         data=readtag()
@@ -1744,7 +1744,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
                         except:
                             lastname = ''
                         try:
-                            nickname = '<a href="https://t.me/' + adduser['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
+                            nickname = '<a href="https://t.me/' + rmuser['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
                         except:
                             nickname = firstname + ' ' + lastname
                         successmsg = successmsg + nickname + "\n"
@@ -1805,7 +1805,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
                 nickname = '<a href="https://t.me/' + adduser['user']['username'] + '">'+firstname + ' ' + lastname+'</a>'
             except:
                 nickname = firstname + ' ' + lastname
-            smsg = smsg + langport['r_success'].format("<b>" + nickname + "</b>"+"<b>" + cmd[2] + "</b>")
+            smsg = smsg + langport['r_success'].format(nickname,"<b>" + cmd[2] + "</b>")
             clog("[Info] " + firstname + ' ' + lastname + " was removed from "+cmd[2])
         grouptagdict[cmd[2]]=temptaglist
         if len(grouptagdict[cmd[2]]) == 0:
