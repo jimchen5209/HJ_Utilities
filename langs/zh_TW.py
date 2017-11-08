@@ -119,8 +119,12 @@
       "list_not_exist": "清單 {0} 不存在",
       "tag_prefix": "正在提及清單 {0} 的 {1} 個人"
     },
+    "tagadmin": {
+        "all_member_are_admin":"偵測到所有人都是管理員,將只提及群主",
+        "tag_prefix": "正在提及群組內的 {0} 位管理員"
+    },
     "general": {
-      "help": "/tag <add|remove|list|tag>",
+      "help": "/tag <add|remove|list|tag|admin>",
       "PWRAPI": "此功能因為API終止服務暫時停用，詳情請到[pwrtelegram](https://t.me/pwrtelegram)"
     }
   },

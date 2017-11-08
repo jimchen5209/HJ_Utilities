@@ -119,8 +119,12 @@
       "list_not_exist": "{0} is not exist.",
       "tag_prefix": "Mentioning {1} member(s) in {0}."
     },
+    "tagadmin": {
+        "all_member_are_admin":"A group with all members are admin enabled,I will only mention the creator.",
+        "tag_prefix": "Mentioning {0} admin(s) in this group."
+    },
     "general": {
-      "help": "/tag <add|remove|list|tag>",
+      "help": "/tag <add|remove|list|tag|admin>",
       "PWRAPI": "The function is temporarily unavailable because the API is down.For further information: [pwrtelegram](https://t.me/pwrtelegram)"
     }
   },
