@@ -2055,7 +2055,10 @@ def set_lang(chat_id,msg,cmd):
     try:
         slang=cmd[1]
     except:
-        dre = bot.sendMessage(chat_id,"/setlang <language>",reply_to_message_id=msg["message_id"])
+        smsg=""
+        for i in lang:
+            smsg = smsg + "- <code>" + i + "</code> <i>"+lang[i]["display_name"]+"</i>\n"
+        dre = bot.sendMessage(chat_id,"/setlang &lt;language&gt;\n\n"+smsg,parse_mode="HTML",reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
     else:
@@ -2065,7 +2068,10 @@ def set_lang(chat_id,msg,cmd):
             try:
                 tmp = lang[slang]
             except:
-                dre = bot.sendMessage(chat_id,"Language {0} not exist.".format(slang),reply_to_message_id=msg['message_id'])
+                smsg=""
+                for i in lang:
+                    smsg = smsg + "- <code>" + i + "</code> <i>"+lang[i]["display_name"]+"</i>\n"
+                dre = bot.sendMessage(chat_id,"Language {0} not exist.\n\n".format("<b>"+slang+"</b>")+smsg,parse_mode="HTML",reply_to_message_id=msg["message_id"])
                 log("[Debug] Raw sent data:"+str(dre))
                 return
             else:
@@ -2079,7 +2085,10 @@ def set_lang(chat_id,msg,cmd):
                 try:
                     tmp = lang[slang]
                 except:
-                    dre = bot.sendMessage(chat_id,"Language {0} not exist.".format(slang),reply_to_message_id=msg['message_id'])
+                    smsg=""
+                    for i in lang:
+                        smsg = smsg + "- <code>" + i + "</code> <i>"+lang[i]["display_name"]+"</i>\n"
+                    dre = bot.sendMessage(chat_id,"Language {0} not exist.\n\n".format("<b>"+slang+"</b>")+smsg,parse_mode="HTML",reply_to_message_id=msg["message_id"])
                     log("[Debug] Raw sent data:"+str(dre))
                 else:
                     chat_config[chat_id]["lang"] = slang
