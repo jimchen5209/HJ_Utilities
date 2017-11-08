@@ -2035,6 +2035,17 @@ def read_chatconfig():
     chat_config = eval(fs.read())
     fs.close
     clog('... Done.','...'+color.GREEN+'Done.')
+    if chat_config['config_ver'] != HJ_Ver:
+        clog('[Info] Updating chat config data...',color.BLUE+'[Info]'+color.RESET+' Updating chat config data...')
+        old_chat_config = chat_config
+        chat_config['config_ver'] = HJ_Ver
+        for i in chat_config:
+            #New configs here
+            time.sleep(0)
+        for i in chat_config:
+            for j in old_chat_config[i]:
+                chat_config[i][j]=old_chat_config[i][j]
+        write_chatconfig(chat_config)
     return
 
 def write_chatconfig(data):
@@ -2112,6 +2123,17 @@ def read_function_list():
     function_list_data = eval(fs.read())
     fs.close
     clog('... Done.','...'+color.GREEN+'Done.')
+    if function_list_data['config_ver'] != HJ_Ver:
+        clog('[Info] Updating function list data...',color.BLUE+'[Info]'+color.RESET+' Updating chat config data...')
+        old_function_list_data = function_list_data
+        function_list_data['config_ver'] = HJ_Ver
+        for i in function_list_data:
+            #New configs here
+            time.sleep(0)
+        for i in function_list_data:
+            for j in old_function_list_data[i]:
+                function_list_data[i][j]=old_function_list_data[i][j]
+        write_function_list(chat_config)
     return
 
 def write_function_list(data):
