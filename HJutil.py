@@ -41,11 +41,11 @@ fs.close()
 lang = {}
 for i in langlist:
     lang[i]={}
-    if i != "en_US":
-        fs = open(langlist["en_US"]["file"],"r")
-        lang[i]["display"] = eval(fs.read())
-        fs.close()
-    fs = open(langlist[i]["file"],"r")    
+    #if i != "en_US":
+    #    fs = open(langlist["en_US"]["file"],"r")
+        #lang[i]["display"] = eval(fs.read())
+        #fs.close()
+    fs = open(langlist[i]["file"],"r")
     lang[i]["display"] = eval(fs.read())
     lang[i]["display_name"]=langlist[i]["display_name"]
     fs.close()
@@ -484,6 +484,8 @@ def on_chat_message(msg):
                 if txt == '@tagall':
                     #tag(chat_id,msg,["/tag","all"],chat_type)
                     time.sleep(0)
+                elif txt == '@tagadmin':
+                    tag(chat_id,msg,["/tag","admin"],chat_type)
                 elif txt[0:4] == '@tag':
                     if txt == '@tag':
                         return
@@ -1942,6 +1944,28 @@ def tags(chat_id,msg,cmd):
                 log("[Debug] Raw sent data:"+str(dre))
     return
 
+def tag_admin(chat_id,msg,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['tag']['tagadmin']
+    if chat_type == "group" and msg['chat']['all_members_are_administrators'] == True:
+        dre = bot.sendMessage(chat_id,langport['all_member_are_admin'],parse_mode="HTML",reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+    admin_list = bot.getChatAdministrators(chat_id)
+    dre = bot.sendMessage(chat_id,langport['tag_prefix'].format("<b>"+str(len(admin_list))+"</b>"),parse_mode="HTML",reply_to_message_id=msg["message_id"])
+    log("[Debug] Raw sent data:"+str(dre))
+    smsg = ""
+    totalcount=0
+    for admin in admin_list:
+        smsg = smsg + "[.](tg://user?id="+str(admin['user']['id'])+")"
+        totalcount=totalcount+1
+        if totalcount >= 5:
+            dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
+            log("[Debug] Raw sent data:"+str(dre))
+            smsg=""
+            totalcount=0
+    if totalcount != 0:
+        dre = bot.sendMessage(chat_id,smsg,parse_mode="Markdown")
+        log("[Debug] Raw sent data:"+str(dre))
+    return
 #def tagall(chat_id,msg):
 #    dre = bot.sendMessage(chat_id,"正在提及群組內的所有人",parse_mode="HTML",reply_to_message_id=msg["message_id"])
 #    log("[Debug] Raw sent data:"+str(dre))
@@ -1996,6 +2020,8 @@ def tag(chat_id,msg,cmd,chat_type):
             #tagall(chat_id,msg)
             dre = bot.sendMessage(chat_id,langport['PWRAPI'],parse_mode='Markdown',reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
+        elif cmd[1] == "admin":
+            tag_admin(chat_id,msg,chat_type)
         else:
             dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
             log("[Debug] Raw sent data:"+str(dre))
