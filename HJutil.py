@@ -40,8 +40,12 @@ langlist = eval(fs.read())
 fs.close()
 lang = {}
 for i in langlist:
-    fs = open(langlist[i]["file"],"r")
     lang[i]={}
+    if i != "en_US":
+        fs = open(langlist["en_US"]["file"],"r")
+        lang[i]["display"] = eval(fs.read())
+        fs.close()
+    fs = open(langlist[i]["file"],"r")    
     lang[i]["display"] = eval(fs.read())
     lang[i]["display_name"]=langlist[i]["display_name"]
     fs.close()
