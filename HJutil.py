@@ -468,9 +468,6 @@ def on_chat_message(msg):
                     tag(chat_id,msg,sortedcmd,chat_type)
             if cmd[0] == '/function' or cmd[0] == '/function@'+username.lower():
                 function(chat_id,msg,cmd,chat_type)
-            if cmd[0] == '/tagall' or cmd[0] == '/tagall@'+username.lower():
-                if groupfundict['tag']:
-                    tag(chat_id,msg,["/tag","all"],chat_type)
             if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username.lower():
                 confirm(chat_id,msg)
             if cmd[0] == '/gtts' or cmd[0] == '/gtts@'+username.lower():
