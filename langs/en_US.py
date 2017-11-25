@@ -170,6 +170,25 @@
       "no_perm": "You don't have permission to export chat link.",
       "error":"A problem occured when exporting chat link\n\n{0}"
   },
+  "delmsg":{
+      "all_member_are_admin": "A group which all members are admins is not able to delete the message by me.",
+      "no_reply":"Reply to a message,please.",
+      "no_perm": "You don't have permission to delete others' message.",
+      "deleting_self_msg": "Delete YOUR message by YOUSELF,PLEASE.",
+      "error":"An error occured when deleting message\n\n{0}",
+      "bot_no_perm": "I don't have enough permission.",
+      "confirm":"ARE YOU SURE YOU WANT TO DELETE THIS MESSAGE?",
+      "yes":"That's right!Delete it!",
+      "no_1":"No I didn't say anything.",
+      "no_2":"It's False",
+      "no_3":"No",
+      "no_4":"Nope.",
+      "success":"Operation completed.",
+      "success_msg":"{0} just deleted {1}'s message.",
+      "canceled":"Operation canceled.",
+      "not_proposer":"You are not the proposer of deleting message.",
+      "message_expired":"Message expired"
+  },
   "help": {
     "nofunction": "All functions are disabled!Use /function if you need to enable."
   },

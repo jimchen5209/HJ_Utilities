@@ -170,6 +170,25 @@
       "no_perm": "您沒有權限取得群組邀請連結",
       "error":"匯出群組連結時發生問題\n\n{0}"
   },
+  "delmsg":{
+      "all_member_are_admin": "所有人都是管理員的普通群組無法透過我來刪除訊息",
+      "no_reply":"請回覆您要刪除的訊息",
+      "no_perm": "您沒有權限取得刪除別人的訊息",
+      "deleting_self_msg": "請自行把自己的訊息刪掉，謝謝",
+      "error":"刪除訊息時發生問題\n\n{0}",
+      "bot_no_perm": "我沒有權限",
+      "confirm":"您確定要刪除這則訊息嗎?",
+      "yes":"對！刪了它！",
+      "no_1":"不我甚麼都沒講",
+      "no_2":"假的",
+      "no_3":"否",
+      "no_4":"沒有阿",
+      "success":"操作已完成",
+      "success_msg":"{0} 刪除了 {1} 的訊息",
+      "canceled":"操作已被取消",
+      "not_proposer":"你不是要求刪除訊息的用戶",
+      "message_expired":"訊息已過時"
+  },
   "help": {
       "nofunction": "所有功能已被停用！若需要啟用，請使用 /function 指令"
   },
