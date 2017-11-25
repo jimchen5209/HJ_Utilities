@@ -1372,7 +1372,10 @@ def replace(chat_id,msg,cmd):
                     tnick = tnick + ' ' + tuser['last_name']
                 except:
                     tnick = tnick
-                smsg= langport['result'].format('<a href="tg://user?id='+str(fuser['id'])+'">'+fnick+'</a>','<a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a>','<i>'+rstring +'</i>')
+                if fuser['id'] == tuser['id']:
+                    smsg= langport['result_self'].format('<a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a>','<i>'+rstring +'</i>')
+                else:
+                    smsg= langport['result'].format('<a href="tg://user?id='+str(fuser['id'])+'">'+fnick+'</a>','<a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a>','<i>'+rstring +'</i>')
                 dre = bot.sendMessage(chat_id,smsg,parse_mode="HTML",reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
     return
