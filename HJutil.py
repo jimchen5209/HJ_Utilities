@@ -2052,7 +2052,7 @@ def exportchatlink(chat_id,msg,chat_type):
             clog('[ERROR] Unable to export chat link '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
         else:
             bot.sendMessage(chat_id,link,reply_to_message_id=msg['message_id'])
-            clog('[Info] Exported chat link: {0}'.format(link)
+            clog('[Info] Exported chat link: {0}'.format(link))
         return
     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
         clog('[Info] Detected a group with all members are admin enabled.')
@@ -2078,7 +2078,7 @@ def exportchatlink(chat_id,msg,chat_type):
                     clog('[ERROR] Unable to export chat link '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
                 else:
                     bot.sendMessage(chat_id,link,reply_to_message_id=msg['message_id'])
-                    clog('[Info] Exported chat link: {0}'.format(link)
+                    clog('[Info] Exported chat link: {0}'.format(link))
                 return
         clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
         dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
@@ -2124,14 +2124,18 @@ def read_chatconfig():
     clog('... Done.','...'+color.GREEN+'Done.')
     if chat_config['config_ver'] != HJ_Ver:
         clog('[Info] Updating chat config data...',color.BLUE+'[Info]'+color.RESET+' Updating chat config data...')
-        old_chat_config = chat_config
+        old_chat_config = str(chat_config)
         chat_config['config_ver'] = HJ_Ver
         for i in chat_config:
+            if i == 'config_ver':
+                continue
             #New configs here
             time.sleep(0)
         for i in chat_config:
-            for j in old_chat_config[i]:
-                chat_config[i][j]=old_chat_config[i][j]
+            if i == 'config_ver':
+                continue
+            for j in eval(old_chat_config)[i]:
+                chat_config[i][j]=eval(old_chat_config)[i][j]
         write_chatconfig(chat_config)
     return
 
@@ -2236,7 +2240,7 @@ def read_function_list():
     clog('... Done.','...'+color.GREEN+'Done.')
     if function_list_data['config_ver'] != HJ_Ver:
         clog('[Info] Updating function list data...',color.BLUE+'[Info]'+color.RESET+' Updating function list data...')
-        old_function_list_data = function_list_data
+        old_function_list_data = str(function_list_data)
         function_list_data['config_ver'] = HJ_Ver
         for i in function_list_data:
             if i == 'config_ver':
@@ -2245,8 +2249,8 @@ def read_function_list():
         for i in function_list_data:
             if i == 'config_ver':
                 continue
-            for j in old_function_list_data[i]:
-                function_list_data[i][j]=old_function_list_data[i][j]
+            for j in eval(old_function_list_data)[i]:
+                function_list_data[i][j]=eval(old_function_list_data)[i][j]
         write_function_list(function_list_data)
     return
 
@@ -2350,7 +2354,7 @@ def function_enable(chat_id,msg,cmd,chat_type):
                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
         return
-    if funct == 'grouppic' or funct == 'title' or funct == 'pin':
+    if funct == 'grouppic' or funct == 'title' or funct == 'pin' or funct == 'export_link':
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
             clog('[Info] Detected a group with all members are admin enabled.')
             dre = bot.sendMessage(chat_id,\
@@ -2404,6 +2408,19 @@ def function_enable(chat_id,msg,cmd,chat_type):
                                 parse_mode='HTML',reply_to_message_id=msg['message_id'])
                             log("[Debug] Raw sent data:"+str(dre))
                             return
+                    if funct == 'export_link':
+                        if admin['can_invite_users']:
+                            groupfundict['pin'] = True
+                            dre = bot.sendMessage(chat_id,\
+                                langport['success'].format('<b>'+funct+'</b>'),\
+                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                        else:
+                            dre = bot.sendMessage(chat_id,\
+                                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
+                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                            return
                 elif chat_type == 'group':
                     clog('[Info] I am an admin in this chat,enabling admin functions without pin...')
                     if funct == 'grouppic':
@@ -2421,6 +2438,12 @@ def function_enable(chat_id,msg,cmd,chat_type):
                     if funct == 'pin':
                         dre = bot.sendMessage(chat_id,\
                             langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_pin']+'</code>'),\
+                            parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                        log("[Debug] Raw sent data:"+str(dre))
+                        return
+                    if funct == 'export_link':
+                        dre = bot.sendMessage(chat_id,\
+                            langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_export']+'</code>'),\
                             parse_mode='HTML',reply_to_message_id=msg['message_id'])
                         log("[Debug] Raw sent data:"+str(dre))
                         return
