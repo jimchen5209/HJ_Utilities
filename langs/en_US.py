@@ -60,7 +60,8 @@
     "not_text": "Reply to a text message,please.",
     "help": "/replace <string to be replaced> <string to replace>\nIf you want to replace with blank,use `''`",
     "error": "An error occured.\n\n{0}",
-    "result": "{0} thinks that the meaning of {1} is {2}"
+    "result": "{0} thinks that the meaning of {1} is {2}",
+    "result_self": "{0} means {1}"
   },
   "getfile": {
     "help": "/getfile <file_id>",
