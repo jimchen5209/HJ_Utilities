@@ -170,6 +170,7 @@
   },
   "config":{
     "langsuccess":"Set language to {0}",
-    "langexist":"The language has already been {0}"
+    "langexist":"The language has already been {0}",
+    "lang_noperm":"You don't have permission to change my language."
   }
 }

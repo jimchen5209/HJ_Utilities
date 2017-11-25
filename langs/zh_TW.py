@@ -170,6 +170,7 @@
   },
   "config":{
     "langsuccess":"已將語言設置為 {0}",
-    "langexist":"語言已經是 {0}"
+    "langexist":"語言已經是 {0}",
+    "lang_noperm":"你沒有權限更改我的語言"
   }
 }
