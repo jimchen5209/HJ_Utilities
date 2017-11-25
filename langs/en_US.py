@@ -147,7 +147,8 @@
       "already_true": "This function has already enabled.",
       "all_member_are_admin": "A group which all members are admins is not able to execute functions that need admin.",
       "no_perm": "I have no permission.",
-      "group_cant_pin": "A group is not able to pin messages."
+      "group_cant_pin": "A group is not able to pin messages.",
+      "group_cant_export": "A group is not able to export chat link."
     },
     "disable": {
       "help": "/function disable <Function name|all>",

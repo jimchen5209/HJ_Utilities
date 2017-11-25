@@ -147,7 +147,8 @@
       "already_true": "此功能目前為啟用狀態",
       "all_member_are_admin": "所有人都是管理員的普通群組無法執行需要管理員的指令",
       "no_perm": "權限不足",
-      "group_cant_pin": "普通群組無法置頂訊息"
+      "group_cant_pin": "普通群組無法置頂訊息",
+      "group_cant_export": "普通群組無法取得邀請連結"
     },
     "disable": {
       "help": "/function disable <Function name|all>",
