@@ -8,6 +8,7 @@ import os
 import platform
 import io
 import telepot
+import random
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -53,6 +54,7 @@ for i in langlist:
 confirmsg = None
 function_list_data = None
 chat_config = {}
+delete_msg_sender={}
 
 class color:
    PURPLE = '\033[95m'
@@ -196,6 +198,8 @@ def on_chat_message(msg):
                 helpp(chat_id,msg)
             if cmd[0] == '/setlang':
                 set_lang(chat_id,msg,cmd)
+            if cmd[0] == 'delmsg':
+                delmsg(chat_id,msg,chat_type)
     elif chat_type == 'group' or chat_type == 'supergroup':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         dlogwc = dlogwc + "["+str(msg['message_id'])+"]"
@@ -628,6 +632,20 @@ def on_chat_message(msg):
                 flog = flog +"FileID:"+ msg['sticker']['file_id']
         if flog != "":
             clog(flog)
+
+def on_callback_query(msg):
+    log("[Debug] Raw query data:"+str(msg))
+    orginal_message = msg['message']['reply_to_message']
+    message_with_inline_keyboard = msg['message']
+    content_type, chat_type, chat_id = telepot.glance(orginal_message)
+    bot_me= bot.getMe()
+    username= bot_me['username'].replace(' ','')
+    query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
+    clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info]["+str(query_id)+"] Callback query form "+str(from_id)+" to "+str(orginal_message['message_id'])+" :"+ data)
+    if data == 'confirm_delete':
+        confirm_delete(chat_id,orginal_message,query_id,message_with_inline_keyboard,from_id)
+    elif data == 'cancel_delete':
+        cancel_delete(chat_id,orginal_message,query_id,message_with_inline_keyboard,from_id)
 
 def startc(chat_id,msg):
     dre = bot.sendMessage(chat_id,'JUST an utilities bot\n/help',reply_to_message_id=msg['message_id'])
@@ -2087,8 +2105,208 @@ def exportchatlink(chat_id,msg,chat_type):
     return
 
 def delmsg(chat_id,msg,chat_type):
+    global delete_msg_sender
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['delmsg']
+    bot_me = bot.getMe()
+    try:
+        reply_to_message=msg['reply_to_message']
+    except:
+        dre = bot.sendMessage(chat_id,langport['no_reply'],reply_to_message_id=msg["message_id"])
+        log("[Debug] Raw sent data:"+str(dre))
+    else:
+        try:
+            tmp=delete_msg_sender[chat_id]
+        except:
+            delete_msg_sender[chat_id]={}
+        if chat_type == "private":
+            markup = inlinekeyboardbutton_delete(chat_id)
+            dre = bot.sendMessage(chat_id,langport['confirm'], reply_markup=markup,parse_mode="HTML",reply_to_message_id=reply_to_message["message_id"])
+            delete_msg_sender[chat_id][dre['message_id']]=msg
+            log("[Debug] Raw sent data:"+str(dre))
+        elif chat_type == 'group' or chat_type == 'supergroup':
+            if msg['from']['id'] == OWNERID:
+                clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+                if reply_to_message['from']['id'] == msg['from']['id']:
+                    dre = bot.sendMessage(chat_id,langport['deleting_self_msg'],reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                elif reply_to_message['from']['id'] == bot_me['id']:
+                    markup = inlinekeyboardbutton_delete(chat_id)
+                    dre = bot.sendMessage(chat_id,langport['confirm'], reply_markup=markup,parse_mode="HTML",reply_to_message_id=reply_to_message["message_id"])
+                    delete_msg_sender[chat_id][dre['message_id']]=msg
+                    log("[Debug] Raw sent data:"+str(dre))
+                else:
+                    if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+                        dre = bot.sendMessage(chat_id,langport['all_member_are_admin'],reply_to_message_id=msg['message_id'])
+                        log("[Debug] Raw sent data:"+str(dre))
+                        return
+                    for admin in bot.getChatAdministrators(chat_id):
+                        if bot_me['id'] == admin['user']['id']:
+                            if chat_type == 'supergroup':
+                                if admin['can_delete_messages']:
+                                    markup = inlinekeyboardbutton_delete(chat_id)
+                                    dre = bot.sendMessage(chat_id,langport['confirm'], reply_markup=markup,parse_mode="HTML",reply_to_message_id=reply_to_message["message_id"])
+                                    delete_msg_sender[chat_id][dre['message_id']]=msg
+                                    log("[Debug] Raw sent data:"+str(dre))
+                                    return
+                                else:
+                                    dre = bot.sendMessage(chat_id,langport['bot_no_perm'],reply_to_message_id=msg['message_id'])
+                                    log("[Debug] Raw sent data:"+str(dre))
+                                    return
+                            elif chat_type == 'group':
+                                markup = inlinekeyboardbutton_delete(chat_id)
+                                dre = bot.sendMessage(chat_id,langport['confirm'], reply_markup=markup,parse_mode="HTML",reply_to_message_id=reply_to_message["message_id"])
+                                delete_msg_sender[chat_id][dre['message_id']]=msg
+                                log("[Debug] Raw sent data:"+str(dre))
+                                return
+                    dre = bot.sendMessage(chat_id,langport['bot_no_perm'],reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                return
+            if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+                clog('[Info] Detected a group with all members are admin enabled.')
+                dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                return
+            else:
+                clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+                for admin in bot.getChatAdministrators(chat_id):
+                    if msg['from']['id'] == admin['user']['id']:
+                        clog('[Info] Admin Matched for \n[Info] '+ str(admin))
+                        if reply_to_message['from']['id'] == msg['from']['id']:
+                            dre = bot.sendMessage(chat_id,langport['deleting_self_msg'],reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                        elif reply_to_message['from']['id'] == bot_me['id']:
+                            markup = inlinekeyboardbutton_delete(chat_id)
+                            dre = bot.sendMessage(chat_id,langport['confirm'], reply_markup=markup,parse_mode="HTML",reply_to_message_id=reply_to_message["message_id"])
+                            delete_msg_sender[chat_id][dre['message_id']]=msg
+                            log("[Debug] Raw sent data:"+str(dre))
+                        else:
+                            if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+                                dre = bot.sendMessage(chat_id,langport['all_member_are_admin'],reply_to_message_id=msg['message_id'])
+                                log("[Debug] Raw sent data:"+str(dre))
+                                return
+                            for admin in bot.getChatAdministrators(chat_id):
+                                if bot_me['id'] == admin['user']['id']:
+                                    if chat_type == 'supergroup':
+                                        if admin['can_delete_messages']:
+                                            markup = inlinekeyboardbutton_delete(chat_id)
+                                            dre = bot.sendMessage(chat_id,langport['confirm'], reply_markup=markup,parse_mode="HTML",reply_to_message_id=reply_to_message["message_id"])
+                                            delete_msg_sender[chat_id][dre['message_id']]=msg
+                                            log("[Debug] Raw sent data:"+str(dre))
+                                            return
+                                        else:
+                                            dre = bot.sendMessage(chat_id,langport['bot_no_perm'],reply_to_message_id=msg['message_id'])
+                                            log("[Debug] Raw sent data:"+str(dre))
+                                            return
+                                    elif chat_type == 'group':
+                                        markup = inlinekeyboardbutton_delete(chat_id)
+                                        dre = bot.sendMessage(chat_id,langport['confirm'], reply_markup=markup,parse_mode="HTML",reply_to_message_id=reply_to_message["message_id"])
+                                        delete_msg_sender[chat_id][dre['message_id']]=msg
+                                        log("[Debug] Raw sent data:"+str(dre))
+                                        return
+                            dre = bot.sendMessage(chat_id,langport['bot_no_perm'],reply_to_message_id=msg['message_id'])
+                            log("[Debug] Raw sent data:"+str(dre))
+                        return
+                clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+                dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
+                log("[Debug] Raw sent data:"+str(dre))
+                return
     return
 
+def confirm_delete(chat_id,orginal_message,query_id,message_with_inline_keyboard,from_id):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['delmsg']
+    try:
+        tmp = delete_msg_sender[chat_id][message_with_inline_keyboard['message_id']]
+    except:
+        bot.answerCallbackQuery(query_id, langport["message_expired"])
+        msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+        bot.editMessageText(msg_idf,langport["message_expired"])
+        return
+    if from_id != tmp['from']['id']:
+        bot.answerCallbackQuery(query_id,langport["not_proposer"])
+        return
+    try:
+        msg_idf = telepot.message_identifier(orginal_message)
+        bot.deleteMessage(msg_idf)
+    except:
+        tp, val, tb = sys.exc_info()
+        bot.answerCallbackQuery(query_id,langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","")))
+        msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+        bot.editMessageText(msg_idf,langport['error'].format("<code>"+str(val).split(',')[0].replace('(','').replace("'","")+"</code>"),parse_mode="HTML")
+    else:
+        bot.answerCallbackQuery(query_id,langport["success"])
+        msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+        bot.deleteMessage(msg_idf)
+        try:
+            msg_idf = telepot.message_identifier(tmp)
+            bot.deleteMessage(msg_idf)
+        except:
+            time.sleep(0)
+        del delete_msg_sender[chat_id][message_with_inline_keyboard['message_id']]
+        #bot.editMessageText(msg_idf, langport["success"])
+    return
+
+def cancel_delete(chat_id,orginal_message,query_id,message_with_inline_keyboard,from_id):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['delmsg']
+    try:
+        tmp = delete_msg_sender[chat_id][message_with_inline_keyboard['message_id']]
+    except:
+        bot.answerCallbackQuery(query_id, langport["message_expired"])
+        msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+        bot.editMessageText(msg_idf,langport["message_expired"])
+        return
+    if from_id != tmp['from']['id']:
+        bot.answerCallbackQuery(query_id,langport["not_proposer"])
+        return
+    bot.answerCallbackQuery(query_id, langport["canceled"])
+    msg_idf = telepot.message_identifier(message_with_inline_keyboard)
+    bot.editMessageText(msg_idf,langport["canceled"])
+    del delete_msg_sender[chat_id][message_with_inline_keyboard['message_id']]
+    return
+
+def inlinekeyboardbutton_delete(chat_id):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['delmsg']
+    roll = random.randint(1,5)
+    if roll == 1:
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text=langport['yes'], callback_data='confirm_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+            ])
+    elif roll == 2:
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='confirm_delete')],
+                [InlineKeyboardButton(text=langport['yes'], callback_data='confirm_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+            ])
+    elif roll == 3:
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['yes'], callback_data='confirm_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+            ])
+    elif roll == 4:
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['yes'], callback_data='confirm_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+            ])
+    elif roll == 5:
+        markup = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['no_'+str(random.randint(1,4))], callback_data='cancel_delete')],
+                [InlineKeyboardButton(text=langport['yes'], callback_data='confirm_delete')],
+            ])
+    return markup
 def gtts(chat_id,msg):
     langport=lang[chat_config[chat_id]["lang"]]["display"]['gtts']
     cmd = msg['text'].split(' ',2)
@@ -2700,6 +2918,8 @@ def help(chat_id,msg):
         smsg = smsg + '/replace\n'
     if groupfundict['export_link']:
         smsg = smsg + '/exportchatlink\n'
+    if groupfundict['delete_message']:
+        smsg = smsg + '/delmsg\n'
     if smsg == '':
         smsg = langport['nofunction']+'\n/setlang'
     else:
@@ -2710,7 +2930,7 @@ def help(chat_id,msg):
    
 def helpp(chat_id,msg):
     dre = bot.sendMessage(chat_id,\
-        '/ping\n/echo\n/getme\n/ns\n/getfile\n/gtts\n/exportblog\n/setlang',\
+        '/ping\n/echo\n/getme\n/ns\n/getfile\n/gtts\n/exportblog\n/setlang\n/delmsg',\
         reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
@@ -2867,7 +3087,8 @@ log("[Debug] Bot's TOKEN is "+TOKEN)
 answerer = telepot.helper.Answerer(bot)
 
 #bot.message_loop({'chat': on_chat_message})
-MessageLoop(bot, {'chat': on_chat_message}).run_as_thread()
+MessageLoop(bot, {'chat': on_chat_message,
+                  'callback_query': on_callback_query}).run_as_thread()
 read_function_list()
 read_chatconfig()
 clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info] Bot has started",\
