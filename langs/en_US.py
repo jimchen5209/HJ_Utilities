@@ -165,6 +165,10 @@
       "msg_checking_admin": "Checking if I am an admin in this group..."
     }
   },
+  "exportchatlink":{
+      "no_perm": "You don't have permission to export chat link.",
+      "error":"A problem occured when exporting chat link\n\n{0}"
+  },
   "help": {
     "nofunction": "All functions are disabled!Use /function if you need to enable."
   },

@@ -165,6 +165,10 @@
       "msg_checking_admin": "正在檢查我是否是管理員..."
     }
   },
+  "exportchatlink":{
+      "no_perm": "您沒有權限取得群組邀請連結",
+      "error":"匯出群組連結時發生問題\n\n{0}"
+  },
   "help": {
       "nofunction": "所有功能已被停用！若需要啟用，請使用 /function 指令"
   },
