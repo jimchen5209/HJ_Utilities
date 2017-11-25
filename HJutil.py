@@ -2150,16 +2150,19 @@ def read_function_list():
     fs.close
     clog('... Done.','...'+color.GREEN+'Done.')
     if function_list_data['config_ver'] != HJ_Ver:
-        clog('[Info] Updating function list data...',color.BLUE+'[Info]'+color.RESET+' Updating chat config data...')
+        clog('[Info] Updating function list data...',color.BLUE+'[Info]'+color.RESET+' Updating function list data...')
         old_function_list_data = function_list_data
         function_list_data['config_ver'] = HJ_Ver
         for i in function_list_data:
-            #New configs here
-            time.sleep(0)
+            if i == 'config_ver':
+                continue
+            function_set_default(i)
         for i in function_list_data:
+            if i == 'config_ver':
+                continue
             for j in old_function_list_data[i]:
                 function_list_data[i][j]=old_function_list_data[i][j]
-        write_function_list(chat_config)
+        write_function_list(function_list_data)
     return
 
 def write_function_list(data):
@@ -2491,6 +2494,15 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
 def function_default(chat_id,msg,chat_type):
     global function_list_data
     bot_me=bot.getMe()
+    function_set_default(chat_id)
+    write_function_list(function_list_data)
+    function_admincheck(chat_id,msg,chat_type,False)
+
+    return
+
+def function_set_default(chat_id):
+    global function_list_data
+    bot_me=bot.getMe()
     try:
         groupfundict = function_list_data[str(chat_id)]
     except:
@@ -2510,10 +2522,8 @@ def function_default(chat_id,msg,chat_type):
     groupfundict['google_tts'] = True
     groupfundict['replace_str'] = True
     function_list_data[str(chat_id)] = groupfundict
-    write_function_list(function_list_data)
-    function_admincheck(chat_id,msg,chat_type,False)
-
     return
+
 
 def function_stats(chat_id,msg):
     global function_list_data
