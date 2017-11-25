@@ -45,7 +45,7 @@
     "help": "/getuser [user_id]\n或回覆一個使用者來取得該用戶的資訊\n回覆時輸入 /getuser forward 可優先查詢轉寄來源的用戶資訊",
     "error": "取得該用戶資訊時發生錯誤 \n\n{0}",
     "nick": "<b>暱稱</b>: {0}",
-    "userame": "<b>Username</b>: {0}",
+    "username": "<b>Username</b>: {0}",
     "userid": "<b>User id</b>: {0}",
     "status": "<b>目前職位</b>: {0}"
   },

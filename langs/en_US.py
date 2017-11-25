@@ -45,7 +45,7 @@
     "help": "/getuser [user_id]\nor reply to a user to get the informations of this user.\nType <code>/getuser forward</code> so as to get the informations of the sender of the forwared message.",
     "error": "An error occured when fetching the informations of this user. \n\n{0}",
     "nick": "<b>Nickname</b>: {0}",
-    "userame": "<b>Username</b>: {0}",
+    "username": "<b>Username</b>: {0}",
     "userid": "<b>User id</b>: {0}",
     "status": "<b>Status</b>: {0}"
   },
