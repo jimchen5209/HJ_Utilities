@@ -1177,7 +1177,7 @@ def getuser(chat_id,msg,txt):
         try:
             uuser_id = int(txt[1])
         except:
-            dre = bot.sendMessage(chat_id,langport['help'],parse_mode = 'Markdown',reply_to_message_id=msg['message_id'])
+            dre = bot.sendMessage(chat_id,langport['help'],parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
             try:
