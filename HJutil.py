@@ -2087,6 +2087,30 @@ def default_lang(chat_id):
     return
 
 def set_lang(chat_id,msg,cmd):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['config']
+    if msg['from']['id'] == OWNERID:
+        clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+        set_lang_command(chat_id,msg,cmd)
+        return
+    if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+        clog('[Info] Detected a group with all members are admin enabled.')
+        dre = bot.sendMessage(chat_id,langport['lang_noperm'],reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    else:
+        clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+        for admin in bot.getChatAdministrators(chat_id):
+            if msg['from']['id'] == admin['user']['id']:
+                clog('[Info] Admin Matched for \n[Info] '+ str(admin))
+                set_lang_command(chat_id,msg,cmd)
+                return
+        clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+        dre = bot.sendMessage(chat_id,langport['lang_noperm'],reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    return
+
+def set_lang_command(chat_id,msg,cmd):
     global chat_config
     bot_me = bot.getMe()
     try:
