@@ -11,7 +11,7 @@ import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
-HJ_Ver= "1.0.1"
+HJ_Ver= "1.0.2"
 try:
     fs = open("./config.json","r")
 except:
@@ -443,6 +443,12 @@ def on_chat_message(msg):
             if cmd[0] == '/getme' or cmd[0] == '/getme@'+username.lower():
                 if groupfundict['user']:
                     getme(chat_id,msg)
+            if cmd[0] == '/exportchatlink' or cmd[0] == '/exportchatlink@'+username.lower():
+                if groupfundict['export_link']:
+                    exportchatlink(chat_id,msg,chat_type)
+            if cmd[0] == '/delmsg' or cmd[0] == '/delmsg@'+username.lower():
+                if groupfundict['delete_message']:
+                    delmsg(chat_id,msg,chat_type)
             if cmd[0] == '/pin' or cmd[0] == '/pin@'+username.lower():
                 if groupfundict['pin']:
                     pin(chat_id,msg,chat_type)
@@ -2028,6 +2034,61 @@ def tag(chat_id,msg,cmd,chat_type):
 
     return
 
+def exportchatlink(chat_id,msg,chat_type):
+    langport=lang[chat_config[chat_id]["lang"]]["display"]['exportchatlink']
+    if msg['from']['id'] == OWNERID:
+        clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
+        try:
+            link = bot.exportChatInviteLink(chat_id)
+        except:
+            tp, val, tb = sys.exc_info()
+            sval=str(val)
+            bot.sendChatAction(chat_id,'typing')
+            dre = bot.sendMessage(chat_id,\
+                langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
+                parse_mode = 'Markdown',\
+                reply_to_message_id=msg['message_id'])
+            log("[Debug] Raw sent data:"+str(dre))
+            clog('[ERROR] Unable to export chat link '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
+        else:
+            bot.sendMessage(chat_id,link,reply_to_message_id=msg['message_id'])
+            clog('[Info] Exported chat link: {0}'.format(link)
+        return
+    if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+        clog('[Info] Detected a group with all members are admin enabled.')
+        dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    else:
+        clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+        for admin in bot.getChatAdministrators(chat_id):
+            if msg['from']['id'] == admin['user']['id']:
+                clog('[Info] Admin Matched for \n[Info] '+ str(admin))
+                try:
+                    link = bot.exportChatInviteLink(chat_id)
+                except:
+                    tp, val, tb = sys.exc_info()
+                    sval=str(val)
+                    bot.sendChatAction(chat_id,'typing')
+                    dre = bot.sendMessage(chat_id,\
+                        langport['error'].format(str(val).split(',')[0].replace('(','').replace("'","`")),\
+                        parse_mode = 'Markdown',\
+                        reply_to_message_id=msg['message_id'])
+                    log("[Debug] Raw sent data:"+str(dre))
+                    clog('[ERROR] Unable to export chat link '+str(reply_to['message_id'])+' in '+msg['chat']['title']+'('+str(chat_id)+') : '+str(val).split(',')[0].replace('(','').replace("'",""))
+                else:
+                    bot.sendMessage(chat_id,link,reply_to_message_id=msg['message_id'])
+                    clog('[Info] Exported chat link: {0}'.format(link)
+                return
+        clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
+        dre = bot.sendMessage(chat_id,langport['no_perm'],reply_to_message_id=msg['message_id'])
+        log("[Debug] Raw sent data:"+str(dre))
+        return
+    return
+
+def delmsg(chat_id,msg,chat_type):
+    return
+
 def gtts(chat_id,msg):
     langport=lang[chat_config[chat_id]["lang"]]["display"]['gtts']
     cmd = msg['text'].split(' ',2)
@@ -2450,6 +2511,8 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
         smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
         groupfundict['title'] = False
         smsg = smsg + langport['success_disable'].format('<b>title</b>')+'\n'
+        groupfundict['export_link'] = False
+        smsg = smsg + langport['success_disable'].format('<b>export_link</b>')+'\n'
         function_list_data[str(chat_id)] = groupfundict
         write_function_list(function_list_data)
         if sendchat:
@@ -2483,6 +2546,12 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
                 else:
                     groupfundict['pin'] = False
                     smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
+                if admin['can_invite_users'] == True:
+                    groupfundict['export_link'] = True
+                    smsg = smsg + langport['success_enable'].format('<b>export_link</b>')+'\n'
+                else:
+                    groupfundict['export_link'] = False
+                    smsg = smsg + langport['success_disable'].format('<b>export_link</b>')+'\n'
             elif chat_type == 'group':
                 clog('[Info] I am an admin in this chat,enabling admin functions without pin...')
                 groupfundict['grouppic'] = True
@@ -2491,6 +2560,8 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
                 smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
                 groupfundict['title'] = True
                 smsg = smsg + langport['success_enable'].format('<b>title</b>')+'\n'
+                groupfundict['export_link'] = False
+                smsg = smsg + langport['success_disable'].format('<b>export_link</b>')+'\n'
             function_list_data[str(chat_id)] = groupfundict
             write_function_list(function_list_data)
             if sendchat:
@@ -2506,6 +2577,8 @@ def function_admincheck(chat_id,msg,chat_type,sendchat):
     smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
     groupfundict['title'] = False
     smsg = smsg + langport['success_disable'].format('<b>title</b>')+'\n'
+    groupfundict['export_link'] = False
+    smsg = smsg + langport['success_disable'].format('<b>export_link</b>')+'\n'
     function_list_data[str(chat_id)] = groupfundict
     write_function_list(function_list_data)
     if sendchat:
@@ -2545,6 +2618,8 @@ def function_set_default(chat_id):
     groupfundict['tag'] = True
     groupfundict['google_tts'] = True
     groupfundict['replace_str'] = True
+    groupfundict['delete_message'] = True
+    groupfundict['export_link'] = True
     function_list_data[str(chat_id)] = groupfundict
     return
 
@@ -2600,6 +2675,8 @@ def help(chat_id,msg):
         smsg = smsg + '/gtts\n'
     if groupfundict['replace_str']:
         smsg = smsg + '/replace\n'
+    if groupfundict['export_link']:
+        smsg = smsg + '/exportchatlink\n'
     if smsg == '':
         smsg = langport['nofunction']+'\n/setlang'
     else:
