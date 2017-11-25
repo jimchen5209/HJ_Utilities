@@ -1207,7 +1207,7 @@ def getuser(chat_id,msg,txt):
                 userid = str(user['user']['id'])
                 dre = bot.sendMessage(chat_id, \
                     langport['nick'].format(nickname) + '\n'+\
-                    langport['userame'].format(uusername)  + '\n' +\
+                    langport['username'].format(uusername)  + '\n' +\
                     langport['userid'].format('<code>' + userid +'</code>')+ '\n' +\
                     langport['status'].format(user['status']),parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
                 log("[Debug] Raw sent data:"+str(dre))
@@ -1239,7 +1239,7 @@ def getuser(chat_id,msg,txt):
         userid = str(user['user']['id'])
         dre = bot.sendMessage(chat_id, \
             langport['nick'].format(nickname) + '\n'+\
-            langport['userame'].format(uusername)  + '\n' +\
+            langport['username'].format(uusername)  + '\n' +\
             langport['userid'].format('<code>' + userid +'</code>')+ '\n' +\
             langport['status'].format(user['status']),parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
         log("[Debug] Raw sent data:"+str(dre))
@@ -1262,7 +1262,7 @@ def getme(chat_id,msg):
     userid = str(user['user']['id'])
     dre = bot.sendMessage(chat_id, \
         langport['nick'].format(nickname) + '\n'+\
-        langport['userame'].format(uusername)  + '\n' +\
+        langport['username'].format(uusername)  + '\n' +\
         langport['userid'].format('<code>' + userid +'</code>')+ '\n' +\
         langport['status'].format(user['status']),parse_mode = 'HTML',reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
