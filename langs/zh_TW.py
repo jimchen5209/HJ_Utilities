@@ -42,7 +42,7 @@
     "not_text": "請回復一個文字信息"
   },
   "getuser": {
-    "help": "/getuser [user_id]\n或回覆一個使用者來取得該用戶的資訊\n回覆時輸入 /getuser forward 可優先查詢轉寄來源的用戶資訊",
+    "help": "/getuser [user_id]\n或回覆一個使用者來取得該用戶的資訊\n回覆時輸入 <code>/getuser forward</code> 可優先查詢轉寄來源的用戶資訊",
     "error": "取得該用戶資訊時發生錯誤 \n\n{0}",
     "nick": "<b>暱稱</b>: {0}",
     "username": "<b>Username</b>: {0}",
