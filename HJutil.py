@@ -485,8 +485,8 @@ def on_chat_message(msg):
                     gtts(chat_id,msg)
             if cmd[0] == '/help' or cmd[0] == '/help@'+username.lower():
                 help(chat_id,msg)
-            if cmd[0] == '/setlang':
-                set_lang(chat_id,msg,cmd)
+            if cmd[0] == '/setlang' or cmd[0] == '/setlang@'+username.lower():
+                set_lang(chat_id,msg,cmd,chat_type)
             for txt in sortedcmd:
                 if txt == '@tagall':
                     #tag(chat_id,msg,["/tag","all"],chat_type)
@@ -1717,7 +1717,7 @@ def rmtag(chat_id,msg,cmd,chat_type):
                             confirmsg = dre
                             log("[Debug] Raw sent data:"+str(dre))
                             return
-                    clog('[Info] No admins matched with ' + msg['from']['username']+'('+msg['from']['id']+ ')')
+                    clog('[Info] No admins matched with ' + msg['from']['username']+'('+str(msg['from']['id'])+ ')')
                     dre = bot.sendMessage(chat_id,langport['remove_all']['no_perm'],reply_to_message_id=msg['message_id'])
                     log("[Debug] Raw sent data:"+str(dre))
                     return
@@ -2369,7 +2369,7 @@ def default_lang(chat_id):
     write_chatconfig(chat_config)
     return
 
-def set_lang(chat_id,msg,cmd):
+def set_lang(chat_id,msg,cmd,chat_type):
     langport=lang[chat_config[chat_id]["lang"]]["display"]['config']
     if msg['from']['id'] == OWNERID:
         clog('[Info] Owner Matched for \n[Info] '+ str(bot.getChatMember(chat_id,msg['from']['id'])))
