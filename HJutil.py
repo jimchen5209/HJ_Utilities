@@ -491,7 +491,7 @@ def on_chat_message(msg):
                 if txt == '@tagall':
                     #tag(chat_id,msg,["/tag","all"],chat_type)
                     time.sleep(0)
-                elif txt == '@tagadmin':
+                elif txt == '@tagadmin' or txt == '@admin':
                     tag(chat_id,msg,["/tag","admin"],chat_type)
                 elif txt[0:4] == '@tag':
                     if txt == '@tag':
