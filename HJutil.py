@@ -101,6 +101,11 @@ def on_chat_message(msg):
         except:
             fnick= fnick
         fuserid = str(fuser['user']['id'])
+    try:
+        temp=chat_config[chat_id]
+    except:
+        chat_config[chat_id]={"lang":"en_US"}
+        write_chatconfig(chat_config)
     if chat_type == 'private':
         dlog = dlog + "[Private]["+str(msg['message_id'])+"]"
         dlogwc = dlogwc + color.BLUE +"[Private]"+color.RESET+"["+str(msg['message_id'])+"]"
