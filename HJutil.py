@@ -202,7 +202,7 @@ def on_chat_message(msg):
             if cmd[0] == '/help':
                 helpp(chat_id,msg)
             if cmd[0] == '/setlang':
-                set_lang(chat_id,msg,cmd)
+                set_lang_command(chat_id,msg,cmd)
             if cmd[0] == 'delmsg':
                 delmsg(chat_id,msg,chat_type)
     elif chat_type == 'group' or chat_type == 'supergroup':
