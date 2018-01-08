@@ -203,7 +203,7 @@ def on_chat_message(msg):
                 helpp(chat_id,msg)
             if cmd[0] == '/setlang':
                 set_lang_command(chat_id,msg,cmd)
-            if cmd[0] == 'delmsg':
+            if cmd[0] == '/delmsg':
                 delmsg(chat_id,msg,chat_type)
     elif chat_type == 'group' or chat_type == 'supergroup':
         dlog = dlog + "["+str(msg['message_id'])+"]"
