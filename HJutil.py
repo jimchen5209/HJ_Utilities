@@ -426,12 +426,14 @@ def on_chat_message(msg):
             if cmd[0] == '/ns' or cmd[0] == '/ns@'+username.lower():
                 if groupfundict['numbersystem']:
                     ns(chat_id,msg,cmd)
-            if cmd[0] == 'ping':
-                if groupfundict['ping']:
-                    ping(chat_id,msg)
             if cmd[0] == '/ping' or cmd[0] == '/ping@'+username.lower():
                 if groupfundict['ping']:
                     ping(chat_id,msg)
+                    return
+            if msg['text'].lower().find('ping') != -1:
+                if groupfundict['ping']:
+                    ping(chat_id,msg)
+                    return
             if cmd[0] == '/title' or cmd[0] == '/title@'+username.lower():
                 if groupfundict['title']:
                     title(chat_id,msg,chat_type)
@@ -976,7 +978,10 @@ def ns(chat_id,msg,txt):
     return
   
 def ping(chat_id,msg):
-    dre = bot.sendMessage(chat_id,'Pong',reply_to_message_id=msg['message_id'])
+    if msg['text'].startswith('/'):
+        dre = bot.sendMessage(chat_id,'Pong',reply_to_message_id=msg['message_id'])
+    else:
+        dre = bot.sendMessage(chat_id,msg['text'].replace('i', 'o').replace('I', 'O'), reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     return
 
