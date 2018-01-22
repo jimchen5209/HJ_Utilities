@@ -143,7 +143,7 @@
       "deploy": "Detected there is no function settings in this group and deployed successfully.",
       "funct_not_exist": "{0} not found.",
       "success": "{0} has been enabled.",
-      "failed": "Unable to enable {0}\n\n{1}",
+      "failed": "Unable to enable {0} : {1}",
       "already_true": "This function has already enabled.",
       "all_member_are_admin": "A group which all members are admins is not able to execute functions that need admin.",
       "no_perm": "I have no permission.",
@@ -156,7 +156,7 @@
       "funct_not_exist": "{0} not found.",
       "success": "{0} has been disabled.",
       "success_all": "All functions are disabled.",
-      "failed": "Unable to disable {0}\n\n{1}",
+      "failed": "Unable to disable {0} : {1}",
       "already_false": "This function has already disabled."
     },
     "admin_check": {

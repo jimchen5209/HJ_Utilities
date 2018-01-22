@@ -143,7 +143,7 @@
       "deploy": "偵測到本群組沒有設定且已初始化功能列表",
       "funct_not_exist": "找不到 {0}",
       "success": "已啟用 {0} 功能",
-      "failed": "無法啟用功能 {0}\n\n{1}",
+      "failed": "無法啟用功能 {0} : {1}",
       "already_true": "此功能目前為啟用狀態",
       "all_member_are_admin": "所有人都是管理員的普通群組無法執行需要管理員的指令",
       "no_perm": "權限不足",
@@ -156,7 +156,7 @@
       "funct_not_exist": "找不到 {0}",
       "success": "已停用 {0} 功能",
       "success_all": "已停用所有功能",
-      "failed": "無法停用功能 {0}\n\n{1}",
+      "failed": "無法停用功能 {0} : {1}",
       "already_false": "此功能目前為停用狀態"
     },
     "admin_check": {

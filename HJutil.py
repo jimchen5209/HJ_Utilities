@@ -434,10 +434,6 @@ def on_chat_message(msg):
                 if groupfundict['ping']:
                     ping(chat_id,msg)
                     return
-            if msg['text'].lower().find('ping') != -1:
-                if groupfundict['ping']:
-                    ping(chat_id,msg)
-                    return
             if cmd[0] == '/title' or cmd[0] == '/title@'+username.lower():
                 if groupfundict['title']:
                     title(chat_id,msg,chat_type)
@@ -489,6 +485,7 @@ def on_chat_message(msg):
                     tag(chat_id,msg,sortedcmd,chat_type)
             if cmd[0] == '/function' or cmd[0] == '/function@'+username.lower():
                 function(chat_id,msg,cmd,chat_type)
+                return
             if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+username.lower():
                 confirm(chat_id,msg)
             if cmd[0] == '/gtts' or cmd[0] == '/gtts@'+username.lower():
@@ -498,6 +495,10 @@ def on_chat_message(msg):
                 help(chat_id,msg)
             if cmd[0] == '/setlang' or cmd[0] == '/setlang@'+username.lower():
                 set_lang(chat_id,msg,cmd,chat_type)
+            if msg['text'].lower().find('ping') != -1:
+                if groupfundict['ping']:
+                    ping(chat_id,msg)
+                    return
             for txt in sortedcmd:
                 if txt == '@tagall':
                     #tag(chat_id,msg,["/tag","all"],chat_type)
@@ -2576,7 +2577,7 @@ def function_enable(chat_id,msg,cmd,chat_type):
     global function_list_data
     bot_me = bot.getMe()
     try:
-        funct=cmd[2]
+        testarg=cmd[2]
     except:
         dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
@@ -2588,128 +2589,162 @@ def function_enable(chat_id,msg,cmd,chat_type):
         dre = bot.sendMessage(chat_id,langport['deploy'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
-    try:
-        currentv = groupfundict[funct]
-    except:
-        dre = bot.sendMessage(chat_id,langport['funct_not_exist'].format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
-        log("[Debug] Raw sent data:"+str(dre))
-        return
-    if currentv == True:
-        dre = bot.sendMessage(chat_id,\
-                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['already_true']+'</code>'),\
-                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-        log("[Debug] Raw sent data:"+str(dre))
-        return
-    if funct == 'grouppic' or funct == 'title' or funct == 'pin' or funct == 'export_link':
-        if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
-            clog('[Info] Detected a group with all members are admin enabled.')
-            dre = bot.sendMessage(chat_id,\
-                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['all_member_are_admin']+'</code>'),\
-                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-            log("[Debug] Raw sent data:"+str(dre))
-            function_list_data[str(chat_id)] = groupfundict
-            write_function_list(function_list_data)
-            return
-        clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
-        for admin in bot.getChatAdministrators(chat_id):
-            if bot_me['id'] == admin['user']['id']:
-                if chat_type == 'supergroup':
-                    clog('[Info] I am an admin in this chat,checking further permissions...')
-                    if funct == 'grouppic':
-                        if admin['can_change_info']:
+    smsg = ""
+    for funct in cmd[2:]:
+        try:
+            currentv = groupfundict[funct]
+        except:
+            smsg += langport['funct_not_exist'].format('<b>'+funct+'</b>') + '\n'
+            # dre = bot.sendMessage(chat_id,langport['funct_not_exist'].format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
+            # log("[Debug] Raw sent data:"+str(dre))
+            continue
+        if currentv == True:
+            smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['already_true']+'</code>') + '\n'
+            # dre = bot.sendMessage(chat_id,\
+                    # langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['already_true']+'</code>'),\
+                    # parse_mode='HTML',reply_to_message_id=msg['message_id'])
+            # log("[Debug] Raw sent data:"+str(dre))
+            continue
+        if funct == 'grouppic' or funct == 'title' or funct == 'pin' or funct == 'export_link':
+            if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
+                clog('[Info] Detected a group with all members are admin enabled.')
+                smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['all_member_are_admin']+'</code>') +'\n'
+                # dre = bot.sendMessage(chat_id,\
+                #     langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['all_member_are_admin']+'</code>'),\
+                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                # log("[Debug] Raw sent data:"+str(dre))
+                # function_list_data[str(chat_id)] = groupfundict
+                # write_function_list(function_list_data)
+                continue
+            clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id)+ ')')
+            hasperm = False
+            for admin in bot.getChatAdministrators(chat_id):
+                if bot_me['id'] == admin['user']['id']:
+                    hasperm = True
+                    if chat_type == 'supergroup':
+                        clog('[Info] I am an admin in this chat,checking further permissions...')
+                        if funct == 'grouppic':
+                            if admin['can_change_info']:
+                                groupfundict['grouppic'] = True
+                                smsg += langport['success'].format('<b>'+funct+'</b>')+"\n"
+                                # dre = bot.sendMessage(chat_id,\
+                                #     langport['success'].format('<b>'+funct+'</b>'),\
+                                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                                # log("[Debug] Raw sent data:"+str(dre))
+                                continue
+                            else:
+                                smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>')+'\n'
+                                # dre = bot.sendMessage(chat_id,\
+                                #     langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
+                                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                                # log("[Debug] Raw sent data:"+str(dre))
+                                continue
+                        if funct == 'title':
+                            if admin['can_change_info']:
+                                groupfundict['title'] = True
+                                smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+                                # dre = bot.sendMessage(chat_id,\
+                                #     langport['success'].format('<b>'+funct+'</b>'),\
+                                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                                # log("[Debug] Raw sent data:"+str(dre))
+                                continue
+                            else:
+                                smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>')+'\n'
+                                # dre = bot.sendMessage(chat_id,\
+                                #     langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
+                                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                                # log("[Debug] Raw sent data:"+str(dre))
+                                continue
+                        if funct == 'pin':
+                            if admin['can_pin_messages']:
+                                groupfundict['pin'] = True
+                                smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+                                # dre = bot.sendMessage(chat_id,\
+                                #     langport['success'].format('<b>'+funct+'</b>'),\
+                                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                                # log("[Debug] Raw sent data:"+str(dre))
+                                continue
+                            else:
+                                smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>') +'\n'
+                                # dre = bot.sendMessage(chat_id,\
+                                #     langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
+                                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                                # log("[Debug] Raw sent data:"+str(dre))
+                                continue
+                        if funct == 'export_link':
+                            if admin['can_invite_users']:
+                                groupfundict['export_link'] = True
+                                smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+                                # dre = bot.sendMessage(chat_id,\
+                                #     langport['success'].format('<b>'+funct+'</b>'),\
+                                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                                # log("[Debug] Raw sent data:"+str(dre))
+                                continue
+                            else:
+                                smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>') + '\n'
+                                # dre = bot.sendMessage(chat_id,\
+                                #     langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
+                                #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                                # log("[Debug] Raw sent data:"+str(dre))
+                                continue
+                    elif chat_type == 'group':
+                        clog('[Info] I am an admin in this chat,enabling admin functions without pin...')
+                        if funct == 'grouppic':
                             groupfundict['grouppic'] = True
-                            dre = bot.sendMessage(chat_id,\
-                                langport['success'].format('<b>'+funct+'</b>'),\
-                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                            log("[Debug] Raw sent data:"+str(dre))
-                        else:
-                            dre = bot.sendMessage(chat_id,\
-                                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
-                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                            log("[Debug] Raw sent data:"+str(dre))
-                            return
-                    if funct == 'title':
-                        if admin['can_change_info']:
-                            groupfundict['grouppic'] = True
-                            dre = bot.sendMessage(chat_id,\
-                                langport['success'].format('<b>'+funct+'</b>'),\
-                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                            log("[Debug] Raw sent data:"+str(dre))
-                        else:
-                            dre = bot.sendMessage(chat_id,\
-                                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
-                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                            log("[Debug] Raw sent data:"+str(dre))
-                            return
-                    if funct == 'pin':
-                        if admin['can_pin_messages']:
-                            groupfundict['pin'] = True
-                            dre = bot.sendMessage(chat_id,\
-                                langport['success'].format('<b>'+funct+'</b>'),\
-                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                            log("[Debug] Raw sent data:"+str(dre))
-                        else:
-                            dre = bot.sendMessage(chat_id,\
-                                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
-                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                            log("[Debug] Raw sent data:"+str(dre))
-                            return
-                    if funct == 'export_link':
-                        if admin['can_invite_users']:
-                            groupfundict['pin'] = True
-                            dre = bot.sendMessage(chat_id,\
-                                langport['success'].format('<b>'+funct+'</b>'),\
-                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                            log("[Debug] Raw sent data:"+str(dre))
-                        else:
-                            dre = bot.sendMessage(chat_id,\
-                                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
-                                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                            log("[Debug] Raw sent data:"+str(dre))
-                            return
-                elif chat_type == 'group':
-                    clog('[Info] I am an admin in this chat,enabling admin functions without pin...')
-                    if funct == 'grouppic':
-                        groupfundict['grouppic'] = True
-                        dre = bot.sendMessage(chat_id,\
-                            langport['success'].format('<b>'+funct+'</b>'),\
-                            parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                        log("[Debug] Raw sent data:"+str(dre))
-                    if funct == 'title':
-                        groupfundict['title'] = True
-                        dre = bot.sendMessage(chat_id,\
-                            langport['success'].format('<b>'+funct+'</b>'),\
-                            parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                        log("[Debug] Raw sent data:"+str(dre))
-                    if funct == 'pin':
-                        dre = bot.sendMessage(chat_id,\
-                            langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_pin']+'</code>'),\
-                            parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                        log("[Debug] Raw sent data:"+str(dre))
-                        return
-                    if funct == 'export_link':
-                        dre = bot.sendMessage(chat_id,\
-                            langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_export']+'</code>'),\
-                            parse_mode='HTML',reply_to_message_id=msg['message_id'])
-                        log("[Debug] Raw sent data:"+str(dre))
-                        return
-                function_list_data[str(chat_id)] = groupfundict
-                write_function_list(function_list_data)
-                return
-        clog('[Info] I am not an admin in this chat.')
-        dre = bot.sendMessage(chat_id,\
-            langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
-            parse_mode='HTML',reply_to_message_id=msg['message_id'])
-        log("[Debug] Raw sent data:"+str(dre))
-        return
-    else:
-        groupfundict[funct]=True
-        dre = bot.sendMessage(chat_id,\
-            langport['success'].format('<b>'+funct+'</b>'),\
-            parse_mode='HTML',reply_to_message_id=msg['message_id'])
-        log("[Debug] Raw sent data:"+str(dre))
-        function_list_data[str(chat_id)] = groupfundict
-        write_function_list(function_list_data)
+                            smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+                            # dre = bot.sendMessage(chat_id,\
+                            #     langport['success'].format('<b>'+funct+'</b>'),\
+                            #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            # log("[Debug] Raw sent data:"+str(dre))
+                            continue
+                        if funct == 'title':
+                            groupfundict['title'] = True
+                            smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+                            # dre = bot.sendMessage(chat_id,\
+                            #     langport['success'].format('<b>'+funct+'</b>'),\
+                            #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            # log("[Debug] Raw sent data:"+str(dre))
+                            continue
+                        if funct == 'pin':
+                            smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_pin']+'</code>')+'\n'
+                            # dre = bot.sendMessage(chat_id,\
+                            #     langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_pin']+'</code>'),\
+                            #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            # log("[Debug] Raw sent data:"+str(dre))
+                            continue
+                        if funct == 'export_link':
+                            smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_export']+'</code>')+'\n'
+                            # dre = bot.sendMessage(chat_id,\
+                            #     langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['group_cant_export']+'</code>'),\
+                            #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+                            # log("[Debug] Raw sent data:"+str(dre))
+                            continue
+                # function_list_data[str(chat_id)] = groupfundict
+                # write_function_list(function_list_data)
+                continue
+            if hasperm:
+                continue
+            clog('[Info] I am not an admin in this chat.')
+            smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>')+'\n'
+            # dre = bot.sendMessage(chat_id,\
+            #     langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['no_perm']+'</code>'),\
+            #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+            # log("[Debug] Raw sent data:"+str(dre))
+            continue
+        else:
+            groupfundict[funct]=True
+            smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+            # dre = bot.sendMessage(chat_id,\
+            #     langport['success'].format('<b>'+funct+'</b>'),\
+            #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+            # log("[Debug] Raw sent data:"+str(dre))
+            continue
+    dre = bot.sendMessage(chat_id,\
+                smsg,\
+                parse_mode='HTML',reply_to_message_id=msg['message_id'])
+    log("[Debug] Raw sent data:"+str(dre))
+    function_list_data[str(chat_id)] = groupfundict
+    write_function_list(function_list_data)
     return
 
 def function_disable(chat_id,msg,cmd,chat_type):
@@ -2717,7 +2752,7 @@ def function_disable(chat_id,msg,cmd,chat_type):
     global function_list_data
     bot_me=bot.getMe()
     try:
-        funct=cmd[2]
+        testarg=cmd[2]
     except:
         dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
@@ -2729,7 +2764,7 @@ def function_disable(chat_id,msg,cmd,chat_type):
         dre = bot.sendMessage(chat_id,langport['deploy'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
-    if funct == 'all':
+    if testarg == 'all':
         for funct in groupfundict:
             groupfundict[funct] = False
         function_list_data[str(chat_id)] = groupfundict
@@ -2737,21 +2772,30 @@ def function_disable(chat_id,msg,cmd,chat_type):
         dre = bot.sendMessage(chat_id,langport['success_all'],reply_to_message_id=msg["message_id"])
         log("[Debug] Raw sent data:"+str(dre))
         return
-    try:
-        currentv = groupfundict[funct]
-    except:
-        dre = bot.sendMessage(chat_id,langport['funct_not_exist'].format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
-        log("[Debug] Raw sent data:"+str(dre))
-        return
-    if currentv == False:
-        dre = bot.sendMessage(chat_id,\
-                langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['already_false']+'</code>'),\
-                parse_mode='HTML',reply_to_message_id=msg['message_id'])
-        log("[Debug] Raw sent data:"+str(dre))
-        return
-    groupfundict[funct]=False
+    smsg = ''
+    for funct in cmd[2:]:
+        try:
+            currentv = groupfundict[funct]
+        except:
+            smsg += langport['funct_not_exist'].format('<b>'+funct+'</b>')+'\n'
+            # dre = bot.sendMessage(chat_id,langport['funct_not_exist'].format('<b>'+funct+'</b>'),parse_mode='HTML',reply_to_message_id=msg["message_id"])
+            # log("[Debug] Raw sent data:"+str(dre))
+            continue
+        if currentv == False:
+            smsg += langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['already_false']+'</code>')+'\n'
+            # dre = bot.sendMessage(chat_id,\
+            #         langport['failed'].format('<b>'+funct+'</b>','<code>'+langport['already_false']+'</code>'),\
+            #         parse_mode='HTML',reply_to_message_id=msg['message_id'])
+            # log("[Debug] Raw sent data:"+str(dre))
+            continue
+        groupfundict[funct]=False
+        smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+        # dre = bot.sendMessage(chat_id,\
+        #     langport['success'].format('<b>'+funct+'</b>'),\
+        #     parse_mode='HTML',reply_to_message_id=msg['message_id'])
+        # log("[Debug] Raw sent data:"+str(dre))
     dre = bot.sendMessage(chat_id,\
-        langport['success'].format('<b>'+funct+'</b>'),\
+        smsg,\
         parse_mode='HTML',reply_to_message_id=msg['message_id'])
     log("[Debug] Raw sent data:"+str(dre))
     function_list_data[str(chat_id)] = groupfundict
