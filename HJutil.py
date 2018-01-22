@@ -12,12 +12,13 @@ import random
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
-HJ_Ver= "1.0.2"
+HJ_Ver = "1.0.2"
 try:
-    fs = open("./config.json","r")
+    fs = open("./config.json", "r")
 except:
     tp, val, tb = sys.exc_info()
-    print("Errored when loading config.json:"+str(val).split(',')[0].replace('(','').replace("'",""))
+    print("Errored when loading config.json:"+\
+        str(val).split(',')[0].replace('(', '').replace("'", ""))
     programPause = input("Press any key to stop...\n")
     exit()
 
@@ -28,56 +29,57 @@ TOKEN = config["TOKEN"]
 pastebin_dev_key = config["pastebin_dev_key"]
 pastebin_user_key = config["pastebin_user_key"]
 Debug = config["Debug"]
-OWNERID=config["OWNERID"]
+OWNERID = config["OWNERID"]
 
 try:
-    fs = open("./langs/list.py","r")
+    fs = open("./langs/list.py", "r")
 except:
     tp, val, tb = sys.exc_info()
-    print("Errored when loading list.py:"+str(val).split(',')[0].replace('(','').replace("'",""))
+    print("Errored when loading list.py:"+\
+        str(val).split(',')[0].replace('(', '').replace("'", ""))
     programPause = input("Press any key to stop...\n")
     exit()
 langlist = eval(fs.read())
 fs.close()
 lang = {}
 for i in langlist:
-    lang[i]={}
+    lang[i] = {}
     #if i != "en_US":
     #    fs = open(langlist["en_US"]["file"],"r")
         #lang[i]["display"] = eval(fs.read())
         #fs.close()
-    fs = open(langlist[i]["file"],"r")
+    fs = open(langlist[i]["file"], "r")
     lang[i]["display"] = eval(fs.read())
-    lang[i]["display_name"]=langlist[i]["display_name"]
+    lang[i]["display_name"] = langlist[i]["display_name"]
     fs.close()
 
 confirmsg = None
 function_list_data = None
 chat_config = {}
-delete_msg_sender={}
+delete_msg_sender = {}
 
 class color:
-   PURPLE = '\033[95m'
-   CYAN = '\033[96m'
-   DARKCYAN = '\033[36m'
-   BLUE = '\033[94m'
-   GREEN = '\033[92m'
-   YELLOW = '\033[93m'
-   RED = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   ITALIC = '\033[3m'
-   RESET = '\033[0m'
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    ITALIC = '\033[3m'
+    RESET = '\033[0m'
 
 
 def on_chat_message(msg):
     edited = False
     content_type, chat_type, chat_id = telepot.glance(msg)
-    bot_me= bot.getMe()
-    username= bot_me['username'].replace(' ','')
+    bot_me = bot.getMe()
+    username= bot_me['username'].replace(' ', '')
     log("[Debug] Raw message:"+str(msg))
-    dlog = "["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"][Info]"
-    dlogwc = color.GREEN +"["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"]"+color.BLUE + "[Info]" +color.RESET
+    dlog = "["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info]"
+    dlogwc = color.GREEN +"["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"]"+color.BLUE + "[Info]" +color.RESET
     flog = ""
     try:
         dlog=dlog+"[EDITED"+str(msg['edit_date'])+"]"
