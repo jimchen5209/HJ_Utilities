@@ -38,7 +38,7 @@
     "no_perm": "你沒有辦法讓我離開喔"
   },
   "a2z": {
-    "help": "/a2z <string>\n或回覆一個信息來將英文字母轉成注音",
+    "help": "/a2z <string>\n或回覆一個信息來將英文字母轉成注音\n使用 /a2z etan <string> 或回覆時輸入 /a2z etan 來使用倚天注音輸入法轉換文字",
     "not_text": "請回復一個文字信息"
   },
   "getuser": {

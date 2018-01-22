@@ -186,27 +186,29 @@ def on_chat_message(msg):
         if content_type == 'text' and edited == False:
             cmd = msg['text'].split()
             if cmd[0] == '/start':
-                startc(chat_id,msg)
+                startc(chat_id, msg)
             if cmd[0] == '/getme':
-                getme(chat_id,msg)
+                getme(chat_id, msg)
             if cmd[0] == '/getfile':
-                getfile(chat_id,msg,cmd)
+                getfile(chat_id,msg, cmd)
             if cmd[0] == '/exportblog':
-                exportblog(chat_id,msg)
+                exportblog(chat_id, msg)
             if cmd[0] == '/ping':
-                ping(chat_id,msg)
+                ping(chat_id, msg)
             if cmd[0] == '/echo':
-                echo(chat_id,msg)
+                echo(chat_id, msg)
             if cmd[0] == '/ns':
-                ns(chat_id,msg,cmd)
+                ns(chat_id,msg, cmd)
             if cmd[0] == '/gtts':
-                gtts(chat_id,msg)
+                gtts(chat_id, msg)
             if cmd[0] == '/help':
-                helpp(chat_id,msg)
+                helpp(chat_id, msg)
             if cmd[0] == '/setlang':
-                set_lang_command(chat_id,msg,cmd)
+                set_lang_command(chat_id, msg,cmd)
             if cmd[0] == '/delmsg':
-                delmsg(chat_id,msg,chat_type)
+                delmsg(chat_id,msg, chat_type)
+            if cmd[0] == '/a2z':
+                a2zc(chat_id, msg)
     elif chat_type == 'group' or chat_type == 'supergroup':
         dlog = dlog + "["+str(msg['message_id'])+"]"
         dlogwc = dlogwc + "["+str(msg['message_id'])+"]"
@@ -1186,18 +1188,31 @@ def a2zc(chat_id,msg):
             dre = bot.sendMessage(chat_id,langport['help'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
-            string=a2z(tcm)
+            temp=tcm.split(' ',1)
+            if temp[0] == 'etan':
+                string=a2z_etan(temp[1])
+            else:
+                string=a2z(tcm)
             dre = bot.sendMessage(chat_id,string,reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
             clog('[A2Z] --->'+string)
     else:
+        cmd = msg['text'].split(' ',1)
         try:
             tcm = reply_to['text']
         except:
             dre = bot.sendMessage(chat_id,langport['not_text'],reply_to_message_id=msg['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
         else:
-            string=a2z(tcm)
+            try:
+                temp = cmd[1]
+            except:
+                string=a2z(tcm)
+            else:
+                if temp == 'etan':
+                    string=a2z_etan(tcm)
+                else:
+                    string=a2z(tcm)
             dre = bot.sendMessage(chat_id,string,reply_to_message_id=reply_to['message_id'])
             log("[Debug] Raw sent data:"+str(dre))
             clog('[A2Z] --->'+string)
@@ -3062,6 +3077,94 @@ def a2z(textLine):
     zh = zh.replace(',','ㄝ')
     zh = zh.replace('.','ㄡ')
     zh = zh.replace('/','ㄥ')
+    return zh
+
+def a2z_etan(textLine):
+    zh = textLine.lower()
+    zh = zh.replace("ａ", "a")
+    zh = zh.replace("ｂ", "b")
+    zh = zh.replace("ｃ", "c")
+    zh = zh.replace("ｄ", "d")
+    zh = zh.replace("ｅ", "e")
+    zh = zh.replace("ｆ", "f")
+    zh = zh.replace("ｇ", "g")
+    zh = zh.replace("ｈ", "h")
+    zh = zh.replace("ｉ", "i")
+    zh = zh.replace("ｊ", "j")
+    zh = zh.replace("ｋ", "k")
+    zh = zh.replace("ｌ", "l")
+    zh = zh.replace("ｍ", "m")
+    zh = zh.replace("ｎ", "n")
+    zh = zh.replace("ｏ", "o")
+    zh = zh.replace("ｐ", "p")
+    zh = zh.replace("ｑ", "q")
+    zh = zh.replace("ｒ", "r")
+    zh = zh.replace("ｓ", "s")
+    zh = zh.replace("ｔ", "t")
+    zh = zh.replace("ｕ", "u")
+    zh = zh.replace("ｖ", "v")
+    zh = zh.replace("ｗ", "w")
+    zh = zh.replace("ｘ", "x")
+    zh = zh.replace("ｙ", "y")
+    zh = zh.replace("ｚ", "z")
+    zh = zh.replace("１", "1")
+    zh = zh.replace("２", "2")
+    zh = zh.replace("３", "3")
+    zh = zh.replace("４", "4")
+    zh = zh.replace("５", "5")
+    zh = zh.replace("６", "6")
+    zh = zh.replace("７", "7")
+    zh = zh.replace("８", "8")
+    zh = zh.replace("９", "9")
+    zh = zh.replace("０", "0")
+    zh = zh.replace("－", "-")
+    zh = zh.replace("；", ";")
+    zh = zh.replace("，", ",")
+    zh = zh.replace("．", ".")
+    zh = zh.replace("＼", "/")
+    zh = zh.replace("＝", "=")
+    zh = zh.replace("’", "'")
+    zh = zh.replace('1','˙')
+    zh = zh.replace('2','ˊ')
+    zh = zh.replace('3','ˇ')
+    zh = zh.replace('4','ˋ')
+    zh = zh.replace('7','ㄑ')
+    zh = zh.replace('8','ㄢ')
+    zh = zh.replace('9','ㄣ')
+    zh = zh.replace('0','ㄤ')
+    zh = zh.replace('-','ㄥ')
+    zh = zh.replace('=','ㄦ')
+    zh = zh.replace('q','ㄟ')
+    zh = zh.replace('w','ㄝ')
+    zh = zh.replace('e','ㄧ')
+    zh = zh.replace('r','ㄜ')
+    zh = zh.replace('t','ㄊ')
+    zh = zh.replace('y','ㄡ')
+    zh = zh.replace('u','ㄩ')
+    zh = zh.replace('i','ㄞ')
+    zh = zh.replace('o','ㄛ')
+    zh = zh.replace('p','ㄆ')
+    zh = zh.replace('a','ㄚ')
+    zh = zh.replace('s','ㄙ')
+    zh = zh.replace('d','ㄉ')
+    zh = zh.replace('f','ㄈ')
+    zh = zh.replace('g','ㄐ')
+    zh = zh.replace('h','ㄏ')
+    zh = zh.replace('j','ㄖ')
+    zh = zh.replace('k','ㄎ')
+    zh = zh.replace('l','ㄌ')
+    zh = zh.replace(';','ㄗ')
+    zh = zh.replace("'",'ㄘ')
+    zh = zh.replace('z','ㄠ')
+    zh = zh.replace('x','ㄨ')
+    zh = zh.replace('c','ㄒ')
+    zh = zh.replace('v','ㄍ')
+    zh = zh.replace('b','ㄅ')
+    zh = zh.replace('n','ㄋ')
+    zh = zh.replace('m','ㄇ')
+    zh = zh.replace(',','之')
+    zh = zh.replace('.','ㄔ')
+    zh = zh.replace('/','ㄕ')
     return zh
 
 def clog(text,colored_text = ""):

@@ -38,7 +38,7 @@
     "no_perm": "You cannot let me leave."
   },
   "a2z": {
-    "help": "/a2z <string>\nor reply to a text message to replace all alphabets to zuyings.",
+    "help": "/a2z <string>\nor reply to a text message to replace all alphabets to zuyings.\n Use /a2z etan <string> or use /a2z etan when reply to transform text with etan input method.",
     "not_text": "Reply to a text message,please."
   },
   "getuser": {
