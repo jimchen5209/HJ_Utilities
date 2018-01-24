@@ -3206,7 +3206,7 @@ def a2z_etan(textLine):
     zh = zh.replace('b','ㄅ')
     zh = zh.replace('n','ㄋ')
     zh = zh.replace('m','ㄇ')
-    zh = zh.replace(',','之')
+    zh = zh.replace(',','ㄓ')
     zh = zh.replace('.','ㄔ')
     zh = zh.replace('/','ㄕ')
     return zh
