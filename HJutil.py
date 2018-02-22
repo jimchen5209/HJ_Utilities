@@ -496,9 +496,16 @@ def on_chat_message(msg):
             if cmd[0] == '/setlang' or cmd[0] == '/setlang@'+username.lower():
                 set_lang(chat_id,msg,cmd,chat_type)
             if msg['text'].lower().find('ping') != -1:
-                if groupfundict['ping']:
-                    ping(chat_id,msg)
-                    return
+                try:
+                    if msg['text'][msg['text'].lower().find('ping')+4] != '@':
+                        if groupfundict['ping']:
+                            ping(chat_id,msg)
+                            return
+                except IndexError:
+                    if groupfundict['ping']:
+                        ping(chat_id,msg)
+                        return
+
             for txt in sortedcmd:
                 if txt == '@tagall':
                     #tag(chat_id,msg,["/tag","all"],chat_type)
