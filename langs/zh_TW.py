@@ -103,7 +103,8 @@
       "too_many": "請不要一次傳太多user,為避免卡死我只處理前50個",
       "not_in_list": "此用戶不在清單中",
       "r_error": "將 {0} 從 {1} 移除時發生問題: {2}",
-      "r_success": "已將 {0} 從 {1} 移除"
+      "r_success": "已將 {0} 從 {1} 移除",
+      "User_Not_Found": "{0} (無法取得用戶資訊)"
     },
     "confirm": {
       "donotknow_confirmabout": "我不知道你是在確認甚麼",
@@ -113,12 +114,14 @@
       "no_list": "此群組沒有任何 Tag 清單",
       "all": "清單 {0} ,有 {1} 人",
       "list_not_exist": "清單 {0} 不存在",
-      "list_prefix": "清單 {0} ,共 {1} 人"
+      "list_prefix": "清單 {0} ,共 {1} 人",
+      "User_Not_Found": "{0} (無法取得用戶資訊)"
     },
     "tag": {
       "help": "/tag tag <tag_name>",
       "list_not_exist": "清單 {0} 不存在",
-      "tag_prefix": "正在提及清單 {0} 的 {1} 個人"
+      "tag_prefix": "正在提及清單 {0} 的 {1} 個人",
+      "user_fetch_fail": "無法提及 {0} : {1}"
     },
     "tagadmin": {
         "all_member_are_admin":"偵測到所有人都是管理員,將只提及群主",

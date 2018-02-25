@@ -1451,11 +1451,16 @@ class tagc:
                         try:
                             rmuser = await bot.getChatMember(chat_id, int(a))
                         except telepot.exception.TelegramError as e1:
-                            logger.clog("[ERROR] Errored when getting user " + a + " :" +
-                                str(e1.args))
-                            errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
-                                str(e1.args)+"</code>\n"
-                            errcount = errcount + 1
+                            if int(a) in temptaglist:
+                                temptaglist.remove(int(a))
+                                successmsg = successmsg + langport['User_Not_Found'].format(a) + "\n"
+                                successcount = successcount + 1
+                            else:
+                                logger.clog("[ERROR] Errored when getting user " + a + " :" +
+                                    str(e1.args))
+                                errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
+                                    str(e1.args)+"</code>\n"
+                                errcount = errcount + 1
                         else:
                             try:
                                 temptaglist.index(int(a))
@@ -1616,7 +1621,7 @@ class tagc:
         except IndexError:
             for ttag in grouptagdict:
                 temptaglist = grouptagdict[ttag]
-                smsg = smsg + \
+                smsg+= \
                     langport['all'].format(
                         "<b>"+ttag+"</b>", "<b>" + str(len(temptaglist)) + "</b>")+"\n"
         else:
@@ -1626,27 +1631,32 @@ class tagc:
                 dre = await bot.sendMessage(chat_id, langport['list_not_exist'].format(
                     "<b>"+listname+"</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
                 logger.log("[Debug] Raw sent data:"+str(dre))
+                return
             else:
-                smsg = smsg + langport['list_prefix'].format(
+                smsg+= langport['list_prefix'].format(
                     "<b>"+listname+"</b>", "<b>" + str(len(temptaglist)) + "</b>")+"\n"
                 count = 0
                 for userid in temptaglist:
-                    adduser = await bot.getChatMember(chat_id, int(userid))
-                    firstname = adduser['user']['first_name']
                     try:
-                        lastname = adduser['user']['last_name']
-                    except KeyError:
-                        lastname = ''
-                    try:
-                        nickname = '<a href="https://t.me/' + \
-                            adduser['user']['username'] + '">' + \
-                            firstname + ' ' + lastname+'</a>'
-                    except KeyError:
-                        nickname = firstname + ' ' + lastname
-                    smsg = smsg + nickname + " "
+                        adduser = await bot.getChatMember(chat_id, int(userid))
+                    except telepot.exception.TelegramError:
+                        smsg += langport['User_Not_Found'].format(userid)
+                    else:
+                        firstname = adduser['user']['first_name']
+                        try:
+                            lastname = adduser['user']['last_name']
+                        except KeyError:
+                            lastname = ''
+                        try:
+                            nickname = '<a href="https://t.me/' + \
+                                adduser['user']['username'] + '">' + \
+                                firstname + ' ' + lastname+'</a>'
+                        except KeyError:
+                            nickname = firstname + ' ' + lastname
+                        smsg+= nickname + " "
                     count = count + 1
                     if count >= 2:
-                        smsg = smsg + "\n"
+                        smsg += "\n"
                         count = 0
         dre = await bot.sendMessage(chat_id, smsg, disable_web_page_preview=True,
                             parse_mode="HTML", reply_to_message_id=msg["message_id"])
@@ -1657,6 +1667,7 @@ class tagc:
         langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['tag']['tag']
         data = self.readtag()
         smsg = ""
+        emsg = ""
         try:
             listname = cmd[2]
         except IndexError:
@@ -1680,11 +1691,16 @@ class tagc:
                     len(temptaglist))+"</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
                 logger.log("[Debug] Raw sent data:"+str(dre))
                 totalcount = 0
-                linecount = 0
+                errcount = 0
                 for userid in temptaglist:
-                    smsg = smsg + "[.](tg://user?id="+str(userid)+")"
-                    totalcount = totalcount+1
-                    linecount = linecount+1
+                    try:
+                        await bot.getChatMember(chat_id, int(userid))
+                    except telepot.exception.TelegramError as e1:
+                        emsg += langport['user_fetch_fail'].format(str(userid), '<code>'+str(e1.args)+'</code>') + '\n'
+                        errcount += 1
+                    else:
+                        smsg = smsg + "[.](tg://user?id="+str(userid)+")"
+                        totalcount += 1
                     if totalcount >= 5:
                         dre = await bot.sendMessage(chat_id, smsg, parse_mode="Markdown")
                         logger.log("[Debug] Raw sent data:"+str(dre))
@@ -1692,6 +1708,9 @@ class tagc:
                         totalcount = 0
                 if totalcount != 0:
                     dre = await bot.sendMessage(chat_id, smsg, parse_mode="Markdown")
+                    logger.log("[Debug] Raw sent data:"+str(dre))
+                if errcount != 0:
+                    dre = await bot.sendMessage(chat_id, emsg, parse_mode="HTML")
                     logger.log("[Debug] Raw sent data:"+str(dre))
         return
 
@@ -1742,7 +1761,7 @@ class tagc:
                     chat_id, langport['PWRAPI'], parse_mode='Markdown', reply_to_message_id=msg["message_id"])
                 logger.log("[Debug] Raw sent data:"+str(dre))
             elif subcmd == "admin":
-                self.tag_admin(chat_id, msg, chat_type)
+                await self.tag_admin(chat_id, msg, chat_type)
             else:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg["message_id"])

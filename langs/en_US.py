@@ -103,7 +103,8 @@
       "too_many": "Don't send too many users in once, I'll only use 50 users in order not to block.",
       "not_in_list": "The user is not in this list",
       "r_error": "An error occured when removing {0} from {1} : {2}",
-      "r_success": "Successfully removed {0} from {1} ."
+      "r_success": "Successfully removed {0} from {1} .",
+      "User_Not_Found": "{0} (Cannot fetch user info)"
     },
     "confirm": {
       "donotknow_confirmabout": "I have no idea what you are confirming about.",
@@ -113,12 +114,14 @@
       "no_list": "There is no list in this group.",
       "all": "List {0} ,has {1} member(s).",
       "list_not_exist": "{0} is not exist.",
-      "list_prefix": "List {0} ,has {1} member(s)."
+      "list_prefix": "List {0} ,has {1} member(s).",
+      "User_Not_Found": "{0} (Cannot fetch user info)"
     },
     "tag": {
       "help": "/tag tag <tag_name>",
       "list_not_exist": "{0} is not exist.",
-      "tag_prefix": "Mentioning {1} member(s) in {0}."
+      "tag_prefix": "Mentioning {1} member(s) in {0}.",
+      "user_fetch_fail": "Cannot mention {0} : {1}"
     },
     "tagadmin": {
         "all_member_are_admin":"A group with all members are admin enabled,I will only mention the creator.",
