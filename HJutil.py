@@ -1244,20 +1244,18 @@ class tagc:
                                 str(e1.args))
                             errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
                                 str(e1.args)+"</code>\n"
-                            errcount = errcount + 1
+                            errcount += 1
                             continue
                         else:
-                            try:
-                                temptaglist.index(int(a))
-                            except ValueError:
-                                temptaglist.append(int(a))
-                            else:
+                            if int(a) in temptaglist:
                                 logger.clog("[ERROR] Errored when adding user " + a +
                                     " to "+tagname+" :The user is already in the list")
                                 errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
                                     langport['already_exist']+"</code>\n"
-                                errcount = errcount + 1
+                                errcount += 1
                                 continue
+                            else:
+                                temptaglist.append(int(a))
                             firstname = adduser['user']['first_name']
                             try:
                                 lastname = adduser['user']['last_name']
@@ -1270,7 +1268,7 @@ class tagc:
                             except KeyError:
                                 nickname = firstname + ' ' + lastname
                             successmsg = successmsg + nickname + "\n"
-                            successcount = successcount + 1
+                            successcount += 1
                             logger.clog("[Info] " + firstname + ' ' +
                                 lastname + " was added to "+tagname)
                     grouptagdict[tagname] = temptaglist
@@ -1311,11 +1309,7 @@ class tagc:
                 logger.log("[Debug] Raw sent data:"+str(dre))
                 return
             else:
-                try:
-                    temptaglist.index(userid)
-                except ValueError:
-                    temptaglist.append(userid)
-                else:
+                if userid in temptaglist:
                     logger.clog("[ERROR] Errored when adding user " + str(userid) +
                         " to "+cmd[2]+" :The user is already in the list")
                     smsg = langport['r_error'].format(
@@ -1324,6 +1318,8 @@ class tagc:
                                         disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
                     logger.log("[Debug] Raw sent data:"+str(dre))
                     return
+                else:
+                    temptaglist.append(userid)
                 firstname = adduser['user']['first_name']
                 try:
                     lastname = adduser['user']['last_name']
@@ -1454,25 +1450,23 @@ class tagc:
                             if int(a) in temptaglist:
                                 temptaglist.remove(int(a))
                                 successmsg = successmsg + langport['User_Not_Found'].format(a) + "\n"
-                                successcount = successcount + 1
+                                successcount += 1
                             else:
                                 logger.clog("[ERROR] Errored when getting user " + a + " :" +
                                     str(e1.args))
                                 errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
                                     str(e1.args)+"</code>\n"
-                                errcount = errcount + 1
+                                errcount += 1
                         else:
-                            try:
-                                temptaglist.index(int(a))
-                            except ValueError:
+                            if int(a) in temptaglist:
+                                temptaglist.remove(int(a))
+                            else:
                                 logger.clog("[ERROR] Errored when removing user " + a +
                                     " from "+cmd[2]+" :The user is not in the list")
                                 errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
                                     langport['not_in_list']+"</code>\n"
-                                errcount = errcount + 1
+                                errcount += 1
                                 continue
-                            else:
-                                temptaglist.remove(int(a))
                             firstname = rmuser['user']['first_name']
                             try:
                                 lastname = rmuser['user']['last_name']
@@ -1485,7 +1479,7 @@ class tagc:
                             except KeyError:
                                 nickname = firstname + ' ' + lastname
                             successmsg = successmsg + nickname + "\n"
-                            successcount = successcount + 1
+                            successcount += 1
                             logger.clog("[Info] " + firstname + ' ' +
                                 lastname + " was removed from "+cmd[2])
                     grouptagdict[cmd[2]] = temptaglist
@@ -1526,9 +1520,9 @@ class tagc:
                 logger.log("[Debug] Raw sent data:"+str(dre))
                 return
             else:
-                try:
-                    temptaglist.index(userid)
-                except ValueError:
+                if userid in temptaglist:
+                    temptaglist.remove(userid)
+                else:
                     logger.clog("[ERROR] Errored when remving user " + str(userid) +
                         " from "+cmd[2]+" :The user is not in the list")
                     smsg = langport['r_error'].format(
@@ -1537,8 +1531,6 @@ class tagc:
                                         disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
                     logger.log("[Debug] Raw sent data:"+str(dre))
                     return
-                else:
-                    temptaglist.remove(userid)
                 firstname = adduser['user']['first_name']
                 try:
                     lastname = adduser['user']['last_name']
