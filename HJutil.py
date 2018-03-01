@@ -398,7 +398,7 @@ class grouppicc:
                 dre = await bot.sendMessage(chat_id,
                                     langport['error'].format(
                                         '<code>'+str(e1.args)+'</code>'),
-                                    parse_mode='Markdown',
+                                    parse_mode='HTML',
                                     reply_to_message_id=msg['message_id'])
                 logger.log("[Debug] Raw sent data:"+str(dre))
                 logger.clog('[ERROR] Unable to change the Group photo in '+msg['chat']['title'] +
@@ -480,8 +480,8 @@ async def ns(chat_id, msg, txt):
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format(str(e1.args)),
-                                  parse_mode='Markdown',
+                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                  parse_mode='HTML',
                                   reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
             logger.clog('[ERROR] ERROR when transfering to dec in'+msg['chat']['title']+'('+str(chat_id)+') : '
@@ -504,8 +504,8 @@ async def ns(chat_id, msg, txt):
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format(str(e1.args)),
-                                  parse_mode='Markdown',
+                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                  parse_mode='HTML',
                                   reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
             logger.clog('[ERROR] ERROR when transfering to bin in'+msg['chat']['title']+'('+str(chat_id)+') : '
@@ -528,8 +528,8 @@ async def ns(chat_id, msg, txt):
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format(str(e1.args)),
-                                  parse_mode='Markdown',
+                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                  parse_mode='HTML',
                                   reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
             logger.clog('[ERROR] ERROR when transfering to bin in'+msg['chat']['title']+'('+str(chat_id)+') : '
@@ -552,8 +552,8 @@ async def ns(chat_id, msg, txt):
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format(str(e1.args)),
-                                  parse_mode='Markdown',
+                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                  parse_mode='HTML',
                                   reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
             logger.clog('[ERROR] ERROR when transfering to bin in'+msg['chat']['title']+'('+str(chat_id)+') : '
@@ -656,8 +656,8 @@ async def lsadmins(chat_id, msg, cmd):
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format(str(e1.args)),
-                                  parse_mode='Markdown',
+                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                  parse_mode='HTML',
                                   reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
             logger.clog('[ERROR] ERROR when getting group'+group + ' : '
@@ -873,8 +873,8 @@ class userc:
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format(str(e1.args)),
-                                parse_mode='Markdown',
+                                langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                parse_mode='HTML',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
             logger.clog('[ERROR] ERROR when getting user'+str(uuser_id) + 'in'+msg['chat']['title']+'('+str(chat_id)+') : '
@@ -944,7 +944,7 @@ class pinc:
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format(str(e1.args)),
+                                langport['error'].format('<code>'+str(e1.args)+'</code>'),
                                 parse_mode='Markdown',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
@@ -1798,7 +1798,7 @@ class exportChatLink:
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format(str(e1.args)),
+                                langport['error'].format('<code>'+str(e1.args)+'</code>'),
                                 parse_mode='Markdown',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
