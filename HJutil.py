@@ -945,7 +945,7 @@ class pinc:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
                                 langport['error'].format('<code>'+str(e1.args)+'</code>'),
-                                parse_mode='Markdown',
+                                parse_mode='HTML',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
             logger.clog('[ERROR] Unable to pin the message '+str(reply_to['message_id'])+' in '+msg['chat']
@@ -1799,7 +1799,7 @@ class exportChatLink:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
                                 langport['error'].format('<code>'+str(e1.args)+'</code>'),
-                                parse_mode='Markdown',
+                                parse_mode='HTML',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
             logger.clog('[ERROR] Unable to export chat link in '+msg['chat']
