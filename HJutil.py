@@ -227,7 +227,7 @@ async def on_chat_message(msg):
                             return
                 except IndexError:
                     if groupfundict['ping']:
-                        ping(chat_id, msg)
+                        await ping(chat_id, msg)
                         return
             for txt in sortedcmd:
                 if txt == '@tagall':
