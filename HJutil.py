@@ -79,7 +79,6 @@ chat_config = {}
 delete_msg_sender = {}
 
 async def on_chat_message(msg):
-    
     try:
         tmp = msg['edit_date']
     except KeyError:
@@ -217,6 +216,9 @@ async def on_chat_message(msg):
                 await help(chat_id, msg, chat_type)
             if cmd[0] == '/setlang' or cmd[0] == '/setlang@'+bot_me.username.lower():
                 await chatconfig.set_lang(chat_id, msg, cmd, chat_type)
+            if msg['text'].lower().find('#pin') != -1:
+                if groupfundict['pin']:
+                    await pin.pinh(chat_id, msg, chat_type)
             if msg['text'].lower().find('ping') != -1:
                 try:
                     if msg['text'][msg['text'].lower().find('ping')+4] != '@':
@@ -274,6 +276,9 @@ async def on_chat_message(msg):
                             if groupfundict['tag']:
                                 await tag.tag(chat_id, msg, [
                                     "/tag", "tag", txt[4:]], chat_type)
+                if msg['caption'].lower().find('#pin') != -1:
+                    if groupfundict['pin']:
+                        await pin.pinh(chat_id, msg, chat_type)
             if groupfundict['replace_str']:
                 try:
                     repsep = msg['caption'].split('/', 2)
@@ -936,6 +941,22 @@ class pinc:
                     chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
                 logger.log("[Debug] Raw sent data:"+str(dre))
                 return
+        return
+    async def pinh(self, chat_id, msg, chat_type):
+        langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['pin']        
+        if msg['from']['id'] == config.OWNERID:
+            logger.clog('[Info] Owner Matched for \n[Info] ' +
+                str(await bot.getChatMember(chat_id, msg['from']['id'])))
+            await self.__pin(chat_id, msg, langport, msg)
+            return
+        logger.clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id) + ')')
+        for admin in await bot.getChatAdministrators(chat_id):
+            if msg['from']['id'] == admin['user']['id']:
+                logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
+                await self.__pin(chat_id, msg, langport, msg)
+                return
+        logger.clog('[Info] No admins matched with ' + msg['from']
+            ['username']+'('+str(msg['from']['id']) + '),ignoring...')
         return
     async def __pin(self, chat_id, reply_to, langport, msg):
         try:
