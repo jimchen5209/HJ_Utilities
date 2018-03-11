@@ -1,1 +1,6 @@
 .vs/
+config.json
+logs/
+chatconfig.json
+fctlsdata.json
+tagdata.json
