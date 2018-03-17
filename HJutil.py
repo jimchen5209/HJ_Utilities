@@ -959,11 +959,17 @@ class pinc:
             ['username']+'('+str(msg['from']['id']) + '),ignoring...')
         return
     async def __pin(self, chat_id, reply_to, langport, msg):
+        chat = await bot.getChat(chat_id)
+        dre = await bot.sendMessage(
+            chat_id, "#Pin #Backup", reply_to_message_id=chat['pinned_message']['message_id'])
+        logger.log("[Debug] Raw sent data:"+str(dre))
         try:
             await bot.pinChatMessage(
                 chat_id, reply_to['message_id'], disable_notification=True)
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
+            msg_idf = telepot.message_identifier(dre)
+            await bot.deleteMessage(msg_idf)
             dre = await bot.sendMessage(chat_id,
                                 langport['error'].format('<code>'+str(e1.args)+'</code>'),
                                 parse_mode='HTML',
