@@ -19,36 +19,53 @@ print("[Info] Starting HJ Util version ", HJ_Ver, "...")
 #Config
 print("[Info] Loading config...")
 try:
-    with open('./config.json','r') as fs:
-        configraw = json.load(fs)
-except FileNotFoundError:
-    print("[Error] Can't load config.json: File not found.\n[Info] Generating empty config...")
-    with open('./config.json', 'w') as fs:
-        fs.write(
-'''{
-    "//TOKEN":"Insert your telegram bot token here.",
-    "TOKEN":"", 
+    if sys.argv[1] == 'test':
+        configraw = {
+            "//TOKEN": "Insert your telegram bot token here.",
+            "TOKEN": "",
+            "//pastebin_dev_key": "Insert your pastebin dev token here.",
+            "pastebin_dev_key": "",
+            "//pastebin_user_key": "Get your user key here: https://pastebin.com/api/api_user_key.html",
+            "pastebin_user_key": "",
+            "//OWNERID": "Your user id as integer.",
+            "OWNERID": 135405898,
+            "//Debug": "If true,raw debug info will be logged into -debug.log file",
+            "Debug": True
+        }
+    else:
+        raise SyntaxError("Invaild command santax: {0}".format(sys.argv[1]))
+except IndexError:
+    try:
+        with open('./config.json','r') as fs:
+            configraw = json.load(fs)
+    except FileNotFoundError:
+        print("[Error] Can't load config.json: File not found.\n[Info] Generating empty config...")
+        with open('./config.json', 'w') as fs:
+            fs.write(
+    '''{
+        "//TOKEN":"Insert your telegram bot token here.",
+        "TOKEN":"", 
 
-    "//pastebin_dev_key":"Insert your pastebin dev token here.",
-    "pastebin_dev_key" : "", 
+        "//pastebin_dev_key":"Insert your pastebin dev token here.",
+        "pastebin_dev_key" : "", 
 
-    "//pastebin_user_key":"Get your user key here: https://pastebin.com/api/api_user_key.html",
-    "pastebin_user_key" : "", 
+        "//pastebin_user_key":"Get your user key here: https://pastebin.com/api/api_user_key.html",
+        "pastebin_user_key" : "", 
 
-    "//OWNERID":"Your user id as integer.",
-    "OWNERID": 0, 
-    
-    "//Debug":"If true,raw debug info will be logged into -debug.log file",
-    "Debug" : false 
-    
-}
-'''
-    )
-    print("\n[Info] Fill your config and try again.")
-    exit()
-except json.decoder.JSONDecodeError as e1:
-    print("[Error] Can't load config.json: JSON decode error:", e1.args, "\n\n[Info] Check your config format and try again.")
-    exit()
+        "//OWNERID":"Your user id as integer.",
+        "OWNERID": 0, 
+        
+        "//Debug":"If true,raw debug info will be logged into -debug.log file",
+        "Debug" : false 
+        
+    }
+    '''
+        )
+        print("\n[Info] Fill your config and try again.")
+        exit()
+    except json.decoder.JSONDecodeError as e1:
+        print("[Error] Can't load config.json: JSON decode error:", e1.args, "\n\n[Info] Check your config format and try again.")
+        exit()
 class config:
     TOKEN = configraw['TOKEN']
     pastebin_dev_key = configraw["pastebin_dev_key"]
@@ -3209,6 +3226,14 @@ class Log:
             logger.write(text+"\n")
         return
 logger = Log()
+try:
+    if sys.argv[1] == 'test':
+        print('There is no santax error,exiting...')
+        exit()
+    else:
+        raise SyntaxError("Invaild command santax: {0}".format(sys.argv[1]))
+except IndexError:
+    pass
 
 botwoasync = telepot.Bot(config.TOKEN)
 bot = telepot.aio.Bot(config.TOKEN)
