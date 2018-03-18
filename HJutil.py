@@ -37,7 +37,7 @@ except FileNotFoundError:
 
     "//OWNERID":"Your user id as integer.",
     "OWNERID": 0, 
-
+    
     "//Debug":"If true,raw debug info will be logged into -debug.log file",
     "Debug" : false 
     
@@ -3115,8 +3115,7 @@ class Log:
                 except KeyError:
                     flog = flog + "FileID:" + photo_array[0]['file_id']
             elif content_type == 'pinned_message':
-                tmpcontent_type, tmpchat_type = telepot.glance(
-                    msg['pinned_message'])
+                tmpcontent_type, tmpchat_type, tmpchat_id = telepot.glance(msg['pinned_message'])
                 if tmpcontent_type == 'text':
                     dlog += ' ' + "A message["+str(msg['pinned_message']['message_id'])+"] was pinned to " +\
                         msg['chat']['title']+' ( '+str(chat_id) + ' ) by :\n'+msg['pinned_message']['text']
@@ -3232,8 +3231,18 @@ loop.create_task(MessageLoop(bot, {'chat': on_chat_message,
                   'callback_query': on_callback_query}).run_forever())
 logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Bot has started")
 logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Listening ...")
-
+if os.path.isfile('./statusmessage.py'):
+    with open('./statusmessage.py') as fs:
+        statMessage = eval(fs.read())
+    msg_idf = telepot.message_identifier(statMessage)
+    botwoasync.editMessageText(msg_idf,'✅ @'+bot_me.username+' is currently online.')
 try:
     loop.run_forever()
 except KeyboardInterrupt:
     logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Interrupt signal received,stopping.")
+    if os.path.isfile('./statusmessage.py'):
+        with open('./statusmessage.py') as fs:
+            statMessage = eval(fs.read())
+        msg_idf = telepot.message_identifier(statMessage)
+        botwoasync.editMessageText(
+            msg_idf, '🔴 @'+bot_me.username+' is currently offline.')

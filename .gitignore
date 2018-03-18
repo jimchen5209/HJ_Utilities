@@ -4,3 +4,5 @@ logs/
 chatconfig.json
 fctlsdata.json
 tagdata.json
+statusmessage.py
+__pycache__/
