@@ -3233,4 +3233,7 @@ loop.create_task(MessageLoop(bot, {'chat': on_chat_message,
 logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Bot has started")
 logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Listening ...")
 
-loop.run_forever()
+try:
+    loop.run_forever()
+except KeyboardInterrupt:
+    logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Interrupt signal received,stopping.")
