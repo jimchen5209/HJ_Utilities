@@ -1,4 +1,4 @@
-# HJ_Utilities
+# HJ_Utilities [![CircleCI](https://circleci.com/gh/jimchen5209/HJ_Utilities/tree/master.svg?style=svg)](https://circleci.com/gh/jimchen5209/HJ_Utilities/tree/master)
 
 #To USE:
 
@@ -10,10 +10,10 @@
 
 4.Install Python 3.5 or higher on your PC.
 
-5.Open command line,and type "pip install telepot".
+5.Open command line,and type "-r requirements.txt".
 
   For Windows: Go to 'python folder'\Scripts\ Shift+right_click to open Command Shell here and type "pip install telepot".
   
-6.Edit config.json .
+6.Start the bot once and edit config.json .
 
 7.Start the python app and enjoy!
