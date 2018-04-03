@@ -3260,7 +3260,10 @@ if os.path.isfile('./statusmessage.py'):
     with open('./statusmessage.py') as fs:
         statMessage = eval(fs.read())
     msg_idf = telepot.message_identifier(statMessage)
-    botwoasync.editMessageText(msg_idf,'✅ @'+bot_me.username+' is currently online.')
+    try:
+        botwoasync.editMessageText(msg_idf,'✅ @'+bot_me.username+' is currently online.')
+    except telepot.exception.TelegramError as e1:
+        print("Error when updating the status message {0}".format(str(e1.args[0])))
 try:
     loop.run_forever()
 except KeyboardInterrupt:
@@ -3269,5 +3272,8 @@ except KeyboardInterrupt:
         with open('./statusmessage.py') as fs:
             statMessage = eval(fs.read())
         msg_idf = telepot.message_identifier(statMessage)
-        botwoasync.editMessageText(
-            msg_idf, '🔴 @'+bot_me.username+' is currently offline.')
+        try:
+            botwoasync.editMessageText(
+                msg_idf, '🔴 @'+bot_me.username+' is currently offline.')
+        except telepot.exception.TelegramError as e1:
+            print("Error when updating the status message {0}".format(str(e1.args[0])))
