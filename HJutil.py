@@ -419,7 +419,7 @@ class grouppicc:
                 await bot.sendChatAction(chat_id, 'typing')
                 dre = await bot.sendMessage(chat_id,
                                     langport['error'].format(
-                                        '<code>'+str(e1.args)+'</code>'),
+                                        '<code>'+str(e1.args[0])+'</code>'),
                                     parse_mode='HTML',
                                     reply_to_message_id=msg['message_id'])
                 logger.log("[Debug] Raw sent data:"+str(dre))
@@ -463,7 +463,7 @@ class grouppicc:
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
                                 parse_mode='HTML',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
@@ -678,7 +678,7 @@ async def lsadmins(chat_id, msg, cmd):
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                  langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
                                   parse_mode='HTML',
                                   reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
@@ -895,7 +895,7 @@ class userc:
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
                                 parse_mode='HTML',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
@@ -994,7 +994,7 @@ class pinc:
             except NameError:
                 pass
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
                                 parse_mode='HTML',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
@@ -1089,7 +1089,7 @@ async def getfile(chat_id, msg, cmd):
         except telepot.exception.TelegramError as e1:
             dre = await bot.sendMessage(chat_id,
                                   langport['error'].format(
-                                      "<code>"+str(e1.args)+"</code>"),
+                                      "<code>"+str(e1.args[0])+"</code>"),
                                   parse_mode='HTML',
                                   reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
@@ -1117,7 +1117,7 @@ async def getfile(chat_id, msg, cmd):
             except telepot.exception.TelegramError as e1:
                 dre = await bot.sendMessage(chat_id,
                                       langport['senderror'].format(
-                                          '<code>'+str(e1.args)+"</code>"),
+                                          '<code>'+str(e1.args[0])+"</code>"),
                                       parse_mode='HTML',
                                       reply_to_message_id=msg['message_id'])
                 logger.log("[Debug] Raw sent data:"+str(dre))
@@ -1293,7 +1293,7 @@ class tagc:
                             logger.clog("[ERROR] Errored when getting user " + a + " :" +
                                 str(e1.args))
                             errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
-                                str(e1.args)+"</code>\n"
+                                str(e1.args[0])+"</code>\n"
                             errcount += 1
                             continue
                         else:
@@ -1353,7 +1353,7 @@ class tagc:
                 logger.clog("[ERROR] Errored when getting user " + str(userid) +
                     " :"+str(e1.args))
                 smsg = langport['r_error'].format("<b>" + str(userid) + "</b>", "<b>" + cmd[2] + "</b>", "<code>"+str(
-                    e1.args)+"</code>")+"\n"
+                    e1.args[0])+"</code>")+"\n"
                 dre = await bot.sendMessage(chat_id, smsg, parse_mode="HTML",
                                     disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
                 logger.log("[Debug] Raw sent data:"+str(dre))
@@ -1505,7 +1505,7 @@ class tagc:
                                 logger.clog("[ERROR] Errored when getting user " + a + " :" +
                                     str(e1.args))
                                 errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
-                                    str(e1.args)+"</code>\n"
+                                    str(e1.args[0])+"</code>\n"
                                 errcount += 1
                         else:
                             if int(a) in temptaglist:
@@ -1564,7 +1564,7 @@ class tagc:
                 logger.clog("[ERROR] Errored when getting user " + str(userid) +
                     " :"+str(e1.args))
                 smsg = langport['r_error'].format("<b>" + userid + "</b>", "<b>" + cmd[2] + "</b>", "<code>"+str(
-                    e1.args)+"</code>")+"\n"
+                    e1.args[0])+"</code>")+"\n"
                 dre = await bot.sendMessage(chat_id, smsg, parse_mode="HTML",
                                     disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
                 logger.log("[Debug] Raw sent data:"+str(dre))
@@ -1738,7 +1738,7 @@ class tagc:
                     try:
                         await bot.getChatMember(chat_id, int(userid))
                     except telepot.exception.TelegramError as e1:
-                        emsg += langport['user_fetch_fail'].format(str(userid), '<code>'+str(e1.args)+'</code>') + '\n'
+                        emsg += langport['user_fetch_fail'].format(str(userid), '<code>'+str(e1.args[0])+'</code>') + '\n'
                         errcount += 1
                     else:
                         smsg = smsg + "[.](tg://user?id="+str(userid)+")"
@@ -1848,7 +1848,7 @@ class exportChatLink:
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args)+'</code>'),
+                                langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
                                 parse_mode='HTML',
                                 reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
@@ -1974,10 +1974,10 @@ class delmsgc:
             await bot.deleteMessage(msg_idf)
         except telepot.exception.TelegramError as e1:
             await bot.answerCallbackQuery(query_id, langport['error'].format(
-                str(e1.args)))
+                str(e1.args[0])))
             msg_idf = telepot.message_identifier(message_with_inline_keyboard)
             await bot.editMessageText(msg_idf, langport['error'].format(
-                "<code>"+str(e1.args)+"</code>"), parse_mode="HTML")
+                "<code>"+str(e1.args[0])+"</code>"), parse_mode="HTML")
         else:
             await bot.answerCallbackQuery(query_id, langport["success"])
             msg_idf = telepot.message_identifier(message_with_inline_keyboard)
