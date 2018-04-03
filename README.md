@@ -10,9 +10,9 @@
 
 4.Install Python 3.5 or higher on your PC.
 
-5.Open command line,and type "-r requirements.txt".
+5.Open command line,and type "pip install -r requirements.txt".
 
-  For Windows: Go to 'python folder'\Scripts\ Shift+right_click to open Command Shell here and type "pip install telepot".
+  For Windows: Go to 'python folder'\Scripts\ Shift+right_click to open Command Shell here and type "pip install -r requirements.txt".
   
 6.Start the bot once and edit config.json .
 
