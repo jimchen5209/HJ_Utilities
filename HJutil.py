@@ -1028,7 +1028,7 @@ async def replace(chat_id, msg, cmd):
         try:
             test = cmd[1]
             test = cmd[2]
-        except KeyError:
+        except IndexError:
             dre = await bot.sendMessage(chat_id, langport['help'],
                                   parse_mode='Markdown', reply_to_message_id=msg['message_id'])
             logger.log("[Debug] Raw sent data:"+str(dre))
