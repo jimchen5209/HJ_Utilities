@@ -409,9 +409,7 @@ class grouppicc:
             else:
                 await bot.sendChatAction(chat_id, 'upload_photo')
                 photo_array.reverse()
-                file = await bot.getFile(photo_array[0]['file_id'])['file_path']
-                urllib.request.urlretrieve(
-                    "https://api.telegram.org/file/bot"+config.TOKEN+"/"+file, "image.jpg")
+                botwoasync.download_file(photo_array[0]['file_id'], "image.jpg")
         with open(os.getcwd()+"/image.jpg", 'rb') as fo:
             try:
                 await bot.setChatPhoto(chat_id, fo)
