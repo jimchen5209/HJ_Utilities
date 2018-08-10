@@ -300,7 +300,7 @@ async def on_chat_message(msg):
                 try:
                     repsep = msg['caption'].split('/', 2)
                 except:
-                    time.sleep(0)
+                    pass
                 else:
                     if repsep[0] == "s":
                         try:
