@@ -39,7 +39,7 @@
   },
   "a2z": {
     "help": "/a2z <string>\n或回覆一個信息來將英文字母轉成注音\n使用 /a2z etan <string> 或回覆時輸入 /a2z etan 來使用倚天注音輸入法轉換文字",
-    "not_text": "請回復一個文字信息"
+    "not_text": "請回覆一個文字信息"
   },
   "getuser": {
     "help": "/getuser [user_id]\n或回覆一個使用者來取得該用戶的資訊\n回覆時輸入 <code>/getuser forward</code> 可優先查詢轉寄來源的用戶資訊",
@@ -50,14 +50,14 @@
     "status": "<b>目前職位</b>: {0}"
   },
   "pin": {
-    "reply_help": "請回復一則訊息以將此訊息至頂",
+    "reply_help": "請回覆一則訊息以將此訊息至頂",
     "group": "普通群組無法置頂訊息",
     "error": "置頂時發生錯誤\n\n{0}",
     "no_perm": "你沒有權限置頂訊息"
   },
   "replace": {
-    "help_not_reply": "請回復一則訊息\n\n用法: /replace <要被取代的文字> <取代的文字>",
-    "not_text": "請回復一個文字信息或有說明文字的任何檔案",
+    "help_not_reply": "請回覆一則訊息\n\n用法: /replace <要被取代的文字> <取代的文字>",
+    "not_text": "請回覆一個文字信息或有說明文字的任何檔案",
     "help": "/replace <要被取代的文字> <取代的文字>\n如果想要取代成空白可以使用`''`",
     "error": "發生錯誤\n\n{0}",
     "result": "{0} 認為 {1} 的意思是 {2}",
@@ -93,7 +93,7 @@
       "help": "/tag remove <tag_name> <userid>\n或回覆該用戶以將該用戶從指定名單移除\n或 /tag remove <tag> * 以移除這個tag",
       "no_list": "本群沒有任何清單",
       "remove_all": {
-        "warn": "將<b>移除</b>本群組中的<b>所有</b>tag,此操作無法復原,確認執行請回復這則訊息並輸入 /confirm",
+        "warn": "將<b>移除</b>本群組中的<b>所有</b>tag,此操作無法復原,確認執行請回覆這則訊息並輸入 /confirm",
         "no_perm": "你沒有權限移除所有tag"
       },
       "list_not_exist": "清單 {0} 不存在",
@@ -170,17 +170,17 @@
     }
   },
   "exportchatlink":{
-      "no_perm": "您沒有權限取得群組邀請連結",
+      "no_perm": "你沒有權限取得群組邀請連結",
       "error":"匯出群組連結時發生問題\n\n{0}"
   },
   "delmsg":{
       "all_member_are_admin": "所有人都是管理員的普通群組無法透過我來刪除訊息",
-      "no_reply":"請回覆您要刪除的訊息",
-      "no_perm": "您沒有權限取得刪除別人的訊息",
+      "no_reply":"請回覆你要刪除的訊息",
+      "no_perm": "你沒有權限刪除別人的訊息",
       "deleting_self_msg": "請自行把自己的訊息刪掉，謝謝",
       "error":"刪除訊息時發生問題\n\n{0}",
       "bot_no_perm": "我沒有權限",
-      "confirm":"您確定要刪除這則訊息嗎?",
+      "confirm":"你確定要刪除這則訊息嗎?",
       "yes":"對！刪了它！",
       "no_1":"不我甚麼都沒講",
       "no_2":"假的",
