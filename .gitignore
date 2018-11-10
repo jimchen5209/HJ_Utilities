@@ -6,3 +6,4 @@ fctlsdata.json
 tagdata.json
 statusmessage.py
 __pycache__/
+.vscode/
