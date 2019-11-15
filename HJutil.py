@@ -13,6 +13,8 @@ import telepot.aio
 from telepot.aio.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
+from status.status import Status
+
 HJ_Ver = "1.0.2.1"
 print("[Info] Starting HJ Util version ", HJ_Ver, "...")
 # Config
@@ -3362,6 +3364,9 @@ loop.create_task(MessageLoop(bot, {'chat': on_chat_message,
                                    'callback_query': on_callback_query}).run_forever())
 logger.clog("[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "][Info] Bot has started")
 logger.clog("[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "][Info] Listening ...")
+status = Status("HJUtil")
+status.set_status()
+# TODO Remove built in status message
 if os.path.isfile('./statusmessage.py'):
     with open('./statusmessage.py') as fs:
         statMessage = eval(fs.read())
@@ -3389,6 +3394,9 @@ except KeyboardInterrupt:
                 msg_idf, '🔴 @' + bot_me.username + ' is currently offline.')
         except telepot.exception.TelegramError as e1:
             print("Error when updating the status message {0}".format(str(e1.args[0])))
+
+            status.set_status()
+            # TODO Remove built in status message
             newstat = botwoasync.sendMessage(
                 statMessage['chat']['id'], '🔴 @' + bot_me.username + ' is currently offline.',
                 disable_notification=True)
