@@ -1,22 +1,21 @@
+import asyncio
+import io
+import json
+import os
+import random
 import sys
 import time
 import urllib
 import urllib.request
-from urllib.request import Request, urlopen
-import os
-import platform
-import io
+
 import telepot
 import telepot.aio
-import asyncio
-import random
-import json
 from telepot.aio.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 HJ_Ver = "1.0.2.1"
 print("[Info] Starting HJ Util version ", HJ_Ver, "...")
-#Config
+# Config
 print("[Info] Loading config...")
 try:
     if sys.argv[1] == 'test':
@@ -36,36 +35,36 @@ try:
         raise SyntaxError("Invaild command santax: {0}".format(sys.argv[1]))
 except IndexError:
     try:
-        with open('./config.json','r') as fs:
+        with open('./config.json', 'r') as fs:
             configraw = json.load(fs)
     except FileNotFoundError:
         print("[Error] Can't load config.json: File not found.\n[Info] Generating empty config...")
         with open('./config.json', 'w') as fs:
-            fs.write(
-    '''{
-        "//TOKEN":"Insert your telegram bot token here.",
-        "TOKEN":"", 
+            json.dump({
+                "//TOKEN": "Insert your telegram bot token here.",
+                "TOKEN": "",
 
-        "//pastebin_dev_key":"Insert your pastebin dev token here.",
-        "pastebin_dev_key" : "", 
+                "//pastebin_dev_key": "Insert your pastebin dev token here.",
+                "pastebin_dev_key": "",
 
-        "//pastebin_user_key":"Get your user key here: https://pastebin.com/api/api_user_key.html",
-        "pastebin_user_key" : "", 
+                "//pastebin_user_key": "Get your user key here: https://pastebin.com/api/api_user_key.html",
+                "pastebin_user_key": "",
 
-        "//OWNERID":"Your user id as integer.",
-        "OWNERID": 0, 
-        
-        "//Debug":"If true,raw debug info will be logged into -debug.log file",
-        "Debug" : false 
-        
-    }
-    '''
-        )
+                "//OWNERID": "Your user id as integer.",
+                "OWNERID": 0,
+
+                "//Debug": "If true,raw debug info will be logged into -debug.log file",
+                "Debug": False
+
+            }, fs, ensure_ascii=False, indent=2)
         print("\n[Info] Fill your config and try again.")
         exit()
     except json.decoder.JSONDecodeError as e1:
-        print("[Error] Can't load config.json: JSON decode error:", e1.args, "\n\n[Info] Check your config format and try again.")
+        print("[Error] Can't load config.json: JSON decode error:", e1.args,
+              "\n\n[Info] Check your config format and try again.")
         exit()
+
+
 class config:
     TOKEN = configraw['TOKEN']
     pastebin_dev_key = configraw["pastebin_dev_key"]
@@ -73,7 +72,8 @@ class config:
     Debug = configraw["Debug"]
     OWNERID = configraw["OWNERID"]
 
-#Language
+
+# Language
 try:
     with open("./langs/list.py", "r") as fs:
         langlist = eval(fs.read())
@@ -94,6 +94,7 @@ confirmsg = None
 function_list_data = None
 chat_config = {}
 delete_msg_sender = {}
+
 
 async def on_chat_message(msg):
     try:
@@ -136,7 +137,7 @@ async def on_chat_message(msg):
             if cmd[0] == '/a2z':
                 await a2zc(chat_id, msg)
     elif chat_type == 'group' or chat_type == 'supergroup':
-        #command_detect
+        # command_detect
         global function_list_data
         try:
             groupfundict = function_list_data[str(chat_id)]
@@ -154,63 +155,63 @@ async def on_chat_message(msg):
             for i in cmd:
                 if i not in sortedcmd:
                     sortedcmd.append(i)
-            if cmd[0] == '/start' or cmd[0] == '/start@'+bot_me.username.lower():
+            if cmd[0] == '/start' or cmd[0] == '/start@' + bot_me.username.lower():
                 await startc(chat_id, msg)
-            if cmd[0] == '/cgp' or cmd[0] == '/cgp@'+bot_me.username.lower():
+            if cmd[0] == '/cgp' or cmd[0] == '/cgp@' + bot_me.username.lower():
                 if groupfundict['grouppic']:
                     await grouppic.cgp(chat_id, msg, chat_type)
-            if cmd[0] == '/rgp' or cmd[0] == '/rgp@'+bot_me.username.lower():
+            if cmd[0] == '/rgp' or cmd[0] == '/rgp@' + bot_me.username.lower():
                 if groupfundict['grouppic']:
                     await grouppic.rgp(chat_id, msg, chat_type)
-            if cmd[0] == '/echo' or cmd[0] == '/echo@'+bot_me.username.lower():
+            if cmd[0] == '/echo' or cmd[0] == '/echo@' + bot_me.username.lower():
                 if groupfundict['echo']:
                     await echo(chat_id, msg)
-            if cmd[0] == '/ns' or cmd[0] == '/ns@'+bot_me.username.lower():
+            if cmd[0] == '/ns' or cmd[0] == '/ns@' + bot_me.username.lower():
                 if groupfundict['numbersystem']:
                     await ns(chat_id, msg, cmd)
-            if cmd[0] == '/ping' or cmd[0] == '/ping@'+bot_me.username.lower():
+            if cmd[0] == '/ping' or cmd[0] == '/ping@' + bot_me.username.lower():
                 if groupfundict['ping']:
                     await ping(chat_id, msg)
                     return
-            if cmd[0] == '/title' or cmd[0] == '/title@'+bot_me.username.lower():
+            if cmd[0] == '/title' or cmd[0] == '/title@' + bot_me.username.lower():
                 if groupfundict['title']:
                     await title.title(chat_id, msg, chat_type)
-            if cmd[0] == '/lsadmins' or cmd[0] == '/lsadmins@'+bot_me.username.lower():
+            if cmd[0] == '/lsadmins' or cmd[0] == '/lsadmins@' + bot_me.username.lower():
                 if groupfundict['lsadmins']:
                     await lsadmins(chat_id, msg, cmd)
-            if cmd[0] == '/groupinfo' or cmd[0] == '/groupinfo@'+bot_me.username.lower():
+            if cmd[0] == '/groupinfo' or cmd[0] == '/groupinfo@' + bot_me.username.lower():
                 if groupfundict['groupinfo']:
                     await groupinfo(chat_id, msg, chat_type)
-            if cmd[0] == '/leavegroup' or cmd[0] == '/leavegroup@'+bot_me.username.lower():
+            if cmd[0] == '/leavegroup' or cmd[0] == '/leavegroup@' + bot_me.username.lower():
                 await leavegroup(chat_id, msg, chat_type)
-            if cmd[0] == '/a2z' or cmd[0] == '/a2z@'+bot_me.username.lower():
+            if cmd[0] == '/a2z' or cmd[0] == '/a2z@' + bot_me.username.lower():
                 if groupfundict['a2z']:
                     await a2zc(chat_id, msg)
-            if cmd[0] == '/getuser' or cmd[0] == '/getuser@'+bot_me.username.lower():
+            if cmd[0] == '/getuser' or cmd[0] == '/getuser@' + bot_me.username.lower():
                 if groupfundict['user']:
                     await user.getuser(chat_id, msg, cmd)
-            if cmd[0] == '/getme' or cmd[0] == '/getme@'+bot_me.username.lower():
+            if cmd[0] == '/getme' or cmd[0] == '/getme@' + bot_me.username.lower():
                 if groupfundict['user']:
                     await user.getme(chat_id, msg)
-            if cmd[0] == '/exportchatlink' or cmd[0] == '/exportchatlink@'+bot_me.username.lower():
+            if cmd[0] == '/exportchatlink' or cmd[0] == '/exportchatlink@' + bot_me.username.lower():
                 if groupfundict['export_link']:
                     await ecl.exportchatlink(chat_id, msg, chat_type)
-            if cmd[0] == '/delmsg' or cmd[0] == '/delmsg@'+bot_me.username.lower():
+            if cmd[0] == '/delmsg' or cmd[0] == '/delmsg@' + bot_me.username.lower():
                 if groupfundict['delete_message']:
                     await delmsg.delmsg(chat_id, msg, chat_type)
-            if cmd[0] == '/pin' or cmd[0] == '/pin@'+bot_me.username.lower():
+            if cmd[0] == '/pin' or cmd[0] == '/pin@' + bot_me.username.lower():
                 if groupfundict['pin']:
                     await pin.pin(chat_id, msg, chat_type)
-            if cmd[0] == '/replace' or cmd[0] == '/replace@'+bot_me.username.lower():
+            if cmd[0] == '/replace' or cmd[0] == '/replace@' + bot_me.username.lower():
                 if groupfundict['replace_str']:
                     await replace(chat_id, msg, cmd)
-            if cmd[0] == '/getfile' or cmd[0] == '/getfile@'+bot_me.username.lower():
+            if cmd[0] == '/getfile' or cmd[0] == '/getfile@' + bot_me.username.lower():
                 if groupfundict['files']:
                     await getfile(chat_id, msg, cmd)
-            if cmd[0] == '/fileinfo' or cmd[0] == '/fileinfo@'+bot_me.username.lower():
+            if cmd[0] == '/fileinfo' or cmd[0] == '/fileinfo@' + bot_me.username.lower():
                 if groupfundict['files']:
                     await fileinfo(chat_id, msg)
-            if cmd[0] == '/tag' or cmd[0] == '/tag@'+bot_me.username.lower():
+            if cmd[0] == '/tag' or cmd[0] == '/tag@' + bot_me.username.lower():
                 if groupfundict['tag']:
                     try:
                         a = sortedcmd[2]
@@ -221,24 +222,24 @@ async def on_chat_message(msg):
                         except IndexError:
                             pass
                     await tag.tag(chat_id, msg, sortedcmd, chat_type)
-            if cmd[0] == '/function' or cmd[0] == '/function@'+bot_me.username.lower():
+            if cmd[0] == '/function' or cmd[0] == '/function@' + bot_me.username.lower():
                 await function.function(chat_id, msg, cmd, chat_type)
                 return
-            if cmd[0] == '/confirm' or cmd[0] == '/confirm@'+bot_me.username.lower():
+            if cmd[0] == '/confirm' or cmd[0] == '/confirm@' + bot_me.username.lower():
                 await tag.confirm(chat_id, msg)
-            if cmd[0] == '/gtts' or cmd[0] == '/gtts@'+bot_me.username.lower():
+            if cmd[0] == '/gtts' or cmd[0] == '/gtts@' + bot_me.username.lower():
                 if groupfundict['google_tts']:
                     await gtts(chat_id, msg)
-            if cmd[0] == '/help' or cmd[0] == '/help@'+bot_me.username.lower():
+            if cmd[0] == '/help' or cmd[0] == '/help@' + bot_me.username.lower():
                 await help(chat_id, msg, chat_type)
-            if cmd[0] == '/setlang' or cmd[0] == '/setlang@'+bot_me.username.lower():
+            if cmd[0] == '/setlang' or cmd[0] == '/setlang@' + bot_me.username.lower():
                 await chatconfig.set_lang(chat_id, msg, cmd, chat_type)
             if msg['text'].lower().find('#pin') != -1:
                 if groupfundict['pin']:
                     await pin.pinh(chat_id, msg, chat_type)
             if msg['text'].lower().find('ping') != -1:
                 try:
-                    if msg['text'][msg['text'].lower().find('ping')+4] != '@':
+                    if msg['text'][msg['text'].lower().find('ping') + 4] != '@':
                         if groupfundict['ping']:
                             await ping(chat_id, msg)
                             return
@@ -248,7 +249,7 @@ async def on_chat_message(msg):
                         return
             for txt in sortedcmd:
                 if txt == '@tagall':
-                    #tag(chat_id,msg,["/tag","all"],chat_type)
+                    # tag(chat_id,msg,["/tag","all"],chat_type)
                     pass
                 elif txt == '@tagadmin' or txt == '@admin':
                     if groupfundict['tag']:
@@ -270,7 +271,7 @@ async def on_chat_message(msg):
                         pass
                     else:
                         await replace(chat_id, msg, [
-                                '/replace', tobereplaced, toreplace])
+                            '/replace', tobereplaced, toreplace])
         else:
             try:
                 cmd = msg['caption'].split()
@@ -284,7 +285,7 @@ async def on_chat_message(msg):
             else:
                 for txt in sortedcmd:
                     if txt == '@tagall':
-                        #tag(chat_id,msg,["/tag","all"],chat_type)
+                        # tag(chat_id,msg,["/tag","all"],chat_type)
                         pass
                     elif txt[0:4] == '@tag':
                         if txt == '@tag':
@@ -310,59 +311,62 @@ async def on_chat_message(msg):
                             pass
                         else:
                             await replace(chat_id, msg, [
-                                    '/replace', tobereplaced, toreplace])
+                                '/replace', tobereplaced, toreplace])
     return
 
+
 async def on_callback_query(msg):
-    logger.log("[Debug] Raw query data:"+str(msg))
+    logger.log("[Debug] Raw query data:" + str(msg))
     orginal_message = msg['message']['reply_to_message']
     message_with_inline_keyboard = msg['message']
     content_type, chat_type, chat_id = telepot.glance(orginal_message)
     query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
-    logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info]["+str(query_id) +
-         "] Callback query form "+str(from_id)+" to "+str(orginal_message['message_id'])+" :" + data)
+    logger.clog("[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "][Info][" + str(query_id) +
+                "] Callback query form " + str(from_id) + " to " + str(orginal_message['message_id']) + " :" + data)
     if data == 'confirm_delete':
         await delmsg.confirm_delete(chat_id, orginal_message, query_id,
-                       message_with_inline_keyboard, from_id)
+                                    message_with_inline_keyboard, from_id)
     elif data == 'cancel_delete':
         await delmsg.cancel_delete(chat_id, orginal_message, query_id,
-                      message_with_inline_keyboard, from_id)
+                                   message_with_inline_keyboard, from_id)
 
     return
+
 
 async def startc(chat_id, msg):
     dre = await bot.sendMessage(chat_id, 'JUST an utilities bot\n/help',
-                          reply_to_message_id=msg['message_id'])
-    logger.log("[Debug] Raw sent data:"+str(dre))
+                                reply_to_message_id=msg['message_id'])
+    logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 class grouppicc:
     async def cgp(self, chat_id, msg, chat_type):
         langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['cgp']
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
             dre = await bot.sendMessage(chat_id,
-                                langport['all_member_are_admin'],
-                                reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        langport['all_member_are_admin'],
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         try:
             reply_to = msg['reply_to_message']
         except KeyError:
             if msg['from']['id'] == config.OWNERID:
                 logger.clog('[Info] Owner Matched for \n[Info] ' +
-                    str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                            str(await bot.getChatMember(chat_id, msg['from']['id'])))
                 await self.__cgp('url', msg, langport, chat_id)
                 return
             else:
-                logger.clog('[Info] Searching admins in '+msg['chat']
-                    ['title']+'('+str(chat_id) + ')')
+                logger.clog('[Info] Searching admins in ' + msg['chat']
+                ['title'] + '(' + str(chat_id) + ')')
                 for admin in await bot.getChatAdministrators(chat_id):
                     if msg['from']['id'] == admin['user']['id']:
                         logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
-                        await self.__cgp('url', msg, langport,chat_id)
+                        await self.__cgp('url', msg, langport, chat_id)
                         return
                 logger.clog('[Info] No admins matched with ' + msg['from']
-                    ['username']+'('+str(msg['from']['id']) + ')')
+                ['username'] + '(' + str(msg['from']['id']) + ')')
                 await bot.sendMessage(
                     chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
                 return
@@ -370,129 +374,137 @@ class grouppicc:
             if msg['from']['id'] == config.OWNERID:
                 logger.clog('[Info] Owner Matched for \n[Info] ' +
                             str(await bot.getChatMember(chat_id, msg['from']['id'])))
-                await self.__cgp('photo', msg, langport,chat_id)
+                await self.__cgp('photo', msg, langport, chat_id)
                 return
             else:
-                logger.clog('[Info] Searching admins in '+msg['chat']
-                    ['title']+'('+str(chat_id) + ')')
+                logger.clog('[Info] Searching admins in ' + msg['chat']
+                ['title'] + '(' + str(chat_id) + ')')
                 for admin in await bot.getChatAdministrators(chat_id):
                     if msg['from']['id'] == admin['user']['id']:
                         logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
-                        await self.__cgp('photo', msg, langport,chat_id)
+                        await self.__cgp('photo', msg, langport, chat_id)
                         return
                 logger.clog('[Info] No admins matched with ' + msg['from']
-                    ['username']+'('+str(msg['from']['id']) + ')')
+                ['username'] + '(' + str(msg['from']['id']) + ')')
                 await bot.sendMessage(
                     chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
                 return
         return
+
     async def __cgp(self, type, msg, langport, chat_id):
         if type == 'url':
             url = msg['text'].split(' ', 1)
             try:
-                logger.log("[Debug] Attemping to download "+url[1])
+                logger.log("[Debug] Attemping to download " + url[1])
                 urllib.request.urlretrieve(url[1], "image.jpg")
             except Exception as e1:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
         elif type == 'photo':
             try:
                 photo_array = msg['reply_to_message']['photo']
-                logger.log("[Debug] File_id to set:"+str(photo_array))
+                logger.log("[Debug] File_id to set:" + str(photo_array))
             except KeyError:
                 dre = await bot.sendMessage(
                     chat_id, langport['reply_not_pic'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
             else:
                 await bot.sendChatAction(chat_id, 'upload_photo')
                 photo_array.reverse()
                 botwoasync.download_file(photo_array[0]['file_id'], "image.jpg")
-        with open(os.getcwd()+"/image.jpg", 'rb') as fo:
+        with open(os.getcwd() + "/image.jpg", 'rb') as fo:
             try:
                 await bot.setChatPhoto(chat_id, fo)
             except telepot.exception.TelegramError as e1:
                 await bot.sendChatAction(chat_id, 'typing')
                 dre = await bot.sendMessage(chat_id,
-                                    langport['error'].format(
-                                        '<code>'+str(e1.args[0])+'</code>'),
-                                    parse_mode='HTML',
-                                    reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
-                logger.clog('[ERROR] Unable to change the Group photo in '+msg['chat']['title'] +
-                            '('+str(chat_id)+') : '+str(e1.args))
+                                            langport['error'].format(
+                                                '<code>' + str(e1.args[0]) + '</code>'),
+                                            parse_mode='HTML',
+                                            reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
+                logger.clog('[ERROR] Unable to change the Group photo in ' + msg['chat']['title'] +
+                            '(' + str(chat_id) + ') : ' + str(e1.args))
             else:
                 logger.clog('[Info] Sucessfully changed the Group photo in ' +
-                    msg['chat']['title']+'('+str(chat_id)+')')
+                            msg['chat']['title'] + '(' + str(chat_id) + ')')
         os.remove('image.jpg')
         return
+
     async def rgp(self, chat_id, msg, chat_type):
         langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['rgp']
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
             dre = await bot.sendMessage(chat_id,
-                                langport['all_member_are_admin'],
-                                reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        langport['all_member_are_admin'],
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         if msg['from']['id'] == config.OWNERID:
             logger.clog('[Info] Owner Matched for \n[Info] ' +
-                str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                        str(await bot.getChatMember(chat_id, msg['from']['id'])))
             await self.__rgp(msg, langport, chat_id)
             return
         else:
-            logger.clog('[Info] Searching admins in '+msg['chat']
-                ['title']+'('+str(chat_id) + ')')
+            logger.clog('[Info] Searching admins in ' + msg['chat']
+            ['title'] + '(' + str(chat_id) + ')')
             for admin in await bot.getChatAdministrators(chat_id):
                 if msg['from']['id'] == admin['user']['id']:
                     logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
                     await self.__rgp(msg, langport, chat_id)
                     return
             logger.clog('[Info] No admins matched with ' + msg['from']
-                ['username']+'('+str(msg['from']['id']) + ')')
+            ['username'] + '(' + str(msg['from']['id']) + ')')
             await bot.sendMessage(
                 chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
 
         return
+
     async def __rgp(self, msg, langport, chat_id):
         try:
             await bot.deleteChatPhoto(chat_id)
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
-                                parse_mode='HTML',
-                                reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] Unable to remove the Group photo in '+msg['chat']['title']+'('+str(chat_id)+') : '
-                        + str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args[0]) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog(
+                '[ERROR] Unable to remove the Group photo in ' + msg['chat']['title'] + '(' + str(chat_id) + ') : '
+                + str(e1.args))
         else:
             logger.clog('[Info] Sucessfully removed the Group photo in ' +
-                msg['chat']['title']+'('+str(chat_id)+')')
+                        msg['chat']['title'] + '(' + str(chat_id) + ')')
         return
+
+
 grouppic = grouppicc()
+
 
 async def echo(chat_id, msg):
     echotxt = msg['text'].split(' ', 1)
     try:
         dre = await bot.sendMessage(
             chat_id, echotxt[1], parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
     except:
         dre = await bot.sendMessage(chat_id, '/echo <String>',
-                              reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+                                    reply_to_message_id=msg['message_id'])
+        logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 async def ns(chat_id, msg, txt):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['ns']
     try:
-        logger.clog("[Info] Number to transfer :"+txt[2])
+        logger.clog("[Info] Number to transfer :" + txt[2])
     except:
         dre = await bot.sendMessage(
             chat_id, langport['help'], parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
         return
     if txt[1] == "todec":
         try:
@@ -500,101 +512,106 @@ async def ns(chat_id, msg, txt):
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
-                                  parse_mode='HTML',
-                                  reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] ERROR when transfering to dec in'+msg['chat']['title']+'('+str(chat_id)+') : '
-                 + str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] ERROR when transfering to dec in' + msg['chat']['title'] + '(' + str(chat_id) + ') : '
+                        + str(e1.args))
         else:
-            logger.clog("[Info] ---> "+str(result))
+            logger.clog("[Info] ---> " + str(result))
             try:
                 dre = await bot.sendMessage(
-                    chat_id, "`"+str(result)+"`", parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                    chat_id, "`" + str(result) + "`", parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
             except telepot.exception.TelegramError as e1:
                 dre = await bot.sendMessage(chat_id,
-                                      pastebin(
-                                          str(result), 'dec-'+time.strftime("%Y/%d/%m-%H:%M:%S").replace("'", "")),
-                                      parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            pastebin(
+                                                str(result),
+                                                'dec-' + time.strftime("%Y/%d/%m-%H:%M:%S").replace("'", "")),
+                                            parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
     elif txt[1] == "tobin":
         try:
             result = bin(int(txt[2], 0))
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
-                                  parse_mode='HTML',
-                                  reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] ERROR when transfering to bin in'+msg['chat']['title']+'('+str(chat_id)+') : '
-                 + str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] ERROR when transfering to bin in' + msg['chat']['title'] + '(' + str(chat_id) + ') : '
+                        + str(e1.args))
         else:
-            logger.clog("[Info] ---> "+str(result))
+            logger.clog("[Info] ---> " + str(result))
             try:
                 dre = await bot.sendMessage(
-                    chat_id, "`"+str(result)[2:]+"`", parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                    chat_id, "`" + str(result)[2:] + "`", parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
             except telepot.exception.TelegramError as e1:
                 dre = await bot.sendMessage(chat_id,
-                                      pastebin(
-                                          str(result)[2:], 'bin-'+time.strftime("%Y/%d/%m-%H:%M:%S").replace("'", "")),
-                                      parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            pastebin(
+                                                str(result)[2:],
+                                                'bin-' + time.strftime("%Y/%d/%m-%H:%M:%S").replace("'", "")),
+                                            parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
     elif txt[1] == "tooct":
         try:
             result = oct(int(txt[2], 0))
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
-                                  parse_mode='HTML',
-                                  reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] ERROR when transfering to bin in'+msg['chat']['title']+'('+str(chat_id)+') : '
-                 + str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] ERROR when transfering to bin in' + msg['chat']['title'] + '(' + str(chat_id) + ') : '
+                        + str(e1.args))
         else:
-            logger.clog("[Info] ---> "+str(result))
+            logger.clog("[Info] ---> " + str(result))
             try:
                 dre = await bot.sendMessage(
-                    chat_id, "`"+str(result)[2:]+"`", parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                    chat_id, "`" + str(result)[2:] + "`", parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
             except telepot.exception.TelegramError as e1:
                 dre = await bot.sendMessage(chat_id,
-                                      pastebin(
-                                          str(result)[2:], 'oct-'+time.strftime("%Y/%d/%m-%H:%M:%S").replace("'", "")),
-                                      parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            pastebin(
+                                                str(result)[2:],
+                                                'oct-' + time.strftime("%Y/%d/%m-%H:%M:%S").replace("'", "")),
+                                            parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
     elif txt[1] == "tohex":
         try:
             result = hex(int(txt[2], 0))
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format('<code>'+str(e1.args)+'</code>'),
-                                  parse_mode='HTML',
-                                  reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] ERROR when transfering to bin in'+msg['chat']['title']+'('+str(chat_id)+') : '
-                 + str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] ERROR when transfering to bin in' + msg['chat']['title'] + '(' + str(chat_id) + ') : '
+                        + str(e1.args))
         else:
-            logger.clog("[Info] ---> "+str(result))
+            logger.clog("[Info] ---> " + str(result))
             try:
                 dre = await bot.sendMessage(
-                    chat_id, "`"+str(result)[2:]+"`", parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                    chat_id, "`" + str(result)[2:] + "`", parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
             except telepot.exception.TelegramError as e1:
                 dre = await bot.sendMessage(chat_id,
-                                      pastebin(
-                                          str(result)[2:], 'hex-'+time.strftime("%Y/%d/%m-%H:%M:%S").replace("'", "")),
-                                      parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            pastebin(
+                                                str(result)[2:],
+                                                'hex-' + time.strftime("%Y/%d/%m-%H:%M:%S").replace("'", "")),
+                                            parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
     else:
         dre = await bot.sendMessage(
             chat_id, langport['help'], parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 async def ping(chat_id, msg):
     if msg['text'].startswith('/'):
@@ -603,8 +620,9 @@ async def ping(chat_id, msg):
     else:
         dre = await bot.sendMessage(chat_id, msg['text'].replace('i', 'o').replace(
             'I', 'O'), reply_to_message_id=msg['message_id'])
-    logger.log("[Debug] Raw sent data:"+str(dre))
+    logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 class titlec:
     async def title(self, chat_id, msg, chat_type):
@@ -616,52 +634,57 @@ class titlec:
             if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
                 dre = await bot.sendMessage(
                     chat_id, langport['all_member_are_admin'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             else:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             return
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
             dre = await bot.sendMessage(
                 chat_id, langport['all_member_are_admin'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             if msg['from']['id'] == config.OWNERID:
                 logger.clog('[Info] Owner Matched for \n[Info] ' +
-                    str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                            str(await bot.getChatMember(chat_id, msg['from']['id'])))
                 await self.__title(msg, chat_id, title, langport)
                 return
-            logger.clog('[Info] Searching admins in '+msg['chat']
-                ['title']+'('+str(chat_id) + ')')
+            logger.clog('[Info] Searching admins in ' + msg['chat']
+            ['title'] + '(' + str(chat_id) + ')')
             for admin in await bot.getChatAdministrators(chat_id):
                 if msg['from']['id'] == admin['user']['id']:
                     logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
                     await self.__title(msg, chat_id, title, langport)
                     return
             logger.clog('[Info] No admins matched with ' + msg['from']
-                ['username']+'('+str(msg['from']['id']) + ')')
+            ['username'] + '(' + str(msg['from']['id']) + ')')
             await bot.sendMessage(
                 chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
             return
         return
+
     async def __title(self, msg, chat_id, title, langport):
         try:
             await bot.setChatTitle(chat_id, title)
         except Exception as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args)+'</code>'),
-                                parse_mode='HTML',
-                                reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] Unable to change the Group title in '+msg['chat']['title']+'('+str(chat_id)+') : '
+                                        langport['error'].format('<code>' + str(e1.args) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog(
+                '[ERROR] Unable to change the Group title in ' + msg['chat']['title'] + '(' + str(chat_id) + ') : '
                 + str(e1.args))
         else:
             logger.clog('[Info] Sucessfully changed the Group title in ' +
-                msg['chat']['title']+'('+str(chat_id)+')')
+                        msg['chat']['title'] + '(' + str(chat_id) + ')')
         return
+
+
 title = titlec()
+
 
 async def lsadmins(chat_id, msg, cmd):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['lsadmins']
@@ -676,18 +699,18 @@ async def lsadmins(chat_id, msg, cmd):
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
-                                  parse_mode='HTML',
-                                  reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] ERROR when getting group'+group + ' : '
-                 + str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args[0]) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] ERROR when getting group' + group + ' : '
+                        + str(e1.args))
             group = chat_id
     target_group = await bot.getChat(group)
     group_type = target_group['type']
-    logger.log("[Debug] Group type: "+group_type)
+    logger.log("[Debug] Group type: " + group_type)
     adminmsg = target_group['title']
-    logger.log("[Debug] Raw admins data:"+str(await bot.getChatAdministrators(group)))
+    logger.log("[Debug] Raw admins data:" + str(await bot.getChatAdministrators(group)))
     for admin in await bot.getChatAdministrators(group):
         if admin['status'] == "creator":
             firstname = admin['user']['first_name']
@@ -697,14 +720,14 @@ async def lsadmins(chat_id, msg, cmd):
                 lastname = ''
             try:
                 nickname = '<a href="https://t.me/' + \
-                    admin['user']['username'] + '">' + \
-                    firstname + ' ' + lastname+'</a>'
+                           admin['user']['username'] + '">' + \
+                           firstname + ' ' + lastname + '</a>'
             except KeyError:
                 nickname = firstname + ' ' + lastname
             adminmsg += "\n" + \
-                langport['creator'].format(nickname)+"\n"
+                        langport['creator'].format(nickname) + "\n"
             if group_type == 'group' and target_group['all_members_are_administrators'] == True:
-                adminmsg += '\n'+langport['everyone_is_admin']
+                adminmsg += '\n' + langport['everyone_is_admin']
     for admin in await bot.getChatAdministrators(group):
         adminmsg += '\n'
         if admin['status'] == "administrator":
@@ -715,8 +738,8 @@ async def lsadmins(chat_id, msg, cmd):
                 lastname = ''
             try:
                 nickname = '<a href="https://t.me/' + \
-                    admin['user']['username'] + '">' + \
-                    firstname + ' ' + lastname+'</a>'
+                           admin['user']['username'] + '">' + \
+                           firstname + ' ' + lastname + '</a>'
             except KeyError:
                 nickname = firstname + ' ' + lastname
             if group_type == 'supergroup':
@@ -745,63 +768,66 @@ async def lsadmins(chat_id, msg, cmd):
                 else:
                     adminmsg += "🌚 "
             else:
-                adminmsg += langport['admin_badge']+" - "
+                adminmsg += langport['admin_badge'] + " - "
             adminmsg += nickname
     dre = await bot.sendMessage(chat_id, adminmsg, parse_mode='HTML',
-                          disable_web_page_preview=True, reply_to_message_id=msg['message_id'])
-    logger.log("[Debug] Raw sent data:"+str(dre))
+                                disable_web_page_preview=True, reply_to_message_id=msg['message_id'])
+    logger.log("[Debug] Raw sent data:" + str(dre))
     print('[Info]Admin list for ', target_group['title'],
           ' ( ', str(target_group['id']), ' ): ')
     logger.clog("[Info]")
     logger.clog(adminmsg)
     return
 
+
 async def groupinfo(chat_id, msg, chat_type):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['groupinfo']
     dre = await bot.sendMessage(chat_id,
-                          langport['grouptype'].format(chat_type)+"\n" +
-                          langport['groupname'].format(msg['chat']['title'])+"\n" +
-                          langport['groupcount'].format(str(await bot.getChatMembersCount(chat_id))) + "\n" +
-                          langport['groupid'].format(
-                              "<code>"+str(chat_id) + "</code>"),
-                          parse_mode='HTML',
-                          reply_to_message_id=msg['message_id'])
-    logger.log("[Debug] Raw sent data:"+str(dre))
+                                langport['grouptype'].format(chat_type) + "\n" +
+                                langport['groupname'].format(msg['chat']['title']) + "\n" +
+                                langport['groupcount'].format(str(await bot.getChatMembersCount(chat_id))) + "\n" +
+                                langport['groupid'].format(
+                                    "<code>" + str(chat_id) + "</code>"),
+                                parse_mode='HTML',
+                                reply_to_message_id=msg['message_id'])
+    logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 async def leavegroup(chat_id, msg, chat_type):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['leavegroup']
     if msg['from']['id'] == config.OWNERID:
         logger.clog('[Info] Owner Matched for \n[Info] ' +
-             str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                    str(await bot.getChatMember(chat_id, msg['from']['id'])))
         dre = await bot.sendMessage(
             chat_id, langport['farewell'], reply_to_message_id=msg['message_id'])
         await bot.leaveChat(chat_id)
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
         return
     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
         dre = await bot.sendMessage(
             chat_id, langport['farewell'], reply_to_message_id=msg['message_id'])
         await bot.leaveChat(chat_id)
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
     else:
-        logger.clog('[Info] Searching admins in '+msg['chat']
-             ['title']+'('+str(chat_id) + ')')
+        logger.clog('[Info] Searching admins in ' + msg['chat']
+        ['title'] + '(' + str(chat_id) + ')')
         for admin in await bot.getChatAdministrators(chat_id):
             if msg['from']['id'] == admin['user']['id']:
                 logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
                 dre = await bot.sendMessage(
                     chat_id, langport['farewell'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 await bot.leaveChat(chat_id)
                 return
         logger.clog('[Info] No admins matched with ' + msg['from']
-             ['username']+'('+str(msg['from']['id']) + ')')
+        ['username'] + '(' + str(msg['from']['id']) + ')')
         dre = await bot.sendMessage(
             chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
         return
     return
+
 
 async def a2zc(chat_id, msg):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['a2z']
@@ -814,7 +840,7 @@ async def a2zc(chat_id, msg):
         except IndexError:
             dre = await bot.sendMessage(
                 chat_id, langport['help'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             temp = tcm.split(' ', 1)
             if temp[0] == 'etan':
@@ -823,8 +849,8 @@ async def a2zc(chat_id, msg):
                 string = a2z(tcm)
             dre = await bot.sendMessage(
                 chat_id, string, reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[A2Z] --->'+string)
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[A2Z] --->' + string)
     else:
         cmd = msg['text'].split(' ', 1)
         try:
@@ -835,7 +861,7 @@ async def a2zc(chat_id, msg):
             except KeyError:
                 dre = await bot.sendMessage(
                     chat_id, langport['not_text'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             try:
                 temp = cmd[1]
@@ -848,9 +874,10 @@ async def a2zc(chat_id, msg):
                     string = a2z(tcm)
             dre = await bot.sendMessage(
                 chat_id, string, reply_to_message_id=reply_to['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[A2Z] --->'+string)
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[A2Z] --->' + string)
     return
+
 
 class userc:
     async def getuser(self, chat_id, msg, txt):
@@ -863,7 +890,7 @@ class userc:
             except IndexError:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], parse_mode='HTML', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             else:
                 await self.__getuser(chat_id, uuser_id, msg, langport)
         else:
@@ -893,12 +920,13 @@ class userc:
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
-                                parse_mode='HTML',
-                                reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] ERROR when getting user'+str(uuser_id) + 'in'+msg['chat']['title']+'('+str(chat_id)+') : '
-                + str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args[0]) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] ERROR when getting user' + str(uuser_id) + 'in' + msg['chat']['title'] + '(' + str(
+                chat_id) + ') : '
+                        + str(e1.args))
         else:
             firstname = user['user']['first_name']
             try:
@@ -908,20 +936,24 @@ class userc:
             try:
                 uusername = '@' + user['user']['username']
                 nickname = '<a href="https://t.me/' + \
-                    user['user']['username'] + '">' + \
-                    firstname + ' ' + lastname+'</a>'
+                           user['user']['username'] + '">' + \
+                           firstname + ' ' + lastname + '</a>'
             except KeyError:
                 uusername = 'Undefined'
                 nickname = firstname + ' ' + lastname
             userid = str(user['user']['id'])
             dre = await bot.sendMessage(chat_id,
-                                langport['nick'].format(nickname) + '\n' +
-                                langport['username'].format(uusername) + '\n' +
-                                langport['userid'].format('<code>' + userid + '</code>') + '\n' +
-                                langport['status'].format(user['status']), parse_mode='HTML', reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        langport['nick'].format(nickname) + '\n' +
+                                        langport['username'].format(uusername) + '\n' +
+                                        langport['userid'].format('<code>' + userid + '</code>') + '\n' +
+                                        langport['status'].format(user['status']), parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
         return
+
+
 user = userc()
+
 
 class pinc:
     async def pin(self, chat_id, msg, chat_type):
@@ -931,54 +963,56 @@ class pinc:
         except:
             dre = await bot.sendMessage(
                 chat_id, langport['reply_help'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             if chat_type == 'group':
                 dre = await bot.sendMessage(
                     chat_id, langport['group'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             else:
                 if msg['from']['id'] == config.OWNERID:
                     logger.clog('[Info] Owner Matched for \n[Info] ' +
-                        str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                                str(await bot.getChatMember(chat_id, msg['from']['id'])))
                     await self.__pin(chat_id, reply_to, langport, msg)
                     return
-                logger.clog('[Info] Searching admins in '+msg['chat']
-                    ['title']+'('+str(chat_id) + ')')
+                logger.clog('[Info] Searching admins in ' + msg['chat']
+                ['title'] + '(' + str(chat_id) + ')')
                 for admin in await bot.getChatAdministrators(chat_id):
                     if msg['from']['id'] == admin['user']['id']:
                         logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
                         await self.__pin(chat_id, reply_to, langport, msg)
                         return
                 logger.clog('[Info] No admins matched with ' + msg['from']
-                    ['username']+'('+str(msg['from']['id']) + ')')
+                ['username'] + '(' + str(msg['from']['id']) + ')')
                 dre = await bot.sendMessage(
                     chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
         return
+
     async def pinh(self, chat_id, msg, chat_type):
-        langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['pin']        
+        langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['pin']
         if msg['from']['id'] == config.OWNERID:
             logger.clog('[Info] Owner Matched for \n[Info] ' +
-                str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                        str(await bot.getChatMember(chat_id, msg['from']['id'])))
             await self.__pin(chat_id, msg, langport, msg)
             return
-        logger.clog('[Info] Searching admins in '+msg['chat']['title']+'('+str(chat_id) + ')')
+        logger.clog('[Info] Searching admins in ' + msg['chat']['title'] + '(' + str(chat_id) + ')')
         for admin in await bot.getChatAdministrators(chat_id):
             if msg['from']['id'] == admin['user']['id']:
                 logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
                 await self.__pin(chat_id, msg, langport, msg)
                 return
         logger.clog('[Info] No admins matched with ' + msg['from']
-            ['username']+'('+str(msg['from']['id']) + '),ignoring...')
+        ['username'] + '(' + str(msg['from']['id']) + '),ignoring...')
         return
+
     async def __pin(self, chat_id, reply_to, langport, msg):
         chat = await bot.getChat(chat_id)
         try:
             dre = await bot.sendMessage(
                 chat_id, "#Pin #Backup", reply_to_message_id=chat['pinned_message']['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         except KeyError:
             pass
         try:
@@ -992,17 +1026,21 @@ class pinc:
             except NameError:
                 pass
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
-                                parse_mode='HTML',
-                                reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] Unable to pin the message '+str(reply_to['message_id'])+' in '+msg['chat']
-                ['title']+'('+str(chat_id)+') : '+str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args[0]) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] Unable to pin the message ' + str(reply_to['message_id']) + ' in ' + msg['chat']
+            ['title'] + '(' + str(chat_id) + ') : ' + str(e1.args))
         else:
-            logger.clog('[Info] Sucessfully pinned the message '+str(reply_to['message_id']
-                                                            )+' in '+msg['chat']['title']+'('+str(chat_id)+')')
+            logger.clog('[Info] Sucessfully pinned the message ' + str(reply_to['message_id']
+                                                                       ) + ' in ' + msg['chat']['title'] + '(' + str(
+                chat_id) + ')')
         return
+
+
 pin = pinc()
+
 
 async def replace(chat_id, msg, cmd):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['replace']
@@ -1011,7 +1049,7 @@ async def replace(chat_id, msg, cmd):
     except KeyError:
         dre = await bot.sendMessage(
             chat_id, langport['help_not_reply'], reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
     else:
         try:
             rstring = reply_to['text']
@@ -1021,15 +1059,15 @@ async def replace(chat_id, msg, cmd):
             except KeyError:
                 dre = await bot.sendMessage(
                     chat_id, langport['not_text'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
         try:
             test = cmd[1]
             test = cmd[2]
         except IndexError:
             dre = await bot.sendMessage(chat_id, langport['help'],
-                                  parse_mode='Markdown', reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        parse_mode='Markdown', reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             try:
                 if cmd[2] == "''":
@@ -1040,13 +1078,15 @@ async def replace(chat_id, msg, cmd):
                 tp, val, tb = sys.exc_info()
                 await bot.sendChatAction(chat_id, 'typing')
                 dre = await bot.sendMessage(chat_id,
-                                      langport['error'].format(str(val).split(
-                                          ',')[0].replace('(', '').replace("'", "`")),
-                                      parse_mode='Markdown',
-                                      reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
-                logger.clog('[ERROR] ERROR when replacing '+cmd[1]+' to ' + cmd[2]+msg['chat']['title']+'('+str(chat_id)+') : '
-                     + str(val).split(',')[0].replace('(', '').replace("'", ""))
+                                            langport['error'].format(str(val).split(
+                                                ',')[0].replace('(', '').replace("'", "`")),
+                                            parse_mode='Markdown',
+                                            reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
+                logger.clog(
+                    '[ERROR] ERROR when replacing ' + cmd[1] + ' to ' + cmd[2] + msg['chat']['title'] + '(' + str(
+                        chat_id) + ') : '
+                    + str(val).split(',')[0].replace('(', '').replace("'", ""))
             else:
                 fuser = msg['from']
                 fnick = fuser['first_name']
@@ -1062,14 +1102,16 @@ async def replace(chat_id, msg, cmd):
                     tnick = tnick
                 if fuser['id'] == tuser['id']:
                     smsg = langport['result_self'].format(
-                        '<a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a>', '<i>'+rstring + '</i>')
+                        '<a href="tg://user?id=' + str(tuser['id']) + '">' + tnick + '</a>', '<i>' + rstring + '</i>')
                 else:
-                    smsg = langport['result'].format('<a href="tg://user?id='+str(fuser['id'])+'">'+fnick+'</a>',
-                                                     '<a href="tg://user?id='+str(tuser['id'])+'">'+tnick+'</a>', '<i>'+rstring + '</i>')
+                    smsg = langport['result'].format(
+                        '<a href="tg://user?id=' + str(fuser['id']) + '">' + fnick + '</a>',
+                        '<a href="tg://user?id=' + str(tuser['id']) + '">' + tnick + '</a>', '<i>' + rstring + '</i>')
                 dre = await bot.sendMessage(
                     chat_id, smsg, parse_mode="HTML", reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 async def getfile(chat_id, msg, cmd):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['getfile']
@@ -1079,49 +1121,50 @@ async def getfile(chat_id, msg, cmd):
     except IndexError:
         dre = await bot.sendMessage(
             chat_id, langport['help'], reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
     else:
         try:
             file = await bot.getFile(file_id)
-            logger.log("[Debug] Raw get data:"+str(file))
+            logger.log("[Debug] Raw get data:" + str(file))
         except telepot.exception.TelegramError as e1:
             dre = await bot.sendMessage(chat_id,
-                                  langport['error'].format(
-                                      "<code>"+str(e1.args[0])+"</code>"),
-                                  parse_mode='HTML',
-                                  reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] Unable to fetch the file '+file_id+'  : ' +
-                 str(e1.args))
+                                        langport['error'].format(
+                                            "<code>" + str(e1.args[0]) + "</code>"),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] Unable to fetch the file ' + file_id + '  : ' +
+                        str(e1.args))
         else:
             type = file['file_path'].split("/")
             try:
                 if type[0] == 'photos':
                     dre = await bot.sendPhoto(
                         chat_id, file_id, reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                 elif type[0] == 'voice':
                     dre = await bot.sendVoice(
                         chat_id, file_id, reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                 elif type[0] == 'videos':
                     dre = await bot.sendVideo(
                         chat_id, file_id, reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                 else:
                     dre = await bot.sendDocument(
                         chat_id, file_id, reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
             except telepot.exception.TelegramError as e1:
                 dre = await bot.sendMessage(chat_id,
-                                      langport['senderror'].format(
-                                          '<code>'+str(e1.args[0])+"</code>"),
-                                      parse_mode='HTML',
-                                      reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
-                logger.clog('[ERROR] Unable to send the file '+file_id+'  : ' +
-                     str(e1.args))
+                                            langport['senderror'].format(
+                                                '<code>' + str(e1.args[0]) + "</code>"),
+                                            parse_mode='HTML',
+                                            reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
+                logger.clog('[ERROR] Unable to send the file ' + file_id + '  : ' +
+                            str(e1.args))
     return
+
 
 async def fileinfo(chat_id, msg):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['fileinfo']
@@ -1130,13 +1173,13 @@ async def fileinfo(chat_id, msg):
     except KeyError:
         dre = await bot.sendMessage(
             chat_id, langport['help'], reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
     else:
         tcontent_type, tchat_type, tchat_id = telepot.glance(reply_to)
         if tcontent_type == 'text':
             dre = await bot.sendMessage(
                 chat_id, lang['istext'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         elif tcontent_type == 'photo':
             photo_array = reply_to['photo']
@@ -1153,12 +1196,13 @@ async def fileinfo(chat_id, msg):
         elif tcontent_type == 'sticker':
             fileid = reply_to['sticker']['file_id']
         dre = await bot.sendMessage(chat_id,
-                              langport['filetype'].format(tcontent_type)+"\n" +
-                              langport['fileid'].format(
-                                  '<code>'+fileid+"</code>"),
-                              parse_mode="HTML", reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+                                    langport['filetype'].format(tcontent_type) + "\n" +
+                                    langport['fileid'].format(
+                                        '<code>' + fileid + "</code>"),
+                                    parse_mode="HTML", reply_to_message_id=msg['message_id'])
+        logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 async def exportblog(chat_id, msg):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['exportblog']
@@ -1167,42 +1211,43 @@ async def exportblog(chat_id, msg):
         debugs = cmd[1]
     except:
         if msg['from']['id'] == config.OWNERID:
-            f = open(logger.logpath+".log", "rb")
+            f = open(logger.logpath + ".log", "rb")
             dre = await bot.sendDocument(
                 chat_id, f, reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             f.close()
         else:
             dre = await bot.sendMessage(
                 chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
     else:
         if msg['from']['id'] == config.OWNERID:
             if config.Debug == True and debugs == "-debug":
-                f = open(logger.logpath+"-debug.log", "rb")
+                f = open(logger.logpath + "-debug.log", "rb")
                 dre = await bot.sendDocument(
                     chat_id, f, reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 f.close()
             else:
                 if config.Debug == False and debugs == "-debug":
                     dre = await bot.sendMessage(
                         chat_id, langport['debug_off'], reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                 elif config.Debug == True and debugs != "-debug":
                     dre = await bot.sendMessage(
                         chat_id, langport['debug'], reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
-                f = open(logger.logpath+".log", "rb")
+                    logger.log("[Debug] Raw sent data:" + str(dre))
+                f = open(logger.logpath + ".log", "rb")
                 dre = await bot.sendDocument(
                     chat_id, f, reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 f.close()
         else:
             dre = await bot.sendMessage(
                 chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 class tagc:
     def readtag(self):
@@ -1212,14 +1257,16 @@ class tagc:
                 fs.write("{}")
         try:
             with open("./tagdata.json", "r") as fs:
-                data = json.load(fs) 
+                data = json.load(fs)
         except json.decoder.JSONDecodeError as e1:
-            logger.clog("[Error] Can't load tagdata.json: JSON decode error:"+ str(e1.args)+ "\n[Info] Trying to read using python format.")
+            logger.clog("[Error] Can't load tagdata.json: JSON decode error:" + str(
+                e1.args) + "\n[Info] Trying to read using python format.")
             try:
                 with open("./tagdata.json", "r") as fs:
                     data = eval(fs.read())
             except Exception as e1:
-                logger.clog("[Error] Can't load tagdata.json: "+ str(e1.args)+ "\n\n[Info] Try fix the data or reset the data.")
+                logger.clog("[Error] Can't load tagdata.json: " + str(
+                    e1.args) + "\n\n[Info] Try fix the data or reset the data.")
                 exit()
             else:
                 logger.clog("[Info] Converting to json format...")
@@ -1229,14 +1276,14 @@ class tagc:
                     json.dump(data, fs, indent=2)
                 logger.clog("[Info] Reloading...")
                 with open("./tagdata.json", "r") as fs:
-                    data = json.load(fs) 
-                
-        return(data)
+                    data = json.load(fs)
+
+        return (data)
 
     def writetag(self, data):
         logger.clog("[Info] Writing tag data...")
         with open("./tagdata.json", "w") as fs:
-            json.dump(data,fs,indent=2)
+            json.dump(data, fs, indent=2)
         return
 
     async def addtag(self, chat_id, msg, cmd):
@@ -1252,7 +1299,7 @@ class tagc:
             except IndexError:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
             try:
                 grouptagdict = data[str(chat_id)]
@@ -1263,25 +1310,26 @@ class tagc:
             except IndexError:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             else:
                 try:
                     testcmduser = cmd[3]
                 except IndexError:
                     dre = await bot.sendMessage(
                         chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                 else:
                     successmsg = langport['b_success'].format(
-                        "<b>" + tagname + "</b>")+"\n"
+                        "<b>" + tagname + "</b>") + "\n"
                     successcount = 0
                     errmsg = langport['b_error'].format(
-                        "<b>" + tagname + "</b>")+"\n"
+                        "<b>" + tagname + "</b>") + "\n"
                     errcount = 0
                     if len(cmd) >= 54:
                         dre = await bot.sendMessage(chat_id, langport['too_many'], parse_mode="HTML",
-                                            disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                                                    disable_web_page_preview=True,
+                                                    reply_to_message_id=msg["message_id"])
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         cmd = cmd[0:53]
                     await bot.sendChatAction(chat_id, "typing")
                     for a in cmd[3:]:
@@ -1289,17 +1337,17 @@ class tagc:
                             adduser = await bot.getChatMember(chat_id, int(a))
                         except telepot.exception.TelegramError as e1:
                             logger.clog("[ERROR] Errored when getting user " + a + " :" +
-                                str(e1.args))
+                                        str(e1.args))
                             errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
-                                str(e1.args[0])+"</code>\n"
+                                     str(e1.args[0]) + "</code>\n"
                             errcount += 1
                             continue
                         else:
                             if int(a) in temptaglist:
                                 logger.clog("[ERROR] Errored when adding user " + a +
-                                    " to "+tagname+" :The user is already in the list")
+                                            " to " + tagname + " :The user is already in the list")
                                 errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
-                                    langport['already_exist']+"</code>\n"
+                                         langport['already_exist'] + "</code>\n"
                                 errcount += 1
                                 continue
                             else:
@@ -1311,14 +1359,14 @@ class tagc:
                                 lastname = ''
                             try:
                                 nickname = '<a href="https://t.me/' + \
-                                    adduser['user']['username'] + '">' + \
-                                    firstname + ' ' + lastname+'</a>'
+                                           adduser['user']['username'] + '">' + \
+                                           firstname + ' ' + lastname + '</a>'
                             except KeyError:
                                 nickname = firstname + ' ' + lastname
                             successmsg = successmsg + nickname + "\n"
                             successcount += 1
                             logger.clog("[Info] " + firstname + ' ' +
-                                lastname + " was added to "+tagname)
+                                        lastname + " was added to " + tagname)
                     grouptagdict[tagname] = temptaglist
                     if len(grouptagdict[tagname]) == 0:
                         del grouptagdict[tagname]
@@ -1330,9 +1378,9 @@ class tagc:
                         successmsg = ""
                     if errcount == 0:
                         errmsg = ""
-                    dre = await bot.sendMessage(chat_id, successmsg+errmsg, parse_mode="HTML",
-                                        disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    dre = await bot.sendMessage(chat_id, successmsg + errmsg, parse_mode="HTML",
+                                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             data = self.readtag()
             try:
@@ -1349,22 +1397,23 @@ class tagc:
                 adduser = await bot.getChatMember(chat_id, userid)
             except telepot.exception.TelegramError as e1:
                 logger.clog("[ERROR] Errored when getting user " + str(userid) +
-                    " :"+str(e1.args))
-                smsg = langport['r_error'].format("<b>" + str(userid) + "</b>", "<b>" + cmd[2] + "</b>", "<code>"+str(
-                    e1.args[0])+"</code>")+"\n"
+                            " :" + str(e1.args))
+                smsg = langport['r_error'].format("<b>" + str(userid) + "</b>", "<b>" + cmd[2] + "</b>", "<code>" + str(
+                    e1.args[0]) + "</code>") + "\n"
                 dre = await bot.sendMessage(chat_id, smsg, parse_mode="HTML",
-                                    disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
             else:
                 if userid in temptaglist:
                     logger.clog("[ERROR] Errored when adding user " + str(userid) +
-                        " to "+cmd[2]+" :The user is already in the list")
+                                " to " + cmd[2] + " :The user is already in the list")
                     smsg = langport['r_error'].format(
-                        "<b>" + str(userid) + "</b>", "<b>" + cmd[2] + "</b>", "<code>"+langport['already_exist']+"</code>")+"\n"
+                        "<b>" + str(userid) + "</b>", "<b>" + cmd[2] + "</b>",
+                        "<code>" + langport['already_exist'] + "</code>") + "\n"
                     dre = await bot.sendMessage(chat_id, smsg, parse_mode="HTML",
-                                        disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                     return
                 else:
                     temptaglist.append(userid)
@@ -1375,22 +1424,22 @@ class tagc:
                     lastname = ''
                 try:
                     nickname = '<a href="https://t.me/' + \
-                        adduser['user']['username'] + '">' + \
-                        firstname + ' ' + lastname+'</a>'
+                               adduser['user']['username'] + '">' + \
+                               firstname + ' ' + lastname + '</a>'
                 except KeyError:
                     nickname = firstname + ' ' + lastname
                 smsg = smsg + \
-                    langport['r_success'].format(nickname, "<b>" + cmd[2] + "</b>")
+                       langport['r_success'].format(nickname, "<b>" + cmd[2] + "</b>")
                 logger.clog("[Info] " + firstname + ' ' +
-                    lastname + " was added to "+cmd[2])
+                            lastname + " was added to " + cmd[2])
             grouptagdict[cmd[2]] = temptaglist
             if len(grouptagdict[cmd[2]]) == 0:
                 del grouptagdict[cmd[2]]
             data[str(chat_id)] = grouptagdict
             self.writetag(data)
             dre = await bot.sendMessage(chat_id, smsg, parse_mode="HTML",
-                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+            logger.log("[Debug] Raw sent data:" + str(dre))
         return
 
     async def rmtag(self, chat_id, msg, cmd, chat_type):
@@ -1406,7 +1455,7 @@ class tagc:
             except IndexError:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
             try:
                 grouptagdict = data[str(chat_id)]
@@ -1417,78 +1466,85 @@ class tagc:
             except IndexError:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             else:
                 if tagname == "*":
                     global confirmsg
                     if grouptagdict == {}:
                         dre = await bot.sendMessage(chat_id, langport['no_list'], parse_mode="HTML",
-                                            disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                                                    disable_web_page_preview=True,
+                                                    reply_to_message_id=msg["message_id"])
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         return
                     if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
                         dre = await bot.sendMessage(chat_id, langport['remove_all']['warn'], parse_mode="HTML",
-                                            disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                                                    disable_web_page_preview=True,
+                                                    reply_to_message_id=msg["message_id"])
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         confirmsg = dre
                         return
                     else:
                         if msg['from']['id'] == config.OWNERID:
                             logger.clog('[Info] Owner Matched for \n[Info] ' +
-                                str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                                        str(await bot.getChatMember(chat_id, msg['from']['id'])))
                             dre = await bot.sendMessage(chat_id, langport['remove_all']['warn'], parse_mode="HTML",
-                                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                                                        disable_web_page_preview=True,
+                                                        reply_to_message_id=msg["message_id"])
                             confirmsg = dre
-                            logger.log("[Debug] Raw sent data:"+str(dre))
+                            logger.log("[Debug] Raw sent data:" + str(dre))
                             return
-                        logger.clog('[Info] Searching admins in '+msg['chat']
-                            ['title']+'('+str(chat_id) + ')')
+                        logger.clog('[Info] Searching admins in ' + msg['chat']
+                        ['title'] + '(' + str(chat_id) + ')')
                         for admin in await bot.getChatAdministrators(chat_id):
                             if msg['from']['id'] == admin['user']['id']:
                                 logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
                                 dre = await bot.sendMessage(chat_id, langport['remove_all']['warn'], parse_mode="HTML",
-                                                    disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                                                            disable_web_page_preview=True,
+                                                            reply_to_message_id=msg["message_id"])
                                 confirmsg = dre
-                                logger.log("[Debug] Raw sent data:"+str(dre))
+                                logger.log("[Debug] Raw sent data:" + str(dre))
                                 return
                         logger.clog('[Info] No admins matched with ' + msg['from']
-                            ['username']+'('+str(msg['from']['id']) + ')')
+                        ['username'] + '(' + str(msg['from']['id']) + ')')
                         dre = await bot.sendMessage(
                             chat_id, langport['remove_all']['no_perm'], reply_to_message_id=msg['message_id'])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         return
                 try:
                     testcmduser = cmd[3]
                 except IndexError:
                     dre = await bot.sendMessage(
                         chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                 else:
                     if testcmduser == "*":
                         if temptaglist == []:
-                            logger.clog("[ERROR] List "+cmd[2] + "not found.")
+                            logger.clog("[ERROR] List " + cmd[2] + "not found.")
                             dre = await bot.sendMessage(chat_id, langport['list_not_exist'].format(
-                                "<b>"+cmd[2]+"</b>"), parse_mode="HTML", disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                            logger.log("[Debug] Raw sent data:"+str(dre))
+                                "<b>" + cmd[2] + "</b>"), parse_mode="HTML", disable_web_page_preview=True,
+                                                        reply_to_message_id=msg["message_id"])
+                            logger.log("[Debug] Raw sent data:" + str(dre))
                             return
                         del grouptagdict[cmd[2]]
-                        logger.clog("[Info] Cleared the list "+cmd[2])
+                        logger.clog("[Info] Cleared the list " + cmd[2])
                         data[str(chat_id)] = grouptagdict
                         self.writetag(data)
                         dre = await bot.sendMessage(chat_id, langport['list_removed'].format(
-                            "<b>"+cmd[2]+"</b>"), parse_mode="HTML", disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                            "<b>" + cmd[2] + "</b>"), parse_mode="HTML", disable_web_page_preview=True,
+                                                    reply_to_message_id=msg["message_id"])
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         return
                     successmsg = langport['b_success'].format(
-                        "<b>" + cmd[2] + "</b>")+"\n"
+                        "<b>" + cmd[2] + "</b>") + "\n"
                     successcount = 0
                     errmsg = langport['b_error'].format(
-                        "<b>" + cmd[2] + "</b>")+":\n"
+                        "<b>" + cmd[2] + "</b>") + ":\n"
                     errcount = 0
                     if len(cmd) >= 54:
                         dre = await bot.sendMessage(chat_id, langport['too_many'], parse_mode="HTML",
-                                            disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                                                    disable_web_page_preview=True,
+                                                    reply_to_message_id=msg["message_id"])
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         cmd = cmd[0:53]
                     await bot.sendChatAction(chat_id, "typing")
                     for a in cmd[3:]:
@@ -1501,18 +1557,18 @@ class tagc:
                                 successcount += 1
                             else:
                                 logger.clog("[ERROR] Errored when getting user " + a + " :" +
-                                    str(e1.args))
+                                            str(e1.args))
                                 errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
-                                    str(e1.args[0])+"</code>\n"
+                                         str(e1.args[0]) + "</code>\n"
                                 errcount += 1
                         else:
                             if int(a) in temptaglist:
                                 temptaglist.remove(int(a))
                             else:
                                 logger.clog("[ERROR] Errored when removing user " + a +
-                                    " from "+cmd[2]+" :The user is not in the list")
+                                            " from " + cmd[2] + " :The user is not in the list")
                                 errmsg = errmsg + "<b>" + a + "</b> : <code>" + \
-                                    langport['not_in_list']+"</code>\n"
+                                         langport['not_in_list'] + "</code>\n"
                                 errcount += 1
                                 continue
                             firstname = rmuser['user']['first_name']
@@ -1522,14 +1578,14 @@ class tagc:
                                 lastname = ''
                             try:
                                 nickname = '<a href="https://t.me/' + \
-                                    rmuser['user']['username'] + '">' + \
-                                    firstname + ' ' + lastname+'</a>'
+                                           rmuser['user']['username'] + '">' + \
+                                           firstname + ' ' + lastname + '</a>'
                             except KeyError:
                                 nickname = firstname + ' ' + lastname
                             successmsg = successmsg + nickname + "\n"
                             successcount += 1
                             logger.clog("[Info] " + firstname + ' ' +
-                                lastname + " was removed from "+cmd[2])
+                                        lastname + " was removed from " + cmd[2])
                     grouptagdict[cmd[2]] = temptaglist
                     if len(grouptagdict[cmd[2]]) == 0:
                         del grouptagdict[cmd[2]]
@@ -1541,9 +1597,9 @@ class tagc:
                         successmsg = ""
                     if errcount == 0:
                         errmsg = ""
-                    dre = await bot.sendMessage(chat_id, successmsg+errmsg, parse_mode="HTML",
-                                        disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    dre = await bot.sendMessage(chat_id, successmsg + errmsg, parse_mode="HTML",
+                                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             data = self.readtag()
             try:
@@ -1560,24 +1616,25 @@ class tagc:
                 adduser = await bot.getChatMember(chat_id, userid)
             except telepot.exception.TelegramError as e1:
                 logger.clog("[ERROR] Errored when getting user " + str(userid) +
-                    " :"+str(e1.args))
-                smsg = langport['r_error'].format("<b>" + userid + "</b>", "<b>" + cmd[2] + "</b>", "<code>"+str(
-                    e1.args[0])+"</code>")+"\n"
+                            " :" + str(e1.args))
+                smsg = langport['r_error'].format("<b>" + userid + "</b>", "<b>" + cmd[2] + "</b>", "<code>" + str(
+                    e1.args[0]) + "</code>") + "\n"
                 dre = await bot.sendMessage(chat_id, smsg, parse_mode="HTML",
-                                    disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
             else:
                 if userid in temptaglist:
                     temptaglist.remove(userid)
                 else:
                     logger.clog("[ERROR] Errored when remving user " + str(userid) +
-                        " from "+cmd[2]+" :The user is not in the list")
+                                " from " + cmd[2] + " :The user is not in the list")
                     smsg = langport['r_error'].format(
-                        "<b>" + str(userid) + "</b>", "<b>" + cmd[2] + "</b>", "<code>"+langport['not_in_list']+"</code>")+"\n"
+                        "<b>" + str(userid) + "</b>", "<b>" + cmd[2] + "</b>",
+                        "<code>" + langport['not_in_list'] + "</code>") + "\n"
                     dre = await bot.sendMessage(chat_id, smsg, parse_mode="HTML",
-                                        disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                     return
                 firstname = adduser['user']['first_name']
                 try:
@@ -1586,22 +1643,22 @@ class tagc:
                     lastname = ''
                 try:
                     nickname = '<a href="https://t.me/' + \
-                        adduser['user']['username'] + '">' + \
-                        firstname + ' ' + lastname+'</a>'
+                               adduser['user']['username'] + '">' + \
+                               firstname + ' ' + lastname + '</a>'
                 except KeyError:
                     nickname = firstname + ' ' + lastname
                 smsg = smsg + \
-                    langport['r_success'].format(nickname, "<b>" + cmd[2] + "</b>")
+                       langport['r_success'].format(nickname, "<b>" + cmd[2] + "</b>")
                 logger.clog("[Info] " + firstname + ' ' +
-                    lastname + " was removed from "+cmd[2])
+                            lastname + " was removed from " + cmd[2])
             grouptagdict[cmd[2]] = temptaglist
             if len(grouptagdict[cmd[2]]) == 0:
                 del grouptagdict[cmd[2]]
             data[str(chat_id)] = grouptagdict
             self.writetag(data)
             dre = await bot.sendMessage(chat_id, smsg, parse_mode="HTML",
-                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+            logger.log("[Debug] Raw sent data:" + str(dre))
         return
 
     async def confirm(self, chat_id, msg):
@@ -1611,36 +1668,37 @@ class tagc:
             reply_to = msg['reply_to_message']
         except KeyError:
             dre = await bot.sendMessage(chat_id, langport['donotknow_confirmabout'],
-                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             global confirmsg
             rreplyto = confirmsg['reply_to_message']
             if confirmsg == None:
                 dre = await bot.sendMessage(chat_id, langport['donotknow_confirmabout'],
-                                    disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
             if reply_to["message_id"] == confirmsg["message_id"]:
                 if msg['from']['id'] != rreplyto['from']['id']:
                     dre = await bot.sendMessage(chat_id, langport['donotknow_confirmabout'],
-                                        disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                                                disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                     return
                 ccmd = rreplyto['text'].split()
-                if ccmd[0] == '/tag' or ccmd[0] == '/tag@'+username:
+                if ccmd[0] == '/tag' or ccmd[0] == '/tag@' + username:
                     if ccmd[1] == 'remove' and ccmd[2] == "*":
                         data = self.readtag()
                         del data[str(chat_id)]
                         self.writetag(data)
-                        dre = await bot.sendMessage(chat_id, langport['remove_all_success'], disable_web_page_preview=True,
-                                            reply_to_message_id=rreplyto["message_id"])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                        dre = await bot.sendMessage(chat_id, langport['remove_all_success'],
+                                                    disable_web_page_preview=True,
+                                                    reply_to_message_id=rreplyto["message_id"])
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         confirmsg = None
             else:
                 dre = await bot.sendMessage(chat_id, langport['donotknow_confirmabout'],
-                                    disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            disable_web_page_preview=True, reply_to_message_id=msg["message_id"])
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
 
         return
@@ -1654,27 +1712,27 @@ class tagc:
         except KeyError:
             dre = await bot.sendMessage(
                 chat_id, langport['no_list'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         try:
             listname = cmd[2]
         except IndexError:
             for ttag in grouptagdict:
                 temptaglist = grouptagdict[ttag]
-                smsg+= \
+                smsg += \
                     langport['all'].format(
-                        "<b>"+ttag+"</b>", "<b>" + str(len(temptaglist)) + "</b>")+"\n"
+                        "<b>" + ttag + "</b>", "<b>" + str(len(temptaglist)) + "</b>") + "\n"
         else:
             try:
                 temptaglist = grouptagdict[listname]
             except KeyError:
                 dre = await bot.sendMessage(chat_id, langport['list_not_exist'].format(
-                    "<b>"+listname+"</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                    "<b>" + listname + "</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
             else:
-                smsg+= langport['list_prefix'].format(
-                    "<b>"+listname+"</b>", "<b>" + str(len(temptaglist)) + "</b>")+"\n"
+                smsg += langport['list_prefix'].format(
+                    "<b>" + listname + "</b>", "<b>" + str(len(temptaglist)) + "</b>") + "\n"
                 count = 0
                 for userid in temptaglist:
                     try:
@@ -1689,18 +1747,18 @@ class tagc:
                             lastname = ''
                         try:
                             nickname = '<a href="https://t.me/' + \
-                                adduser['user']['username'] + '">' + \
-                                firstname + ' ' + lastname+'</a>'
+                                       adduser['user']['username'] + '">' + \
+                                       firstname + ' ' + lastname + '</a>'
                         except KeyError:
                             nickname = firstname + ' ' + lastname
-                        smsg+= nickname + " "
+                        smsg += nickname + " "
                     count = count + 1
                     if count >= 2:
                         smsg += "\n"
                         count = 0
         dre = await bot.sendMessage(chat_id, smsg, disable_web_page_preview=True,
-                            parse_mode="HTML", reply_to_message_id=msg["message_id"])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+                                    parse_mode="HTML", reply_to_message_id=msg["message_id"])
+        logger.log("[Debug] Raw sent data:" + str(dre))
         return
 
     async def tags(self, chat_id, msg, cmd):
@@ -1713,45 +1771,48 @@ class tagc:
         except IndexError:
             dre = await bot.sendMessage(
                 chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             try:
                 temptaglist = data[str(chat_id)][listname]
             except KeyError:
                 dre = await bot.sendMessage(chat_id, langport['list_not_exist'].format(
-                    "<b>"+listname+"</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                    "<b>" + listname + "</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
+                logger.log("[Debug] Raw sent data:" + str(dre))
             else:
                 if temptaglist == []:
                     dre = await bot.sendMessage(chat_id, langport['list_not_exist'].format(
-                        "<b>"+listname+"</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                        "<b>" + listname + "</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                     return
-                dre = await bot.sendMessage(chat_id, langport['tag_prefix'].format("<b>"+listname+"</b>", "<b>"+str(
-                    len(temptaglist))+"</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                dre = await bot.sendMessage(chat_id,
+                                            langport['tag_prefix'].format("<b>" + listname + "</b>", "<b>" + str(
+                                                len(temptaglist)) + "</b>"), parse_mode="HTML",
+                                            reply_to_message_id=msg["message_id"])
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 totalcount = 0
                 errcount = 0
                 for userid in temptaglist:
                     try:
                         await bot.getChatMember(chat_id, int(userid))
                     except telepot.exception.TelegramError as e1:
-                        emsg += langport['user_fetch_fail'].format(str(userid), '<code>'+str(e1.args[0])+'</code>') + '\n'
+                        emsg += langport['user_fetch_fail'].format(str(userid),
+                                                                   '<code>' + str(e1.args[0]) + '</code>') + '\n'
                         errcount += 1
                     else:
-                        smsg = smsg + "[.](tg://user?id="+str(userid)+")"
+                        smsg = smsg + "[.](tg://user?id=" + str(userid) + ")"
                         totalcount += 1
                     if totalcount >= 5:
                         dre = await bot.sendMessage(chat_id, smsg, parse_mode="Markdown")
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         smsg = ""
                         totalcount = 0
                 if totalcount != 0:
                     dre = await bot.sendMessage(chat_id, smsg, parse_mode="Markdown")
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                 if errcount != 0:
                     dre = await bot.sendMessage(chat_id, emsg, parse_mode="HTML")
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
         return
 
     async def tag_admin(self, chat_id, msg, chat_type):
@@ -1759,24 +1820,24 @@ class tagc:
         if chat_type == "group" and msg['chat']['all_members_are_administrators'] == True:
             dre = await bot.sendMessage(
                 chat_id, langport['all_member_are_admin'], parse_mode="HTML", reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         admin_list = await bot.getChatAdministrators(chat_id)
         dre = await bot.sendMessage(chat_id, langport['tag_prefix'].format(
-            "<b>"+str(len(admin_list))+"</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+            "<b>" + str(len(admin_list)) + "</b>"), parse_mode="HTML", reply_to_message_id=msg["message_id"])
+        logger.log("[Debug] Raw sent data:" + str(dre))
         smsg = ""
         totalcount = 0
         for admin in admin_list:
-            smsg = smsg + "[.](tg://user?id="+str(admin['user']['id'])+")"
-            totalcount = totalcount+1
+            smsg = smsg + "[.](tg://user?id=" + str(admin['user']['id']) + ")"
+            totalcount = totalcount + 1
             if totalcount >= 5:
                 dre = await bot.sendMessage(chat_id, smsg, parse_mode="Markdown")
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 smsg = ""
                 totalcount = 0
         if totalcount != 0:
             dre = await bot.sendMessage(chat_id, smsg, parse_mode="Markdown")
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         return
 
     async def tag(self, chat_id, msg, cmd, chat_type):
@@ -1786,7 +1847,7 @@ class tagc:
         except:
             dre = await bot.sendMessage(
                 chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             if subcmd == "add":
                 await self.addtag(chat_id, msg, cmd)
@@ -1799,34 +1860,37 @@ class tagc:
             elif subcmd == "all":
                 dre = await bot.sendMessage(
                     chat_id, langport['PWRAPI'], parse_mode='Markdown', reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             elif subcmd == "admin":
                 await self.tag_admin(chat_id, msg, chat_type)
             else:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
 
         return
+
+
 tag = tagc()
+
 
 class exportChatLink:
     async def exportchatlink(self, chat_id, msg, chat_type):
         langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['exportchatlink']
         if msg['from']['id'] == config.OWNERID:
             logger.clog('[Info] Owner Matched for \n[Info] ' +
-                str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                        str(await bot.getChatMember(chat_id, msg['from']['id'])))
             await self.__export(chat_id, msg, langport)
             return
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
             logger.clog('[Info] Detected a group with all members are admin enabled.')
             dre = await bot.sendMessage(
                 chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         else:
-            logger.clog('[Info] Searching admins in '+msg['chat']
-                ['title']+'('+str(chat_id) + ')')
+            logger.clog('[Info] Searching admins in ' + msg['chat']
+            ['title'] + '(' + str(chat_id) + ')')
             for admin in await bot.getChatAdministrators(chat_id):
                 if msg['from']['id'] == admin['user']['id']:
                     logger.clog(
@@ -1834,30 +1898,34 @@ class exportChatLink:
                     await self.__export(chat_id, msg, langport)
                     return
             logger.clog('[Info] No admins matched with ' + msg['from']
-                ['username']+'('+str(msg['from']['id']) + ')')
+            ['username'] + '(' + str(msg['from']['id']) + ')')
             dre = await bot.sendMessage(
                 chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         return
+
     async def __export(self, chat_id, msg, langport):
         try:
             link = await bot.exportChatInviteLink(chat_id)
         except telepot.exception.TelegramError as e1:
             await bot.sendChatAction(chat_id, 'typing')
             dre = await bot.sendMessage(chat_id,
-                                langport['error'].format('<code>'+str(e1.args[0])+'</code>'),
-                                parse_mode='HTML',
-                                reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-            logger.clog('[ERROR] Unable to export chat link in '+msg['chat']
-                ['title']+'('+str(chat_id)+') : '+str(e1.args))
+                                        langport['error'].format('<code>' + str(e1.args[0]) + '</code>'),
+                                        parse_mode='HTML',
+                                        reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
+            logger.clog('[ERROR] Unable to export chat link in ' + msg['chat']
+            ['title'] + '(' + str(chat_id) + ') : ' + str(e1.args))
         else:
             await bot.sendMessage(
                 chat_id, link, reply_to_message_id=msg['message_id'])
             logger.clog('[Info] Exported chat link: {0}'.format(link))
         return
+
+
 ecl = exportChatLink()
+
 
 class delmsgc:
     async def delmsg(self, chat_id, msg, chat_type):
@@ -1868,7 +1936,7 @@ class delmsgc:
         except KeyError:
             dre = await bot.sendMessage(
                 chat_id, langport['no_reply'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             try:
                 tmp = delete_msg_sender[chat_id]
@@ -1877,13 +1945,13 @@ class delmsgc:
             if chat_type == "private":
                 markup = self.__inlinekeyboardbutton(chat_id)
                 dre = await bot.sendMessage(chat_id, langport['confirm'], reply_markup=markup,
-                                    parse_mode="HTML", reply_to_message_id=reply_to_message["message_id"])
+                                            parse_mode="HTML", reply_to_message_id=reply_to_message["message_id"])
                 delete_msg_sender[chat_id][dre['message_id']] = msg
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             elif chat_type == 'group' or chat_type == 'supergroup':
                 if msg['from']['id'] == config.OWNERID:
                     logger.clog('[Info] Owner Matched for \n[Info] ' +
-                        str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                                str(await bot.getChatMember(chat_id, msg['from']['id'])))
                     await self.__del(reply_to_message, msg, chat_id, langport, chat_type)
                     return
                 if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
@@ -1891,11 +1959,11 @@ class delmsgc:
                         '[Info] Detected a group with all members are admin enabled.')
                     dre = await bot.sendMessage(
                         chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                     return
                 else:
-                    logger.clog('[Info] Searching admins in '+msg['chat']
-                        ['title']+'('+str(chat_id) + ')')
+                    logger.clog('[Info] Searching admins in ' + msg['chat']
+                    ['title'] + '(' + str(chat_id) + ')')
                     for admin in await bot.getChatAdministrators(chat_id):
                         if msg['from']['id'] == admin['user']['id']:
                             logger.clog(
@@ -1903,10 +1971,10 @@ class delmsgc:
                             await self.__del(reply_to_message, msg, chat_id, langport, chat_type)
                             return
                     logger.clog('[Info] No admins matched with ' + msg['from']
-                        ['username']+'('+str(msg['from']['id']) + ')')
+                    ['username'] + '(' + str(msg['from']['id']) + ')')
                     dre = await bot.sendMessage(
                         chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                     return
         return
 
@@ -1914,18 +1982,18 @@ class delmsgc:
         if reply_to_message['from']['id'] == msg['from']['id']:
             dre = await bot.sendMessage(
                 chat_id, langport['deleting_self_msg'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         elif reply_to_message['from']['id'] == bot_me.id:
             markup = self.__inlinekeyboardbutton(chat_id)
             dre = await bot.sendMessage(chat_id, langport['confirm'], reply_markup=markup,
-                                parse_mode="HTML", reply_to_message_id=reply_to_message["message_id"])
+                                        parse_mode="HTML", reply_to_message_id=reply_to_message["message_id"])
             delete_msg_sender[chat_id][dre['message_id']] = msg
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
                 dre = await bot.sendMessage(
                     chat_id, langport['all_member_are_admin'], reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
                 return
             for admin in await bot.getChatAdministrators(chat_id):
                 if bot_me.id == admin['user']['id']:
@@ -1934,25 +2002,27 @@ class delmsgc:
                             markup = self.__inlinekeyboardbutton(
                                 chat_id)
                             dre = await bot.sendMessage(
-                                chat_id, langport['confirm'], reply_markup=markup, parse_mode="HTML", reply_to_message_id=reply_to_message["message_id"])
+                                chat_id, langport['confirm'], reply_markup=markup, parse_mode="HTML",
+                                reply_to_message_id=reply_to_message["message_id"])
                             delete_msg_sender[chat_id][dre['message_id']] = msg
-                            logger.log("[Debug] Raw sent data:"+str(dre))
+                            logger.log("[Debug] Raw sent data:" + str(dre))
                             return
                         else:
                             dre = await bot.sendMessage(
                                 chat_id, langport['bot_no_perm'], reply_to_message_id=msg['message_id'])
-                            logger.log("[Debug] Raw sent data:"+str(dre))
+                            logger.log("[Debug] Raw sent data:" + str(dre))
                             return
                     elif chat_type == 'group':
                         markup = self.__inlinekeyboardbutton(chat_id)
                         dre = await bot.sendMessage(
-                            chat_id, langport['confirm'], reply_markup=markup, parse_mode="HTML", reply_to_message_id=reply_to_message["message_id"])
+                            chat_id, langport['confirm'], reply_markup=markup, parse_mode="HTML",
+                            reply_to_message_id=reply_to_message["message_id"])
                         delete_msg_sender[chat_id][dre['message_id']] = msg
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                         return
             dre = await bot.sendMessage(
                 chat_id, langport['bot_no_perm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         return
 
     async def confirm_delete(self, chat_id, orginal_message, query_id, message_with_inline_keyboard, from_id):
@@ -1975,7 +2045,7 @@ class delmsgc:
                 str(e1.args[0])))
             msg_idf = telepot.message_identifier(message_with_inline_keyboard)
             await bot.editMessageText(msg_idf, langport['error'].format(
-                "<code>"+str(e1.args[0])+"</code>"), parse_mode="HTML")
+                "<code>" + str(e1.args[0]) + "</code>"), parse_mode="HTML")
         else:
             await bot.answerCallbackQuery(query_id, langport["success"])
             msg_idf = telepot.message_identifier(message_with_inline_keyboard)
@@ -2012,70 +2082,73 @@ class delmsgc:
         if roll == 1:
             markup = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text=langport['yes'],
-                                    callback_data='confirm_delete')],
+                                      callback_data='confirm_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
             ])
         elif roll == 2:
             markup = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='confirm_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='confirm_delete')],
                 [InlineKeyboardButton(
                     text=langport['yes'], callback_data='confirm_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
             ])
         elif roll == 3:
             markup = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
                     text=langport['yes'], callback_data='confirm_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
             ])
         elif roll == 4:
             markup = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
                     text=langport['yes'], callback_data='confirm_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
             ])
         elif roll == 5:
             markup = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
-                    text=langport['no_'+str(random.randint(1, 4))], callback_data='cancel_delete')],
+                    text=langport['no_' + str(random.randint(1, 4))], callback_data='cancel_delete')],
                 [InlineKeyboardButton(
                     text=langport['yes'], callback_data='confirm_delete')],
             ])
         return markup
+
+
 delmsg = delmsgc()
+
 
 async def gtts(chat_id, msg):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['gtts']
@@ -2085,7 +2158,7 @@ async def gtts(chat_id, msg):
     except IndexError:
         dre = await bot.sendMessage(
             chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+        logger.log("[Debug] Raw sent data:" + str(dre))
         return
     else:
         try:
@@ -2093,15 +2166,16 @@ async def gtts(chat_id, msg):
         except IndexError:
             dre = await bot.sendMessage(
                 chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         else:
             smsg = '[Link](https://translate.google.com.tw/translate_tts?ie=UTF-8&q=' + \
-                txt+'&tl='+clang+'&client=tw-ob)'
+                   txt + '&tl=' + clang + '&client=tw-ob)'
             dre = await bot.sendMessage(
                 chat_id, smsg, parse_mode="Markdown", reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 class chatconfigc:
     def read_chatconfig(self):
@@ -2114,7 +2188,8 @@ class chatconfigc:
             with open("./chatconfig.json", "r") as fs:
                 chat_config = json.load(fs)
         except json.decoder.JSONDecodeError as e1:
-            logger.clog("[Error] Can't load chatconfig.json: JSON decode error:"+ str(e1.args)+ "\n[Info] Trying to read using python format.")
+            logger.clog("[Error] Can't load chatconfig.json: JSON decode error:" + str(
+                e1.args) + "\n[Info] Trying to read using python format.")
             try:
                 with open("./chatconfig.json", "r") as fs:
                     chat_config = eval(fs.read())
@@ -2139,8 +2214,8 @@ class chatconfigc:
             for i in chat_config:
                 if i == 'config_ver':
                     continue
-                #New configs here
-                
+                # New configs here
+
             for i in chat_config:
                 if i == 'config_ver':
                     continue
@@ -2164,28 +2239,28 @@ class chatconfigc:
         langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['config']
         if msg['from']['id'] == config.OWNERID:
             logger.clog('[Info] Owner Matched for \n[Info] ' +
-                str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                        str(await bot.getChatMember(chat_id, msg['from']['id'])))
             await self.set_lang_command(chat_id, msg, cmd)
             return
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
             logger.clog('[Info] Detected a group with all members are admin enabled.')
             dre = await bot.sendMessage(
                 chat_id, langport['lang_noperm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         else:
-            logger.clog('[Info] Searching admins in '+msg['chat']
-                ['title']+'('+str(chat_id) + ')')
+            logger.clog('[Info] Searching admins in ' + msg['chat']
+            ['title'] + '(' + str(chat_id) + ')')
             for admin in await bot.getChatAdministrators(chat_id):
                 if msg['from']['id'] == admin['user']['id']:
                     logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
                     await self.set_lang_command(chat_id, msg, cmd)
                     return
             logger.clog('[Info] No admins matched with ' + msg['from']
-                ['username']+'('+str(msg['from']['id']) + ')')
+            ['username'] + '(' + str(msg['from']['id']) + ')')
             dre = await bot.sendMessage(
                 chat_id, langport['lang_noperm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         return
 
@@ -2197,10 +2272,10 @@ class chatconfigc:
             smsg = ""
             for i in lang:
                 smsg = smsg + "- <code>" + i + "</code> <i>" + \
-                    lang[i]["display_name"]+"</i>\n"
+                       lang[i]["display_name"] + "</i>\n"
             dre = await bot.sendMessage(chat_id, "/setlang &lt;language&gt;\n\n" +
-                                smsg, parse_mode="HTML", reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        smsg, parse_mode="HTML", reply_to_message_id=msg["message_id"])
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         else:
             try:
@@ -2212,17 +2287,20 @@ class chatconfigc:
                     smsg = ""
                     for i in lang:
                         smsg = smsg + "- <code>" + i + "</code> <i>" + \
-                            lang[i]["display_name"]+"</i>\n"
+                               lang[i]["display_name"] + "</i>\n"
                     dre = await bot.sendMessage(chat_id, "Language {0} not exist.\n\n".format(
-                        "<b>"+slang+"</b>")+smsg, parse_mode="HTML", reply_to_message_id=msg["message_id"])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                        "<b>" + slang + "</b>") + smsg, parse_mode="HTML", reply_to_message_id=msg["message_id"])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                     return
                 else:
                     chat_config[str(chat_id)] = {"lang": slang}
                     self.write_chatconfig(chat_config)
                     dre = await bot.sendMessage(chat_id,
-                                        lang[chat_config[str(chat_id)]["lang"]]["display"]["config"]["langsuccess"].format(lang[chat_config[str(chat_id)]["lang"]]["display_name"]), reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                                                lang[chat_config[str(chat_id)]["lang"]]["display"]["config"][
+                                                    "langsuccess"].format(
+                                                    lang[chat_config[str(chat_id)]["lang"]]["display_name"]),
+                                                reply_to_message_id=msg['message_id'])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
             else:
                 if slang != chat_config[str(chat_id)]["lang"]:
                     try:
@@ -2231,22 +2309,29 @@ class chatconfigc:
                         smsg = ""
                         for i in lang:
                             smsg = smsg + "- <code>" + i + "</code> <i>" + \
-                                lang[i]["display_name"]+"</i>\n"
+                                   lang[i]["display_name"] + "</i>\n"
                         dre = await bot.sendMessage(chat_id, "Language {0} not exist.\n\n".format(
-                            "<b>"+slang+"</b>")+smsg, parse_mode="HTML", reply_to_message_id=msg["message_id"])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                            "<b>" + slang + "</b>") + smsg, parse_mode="HTML", reply_to_message_id=msg["message_id"])
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                     else:
                         chat_config[str(chat_id)]["lang"] = slang
                         self.write_chatconfig(chat_config)
                         dre = await bot.sendMessage(chat_id,
-                                            lang[chat_config[str(chat_id)]["lang"]]["display"]["config"]["langsuccess"].format(lang[chat_config[str(chat_id)]["lang"]]["display_name"]), reply_to_message_id=msg['message_id'])
-                        logger.log("[Debug] Raw sent data:"+str(dre))
+                                                    lang[chat_config[str(chat_id)]["lang"]]["display"]["config"][
+                                                        "langsuccess"].format(
+                                                        lang[chat_config[str(chat_id)]["lang"]]["display_name"]),
+                                                    reply_to_message_id=msg['message_id'])
+                        logger.log("[Debug] Raw sent data:" + str(dre))
                 else:
-                    dre = await bot.sendMessage(chat_id, lang[chat_config[str(chat_id)]["lang"]]["display"]["config"]["langexist"].format(
+                    dre = await bot.sendMessage(chat_id, lang[chat_config[str(chat_id)]["lang"]]["display"]["config"][
+                        "langexist"].format(
                         lang[chat_config[str(chat_id)]["lang"]]["display_name"]), reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                    logger.log("[Debug] Raw sent data:" + str(dre))
         return
+
+
 chatconfig = chatconfigc()
+
 
 class functionc:
     def read_function_list(self):
@@ -2254,12 +2339,13 @@ class functionc:
         logger.clog('[Info] Reading function list data...')
         if os.path.isfile("./fctlsdata.json") == False:
             with open("./fctlsdata.json", "w") as fs:
-                json.dump({'config_ver': HJ_Ver }, fs, indent=2)
+                json.dump({'config_ver': HJ_Ver}, fs, indent=2)
         try:
             with open("./fctlsdata.json", "r") as fs:
                 function_list_data = json.load(fs)
         except json.decoder.JSONDecodeError as e1:
-            logger.clog("[Error] Can't load fctlsdata.json: JSON decode error:"+ str(e1.args)+ "\n[Info] Trying to read using python format.")
+            logger.clog("[Error] Can't load fctlsdata.json: JSON decode error:" + str(
+                e1.args) + "\n[Info] Trying to read using python format.")
             try:
                 with open("./fctlsdata.json", "r") as fs:
                     function_list_data = eval(fs.read())
@@ -2301,31 +2387,31 @@ class functionc:
 
     async def function(self, chat_id, msg, cmd, chat_type):
         langport = lang[chat_config[str(chat_id)]["lang"]
-                        ]["display"]['function']['general']
+        ]["display"]['function']['general']
         if msg['from']['id'] == config.OWNERID:
             logger.clog('[Info] Owner Matched for \n[Info] ' +
-                str(await bot.getChatMember(chat_id, msg['from']['id'])))
+                        str(await bot.getChatMember(chat_id, msg['from']['id'])))
             await self.__cmd(chat_id, msg, cmd, langport, chat_type)
             return
         if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
             logger.clog('[Info] Detected a group with all members are admin enabled.')
             dre = await bot.sendMessage(
                 chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         else:
-            logger.clog('[Info] Searching admins in '+msg['chat']
-                ['title']+'('+str(chat_id) + ')')
+            logger.clog('[Info] Searching admins in ' + msg['chat']
+            ['title'] + '(' + str(chat_id) + ')')
             for admin in await bot.getChatAdministrators(chat_id):
                 if msg['from']['id'] == admin['user']['id']:
                     logger.clog('[Info] Admin Matched for \n[Info] ' + str(admin))
                     await self.__cmd(chat_id, msg, cmd, langport, chat_type)
                     return
             logger.clog('[Info] No admins matched with ' + msg['from']
-                ['username']+'('+str(msg['from']['id']) + ')')
+            ['username'] + '(' + str(msg['from']['id']) + ')')
             dre = await bot.sendMessage(
                 chat_id, langport['no_perm'], reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         return
 
@@ -2335,7 +2421,7 @@ class functionc:
         except IndexError:
             dre = await bot.sendMessage(
                 chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
         else:
             if subcmd == "enable":
                 await self.function_enable(chat_id, msg, cmd, chat_type)
@@ -2349,23 +2435,23 @@ class functionc:
                 await self.function_default(chat_id, msg, chat_type)
                 dre = await bot.sendMessage(
                     chat_id, langport['reset_complete'], reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
             else:
                 dre = await bot.sendMessage(
                     chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                logger.log("[Debug] Raw sent data:" + str(dre))
         return
 
     async def function_enable(self, chat_id, msg, cmd, chat_type):
         langport = lang[chat_config[str(chat_id)]["lang"]
-                        ]["display"]['function']['enable']
+        ]["display"]['function']['enable']
         global function_list_data
         try:
             testarg = cmd[2]
         except IndexError:
             dre = await bot.sendMessage(
                 chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         try:
             groupfundict = function_list_data[str(chat_id)]
@@ -2373,7 +2459,7 @@ class functionc:
             await self.function_default(chat_id, msg, chat_type)
             dre = await bot.sendMessage(
                 chat_id, langport['deploy'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         smsg = ""
         for funct in cmd[2:]:
@@ -2381,20 +2467,20 @@ class functionc:
                 currentv = groupfundict[funct]
             except KeyError:
                 smsg += langport['funct_not_exist'].format(
-                    '<b>'+funct+'</b>') + '\n'
+                    '<b>' + funct + '</b>') + '\n'
                 continue
             if currentv == True:
-                smsg += langport['failed'].format('<b>'+funct+'</b>',
-                                                '<code>'+langport['already_true']+'</code>') + '\n'
+                smsg += langport['failed'].format('<b>' + funct + '</b>',
+                                                  '<code>' + langport['already_true'] + '</code>') + '\n'
                 continue
             if funct == 'grouppic' or funct == 'title' or funct == 'pin' or funct == 'export_link':
                 if chat_type == 'group' and msg['chat']['all_members_are_administrators'] == True:
                     logger.clog('[Info] Detected a group with all members are admin enabled.')
                     smsg += langport['failed'].format(
-                        '<b>'+funct+'</b>', '<code>'+langport['all_member_are_admin']+'</code>') + '\n'
+                        '<b>' + funct + '</b>', '<code>' + langport['all_member_are_admin'] + '</code>') + '\n'
                     continue
-                logger.clog('[Info] Searching admins in '+msg['chat']
-                    ['title']+'('+str(chat_id) + ')')
+                logger.clog('[Info] Searching admins in ' + msg['chat']
+                ['title'] + '(' + str(chat_id) + ')')
                 hasperm = False
                 for admin in await bot.getChatAdministrators(chat_id):
                     if bot_me.id == admin['user']['id']:
@@ -2406,41 +2492,41 @@ class functionc:
                                 if admin['can_change_info']:
                                     groupfundict['grouppic'] = True
                                     smsg += langport['success'].format(
-                                        '<b>'+funct+'</b>')+"\n"
+                                        '<b>' + funct + '</b>') + "\n"
                                     continue
                                 else:
                                     smsg += langport['failed'].format(
-                                        '<b>'+funct+'</b>', '<code>'+langport['no_perm']+'</code>')+'\n'
+                                        '<b>' + funct + '</b>', '<code>' + langport['no_perm'] + '</code>') + '\n'
                                     continue
                             if funct == 'title':
                                 if admin['can_change_info']:
                                     groupfundict['title'] = True
                                     smsg += langport['success'].format(
-                                        '<b>'+funct+'</b>')+'\n'
+                                        '<b>' + funct + '</b>') + '\n'
                                     continue
                                 else:
                                     smsg += langport['failed'].format(
-                                        '<b>'+funct+'</b>', '<code>'+langport['no_perm']+'</code>')+'\n'
+                                        '<b>' + funct + '</b>', '<code>' + langport['no_perm'] + '</code>') + '\n'
                                     continue
                             if funct == 'pin':
                                 if admin['can_pin_messages']:
                                     groupfundict['pin'] = True
                                     smsg += langport['success'].format(
-                                        '<b>'+funct+'</b>')+'\n'
+                                        '<b>' + funct + '</b>') + '\n'
                                     continue
                                 else:
                                     smsg += langport['failed'].format(
-                                        '<b>'+funct+'</b>', '<code>'+langport['no_perm']+'</code>') + '\n'
+                                        '<b>' + funct + '</b>', '<code>' + langport['no_perm'] + '</code>') + '\n'
                                     continue
                             if funct == 'export_link':
                                 if admin['can_invite_users']:
                                     groupfundict['export_link'] = True
                                     smsg += langport['success'].format(
-                                        '<b>'+funct+'</b>')+'\n'
+                                        '<b>' + funct + '</b>') + '\n'
                                     continue
                                 else:
                                     smsg += langport['failed'].format(
-                                        '<b>'+funct+'</b>', '<code>'+langport['no_perm']+'</code>') + '\n'
+                                        '<b>' + funct + '</b>', '<code>' + langport['no_perm'] + '</code>') + '\n'
                                     continue
                         elif chat_type == 'group':
                             logger.clog(
@@ -2448,50 +2534,50 @@ class functionc:
                             if funct == 'grouppic':
                                 groupfundict['grouppic'] = True
                                 smsg += langport['success'].format(
-                                    '<b>'+funct+'</b>')+'\n'
+                                    '<b>' + funct + '</b>') + '\n'
                                 continue
                             if funct == 'title':
                                 groupfundict['title'] = True
                                 smsg += langport['success'].format(
-                                    '<b>'+funct+'</b>')+'\n'
+                                    '<b>' + funct + '</b>') + '\n'
                                 continue
                             if funct == 'pin':
                                 smsg += langport['failed'].format(
-                                    '<b>'+funct+'</b>', '<code>'+langport['group_cant_pin']+'</code>')+'\n'
+                                    '<b>' + funct + '</b>', '<code>' + langport['group_cant_pin'] + '</code>') + '\n'
                                 continue
                             if funct == 'export_link':
                                 smsg += langport['failed'].format(
-                                    '<b>'+funct+'</b>', '<code>'+langport['group_cant_export']+'</code>')+'\n'
+                                    '<b>' + funct + '</b>', '<code>' + langport['group_cant_export'] + '</code>') + '\n'
                                 continue
                     continue
                 if hasperm:
                     continue
                 logger.clog('[Info] I am not an admin in this chat.')
-                smsg += langport['failed'].format('<b>'+funct+'</b>',
-                                                '<code>'+langport['no_perm']+'</code>')+'\n'
+                smsg += langport['failed'].format('<b>' + funct + '</b>',
+                                                  '<code>' + langport['no_perm'] + '</code>') + '\n'
                 continue
             else:
                 groupfundict[funct] = True
-                smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+                smsg += langport['success'].format('<b>' + funct + '</b>') + '\n'
                 continue
         dre = await bot.sendMessage(chat_id,
-                            smsg,
-                            parse_mode='HTML', reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+                                    smsg,
+                                    parse_mode='HTML', reply_to_message_id=msg['message_id'])
+        logger.log("[Debug] Raw sent data:" + str(dre))
         function_list_data[str(chat_id)] = groupfundict
         self.write_function_list(function_list_data)
         return
 
     async def function_disable(self, chat_id, msg, cmd, chat_type):
         langport = lang[chat_config[str(chat_id)]["lang"]
-                        ]["display"]['function']['disable']
+        ]["display"]['function']['disable']
         global function_list_data
         try:
             testarg = cmd[2]
         except IndexError:
             dre = await bot.sendMessage(
                 chat_id, langport['help'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         try:
             groupfundict = function_list_data[str(chat_id)]
@@ -2499,7 +2585,7 @@ class functionc:
             await self.function_default(chat_id, msg, chat_type)
             dre = await bot.sendMessage(
                 chat_id, langport['deploy'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         if testarg == 'all':
             for funct in groupfundict:
@@ -2508,32 +2594,32 @@ class functionc:
             self.write_function_list(function_list_data)
             dre = await bot.sendMessage(
                 chat_id, langport['success_all'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+            logger.log("[Debug] Raw sent data:" + str(dre))
             return
         smsg = ''
         for funct in cmd[2:]:
             try:
                 currentv = groupfundict[funct]
             except KeyError:
-                smsg += langport['funct_not_exist'].format('<b>'+funct+'</b>')+'\n'
+                smsg += langport['funct_not_exist'].format('<b>' + funct + '</b>') + '\n'
                 continue
             if currentv == False:
-                smsg += langport['failed'].format('<b>'+funct+'</b>',
-                                                '<code>'+langport['already_false']+'</code>')+'\n'
+                smsg += langport['failed'].format('<b>' + funct + '</b>',
+                                                  '<code>' + langport['already_false'] + '</code>') + '\n'
                 continue
             groupfundict[funct] = False
-            smsg += langport['success'].format('<b>'+funct+'</b>')+'\n'
+            smsg += langport['success'].format('<b>' + funct + '</b>') + '\n'
         dre = await bot.sendMessage(chat_id,
-                            smsg,
-                            parse_mode='HTML', reply_to_message_id=msg['message_id'])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+                                    smsg,
+                                    parse_mode='HTML', reply_to_message_id=msg['message_id'])
+        logger.log("[Debug] Raw sent data:" + str(dre))
         function_list_data[str(chat_id)] = groupfundict
         self.write_function_list(function_list_data)
         return
 
     async def function_admincheck(self, chat_id, msg, chat_type, sendchat):
         langport = lang[chat_config[str(chat_id)]["lang"]
-                        ]["display"]['function']['admin_check']
+        ]["display"]['function']['admin_check']
         global function_list_data
         try:
             groupfundict = function_list_data[str(chat_id)]
@@ -2544,33 +2630,33 @@ class functionc:
             logger.clog('[Info] Detected a group with all members are admin enabled,disabling admin functions...')
             if sendchat:
                 dre = await bot.sendMessage(chat_id,
-                                    langport['all_member_are_admin'],
-                                    parse_mode='HTML', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            langport['all_member_are_admin'],
+                                            parse_mode='HTML', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
             groupfundict['grouppic'] = False
             smsg = smsg + \
-                langport['success_disable'].format('<b>grouppic</b>')+'\n'
+                   langport['success_disable'].format('<b>grouppic</b>') + '\n'
             groupfundict['pin'] = False
-            smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
+            smsg = smsg + langport['success_disable'].format('<b>pin</b>') + '\n'
             groupfundict['title'] = False
-            smsg = smsg + langport['success_disable'].format('<b>title</b>')+'\n'
+            smsg = smsg + langport['success_disable'].format('<b>title</b>') + '\n'
             groupfundict['export_link'] = False
             smsg = smsg + \
-                langport['success_disable'].format('<b>export_link</b>')+'\n'
+                   langport['success_disable'].format('<b>export_link</b>') + '\n'
             function_list_data[str(chat_id)] = groupfundict
             self.write_function_list(function_list_data)
             if sendchat:
                 dre = await bot.sendMessage(chat_id,
-                                    smsg,
-                                    parse_mode='HTML', reply_to_message_id=msg['message_id'])
-                logger.log("[Debug] Raw sent data:"+str(dre))
+                                            smsg,
+                                            parse_mode='HTML', reply_to_message_id=msg['message_id'])
+                logger.log("[Debug] Raw sent data:" + str(dre))
             return
         if sendchat:
             dre = await bot.sendMessage(
                 chat_id, langport['msg_checking_admin'], reply_to_message_id=msg["message_id"])
-            logger.log("[Debug] Raw sent data:"+str(dre))
-        logger.clog('[Info] Searching admins in '+msg['chat']
-            ['title']+'('+str(chat_id) + ')')
+            logger.log("[Debug] Raw sent data:" + str(dre))
+        logger.clog('[Info] Searching admins in ' + msg['chat']
+        ['title'] + '(' + str(chat_id) + ')')
 
         for admin in await bot.getChatAdministrators(chat_id):
             if bot_me.id == admin['user']['id']:
@@ -2580,77 +2666,77 @@ class functionc:
                     if admin['can_change_info']:
                         groupfundict['grouppic'] = True
                         smsg = smsg + \
-                            langport['success_enable'].format(
-                                '<b>grouppic</b>')+'\n'
+                               langport['success_enable'].format(
+                                   '<b>grouppic</b>') + '\n'
                         groupfundict['title'] = True
                         smsg = smsg + \
-                            langport['success_enable'].format('<b>title</b>')+'\n'
+                               langport['success_enable'].format('<b>title</b>') + '\n'
                     else:
                         groupfundict['grouppic'] = False
                         smsg = smsg + \
-                            langport['success_disable'].format(
-                                '<b>grouppic</b>')+'\n'
+                               langport['success_disable'].format(
+                                   '<b>grouppic</b>') + '\n'
                         groupfundict['title'] = False
                         smsg = smsg + \
-                            langport['success_disable'].format('<b>title</b>')+'\n'
+                               langport['success_disable'].format('<b>title</b>') + '\n'
                     if admin['can_pin_messages'] == True:
                         groupfundict['pin'] = True
                         smsg = smsg + \
-                            langport['success_enable'].format('<b>pin</b>')+'\n'
+                               langport['success_enable'].format('<b>pin</b>') + '\n'
                     else:
                         groupfundict['pin'] = False
                         smsg = smsg + \
-                            langport['success_disable'].format('<b>pin</b>')+'\n'
+                               langport['success_disable'].format('<b>pin</b>') + '\n'
                     if admin['can_invite_users'] == True:
                         groupfundict['export_link'] = True
                         smsg = smsg + \
-                            langport['success_enable'].format(
-                                '<b>export_link</b>')+'\n'
+                               langport['success_enable'].format(
+                                   '<b>export_link</b>') + '\n'
                     else:
                         groupfundict['export_link'] = False
                         smsg = smsg + \
-                            langport['success_disable'].format(
-                                '<b>export_link</b>')+'\n'
+                               langport['success_disable'].format(
+                                   '<b>export_link</b>') + '\n'
                 elif chat_type == 'group':
                     logger.clog(
                         '[Info] I am an admin in this chat,enabling admin functions without pin...')
                     groupfundict['grouppic'] = True
                     smsg = smsg + \
-                        langport['success_enable'].format('<b>grouppic</b>')+'\n'
+                           langport['success_enable'].format('<b>grouppic</b>') + '\n'
                     groupfundict['pin'] = False
                     smsg = smsg + \
-                        langport['success_disable'].format('<b>pin</b>')+'\n'
+                           langport['success_disable'].format('<b>pin</b>') + '\n'
                     groupfundict['title'] = True
                     smsg = smsg + \
-                        langport['success_enable'].format('<b>title</b>')+'\n'
+                           langport['success_enable'].format('<b>title</b>') + '\n'
                     groupfundict['export_link'] = False
                     smsg = smsg + \
-                        langport['success_disable'].format(
-                            '<b>export_link</b>')+'\n'
+                           langport['success_disable'].format(
+                               '<b>export_link</b>') + '\n'
                 function_list_data[str(chat_id)] = groupfundict
                 self.write_function_list(function_list_data)
                 if sendchat:
                     dre = await bot.sendMessage(chat_id,
-                                        smsg,
-                                        parse_mode='HTML', reply_to_message_id=msg['message_id'])
-                    logger.log("[Debug] Raw sent data:"+str(dre))
+                                                smsg,
+                                                parse_mode='HTML', reply_to_message_id=msg['message_id'])
+                    logger.log("[Debug] Raw sent data:" + str(dre))
                 return
         logger.clog('[Info] I am not an admin in this chat.')
         groupfundict['grouppic'] = False
-        smsg = smsg + langport['success_disable'].format('<b>grouppic</b>')+'\n'
+        smsg = smsg + langport['success_disable'].format('<b>grouppic</b>') + '\n'
         groupfundict['pin'] = False
-        smsg = smsg + langport['success_disable'].format('<b>pin</b>')+'\n'
+        smsg = smsg + langport['success_disable'].format('<b>pin</b>') + '\n'
         groupfundict['title'] = False
-        smsg = smsg + langport['success_disable'].format('<b>title</b>')+'\n'
+        smsg = smsg + langport['success_disable'].format('<b>title</b>') + '\n'
         groupfundict['export_link'] = False
-        smsg = smsg + langport['success_disable'].format('<b>export_link</b>')+'\n'
+        smsg = smsg + langport['success_disable'].format('<b>export_link</b>') + '\n'
         function_list_data[str(chat_id)] = groupfundict
         self.write_function_list(function_list_data)
         if sendchat:
             dre = await bot.sendMessage(chat_id,
-                                smsg,
-                                parse_mode='HTML', reply_to_message_id=msg['message_id'])
-            logger.log("[Debug] Raw sent data:"+str(dre))
+                                        smsg,
+                                        parse_mode='HTML', reply_to_message_id=msg['message_id'])
+            logger.log("[Debug] Raw sent data:" + str(dre))
         return
 
     async def function_default(self, chat_id, msg, chat_type):
@@ -2694,13 +2780,16 @@ class functionc:
         smsg = ''
         for funct in groupfundict:
             smsg = smsg + \
-                '<b>{0}</b> : <code>{1}</code>\n'.format(
-                    funct, str(groupfundict[funct]))
+                   '<b>{0}</b> : <code>{1}</code>\n'.format(
+                       funct, str(groupfundict[funct]))
         dre = await bot.sendMessage(chat_id, smsg, parse_mode='HTML',
-                            reply_to_message_id=msg["message_id"])
-        logger.log("[Debug] Raw sent data:"+str(dre))
+                                    reply_to_message_id=msg["message_id"])
+        logger.log("[Debug] Raw sent data:" + str(dre))
         return
+
+
 function = functionc()
+
 
 async def help(chat_id, msg, chat_type):
     langport = lang[chat_config[str(chat_id)]["lang"]]["display"]['help']
@@ -2743,19 +2832,21 @@ async def help(chat_id, msg, chat_type):
     if groupfundict['delete_message']:
         smsg = smsg + '/delmsg\n'
     if smsg == '':
-        smsg = langport['nofunction']+'\n/setlang'
+        smsg = langport['nofunction'] + '\n/setlang'
     else:
         smsg = smsg + '/function\n/setlang'
     dre = await bot.sendMessage(chat_id, smsg, reply_to_message_id=msg['message_id'])
-    logger.log("[Debug] Raw sent data:"+str(dre))
+    logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 async def helpp(chat_id, msg):
     dre = await bot.sendMessage(chat_id,
-                          '/ping\n/echo\n/getme\n/ns\n/getfile\n/gtts\n/exportblog\n/setlang\n/delmsg',
-                          reply_to_message_id=msg['message_id'])
-    logger.log("[Debug] Raw sent data:"+str(dre))
+                                '/ping\n/echo\n/getme\n/ns\n/getfile\n/gtts\n/exportblog\n/setlang\n/delmsg',
+                                reply_to_message_id=msg['message_id'])
+    logger.log("[Debug] Raw sent data:" + str(dre))
     return
+
 
 def pastebin(data, title):
     if config.pastebin_dev_key != "none" and config.pastebin_user_key != "none":
@@ -2767,10 +2858,11 @@ def pastebin(data, title):
         response = urllib.request.urlopen('http://pastebin.com/api/api_post.php',
                                           bytes(urllib.parse.urlencode(pastebin_vars), 'utf-8'))
         url = response.read()
-        logger.clog("[Pastebin]Uploaded to pastebin URL:"+str(url, 'utf-8'))
-        return(str(url, 'utf-8'))
+        logger.clog("[Pastebin]Uploaded to pastebin URL:" + str(url, 'utf-8'))
+        return (str(url, 'utf-8'))
     else:
-        return("invalid pastebin key")
+        return ("invalid pastebin key")
+
 
 def a2z(textLine):
     zh = textLine.lower()
@@ -2857,6 +2949,7 @@ def a2z(textLine):
     zh = zh.replace('.', 'ㄡ')
     zh = zh.replace('/', 'ㄥ')
     return zh
+
 
 def a2z_etan(textLine):
     zh = textLine.lower()
@@ -2946,25 +3039,28 @@ def a2z_etan(textLine):
     zh = zh.replace('/', 'ㄕ')
     return zh
 
+
 class Log:
-    logpath = "./logs/"+time.strftime("%Y-%m-%d-%H-%M-%S").replace("'","")
+    logpath = "./logs/" + time.strftime("%Y-%m-%d-%H-%M-%S").replace("'", "")
+
     def __init__(self):
         if os.path.isdir("./logs") == False:
             os.mkdir("./logs")
         self.log("[Logger] If you don't see this file currectly,turn the viewing encode to UTF-8.")
         self.log("[Debug][Logger] If you don't see this file currectly,turn the viewing encode to UTF-8.")
-        self.log("[Debug] Bot's TOKEN is "+config.TOKEN)
+        self.log("[Debug] Bot's TOKEN is " + config.TOKEN)
+
     async def logmsg(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg)
-        self.log("[Debug] Raw message:"+str(msg))
-        dlog = "["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info]"
+        self.log("[Debug] Raw message:" + str(msg))
+        dlog = "[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "][Info]"
         flog = ""
         try:
-            dlog += "[EDITED"+str(msg['edit_date'])+"]"
+            dlog += "[EDITED" + str(msg['edit_date']) + "]"
         except KeyError:
             pass
         try:
-            fuser= await bot.getChatMember(chat_id, msg['from']['id'])
+            fuser = await bot.getChatMember(chat_id, msg['from']['id'])
         except KeyError:
             fnick = "Channel Admin"
             fuserid = None
@@ -2975,13 +3071,13 @@ class Log:
             except KeyError:
                 pass
             try:
-                fnick +="@"+ fuser['user']['username']
+                fnick += "@" + fuser['user']['username']
             except KeyError:
                 pass
             fuserid = str(fuser['user']['id'])
         if chat_type == 'private':
             dlog += "[Private]"
-        dlog += "["+str(msg['message_id'])+"]"
+        dlog += "[" + str(msg['message_id']) + "]"
         try:
             reply_to = msg['reply_to_message']['from']['id']
         except KeyError:
@@ -2989,7 +3085,7 @@ class Log:
         else:
             if chat_type != 'channel':
                 if reply_to == bot_me.id:
-                    dlog += " ( Reply to my message "+str(msg['reply_to_message']['message_id'])+" )"
+                    dlog += " ( Reply to my message " + str(msg['reply_to_message']['message_id']) + " )"
                 else:
                     tuser = msg['reply_to_message']['from']['first_name']
                     try:
@@ -3000,27 +3096,27 @@ class Log:
                         tuser += '@' + msg['reply_to_message']['from']['username']
                     except KeyError:
                         pass
-                    dlog += " ( Reply to "+tuser+"'s message "+str(msg['reply_to_message']['message_id'])+" )"
+                    dlog += " ( Reply to " + tuser + "'s message " + str(msg['reply_to_message']['message_id']) + " )"
             else:
                 dlog += \
                     " ( Reply to " + \
-                    str(msg['reply_to_message']['message_id'])+" )"
+                    str(msg['reply_to_message']['message_id']) + " )"
         if chat_type == 'private':
             if content_type == 'text':
-                dlog += ' ' + fnick + " ( "+fuserid+" ) : " + msg['text']
+                dlog += ' ' + fnick + " ( " + fuserid + " ) : " + msg['text']
             else:
                 dlog += ' ' + fnick + \
-                    " ( "+fuserid+" ) sent a " + content_type
+                        " ( " + fuserid + " ) sent a " + content_type
         elif chat_type == 'group' or chat_type == 'supergroup':
             if content_type == 'text':
                 dlog += ' ' + fnick + \
-                    " ( "+fuserid+" ) in "+msg['chat']['title'] + \
-                    ' ( '+str(chat_id) + ' ): ' + msg['text']
+                        " ( " + fuserid + " ) in " + msg['chat']['title'] + \
+                        ' ( ' + str(chat_id) + ' ): ' + msg['text']
             elif content_type == 'new_chat_member':
                 if msg['new_chat_member']['id'] == bot_me.id:
                     dlog += ' I have been added to ' + \
-                        msg['chat']['title'] + \
-                        ' ( '+str(chat_id) + ' ) by ' + fnick + " ( "+fuserid+" )"
+                            msg['chat']['title'] + \
+                            ' ( ' + str(chat_id) + ' ) by ' + fnick + " ( " + fuserid + " )"
                 else:
                     tuser = msg['new_chat_member']['first_name']
                     try:
@@ -3032,12 +3128,12 @@ class Log:
                     except KeyError:
                         pass
                     dlog += ' ' + tuser + ' joined the ' + chat_type + \
-                        ' '+msg['chat']['title']+' ( '+str(chat_id) + ' ) '
+                            ' ' + msg['chat']['title'] + ' ( ' + str(chat_id) + ' ) '
             elif content_type == 'left_chat_member':
                 if msg['left_chat_member']['id'] == bot_me.id:
                     dlog += ' I have been kicked from ' + \
-                        msg['chat']['title'] + \
-                        ' ( '+str(chat_id) + ' ) by ' + fnick + " ( "+fuserid+" )"
+                            msg['chat']['title'] + \
+                            ' ( ' + str(chat_id) + ' ) by ' + fnick + " ( " + fuserid + " )"
                 else:
                     tuser = msg['left_chat_member']['first_name']
                     try:
@@ -3049,12 +3145,12 @@ class Log:
                     except KeyError:
                         pass
                     dlog += ' ' + tuser + ' left the ' + chat_type + \
-                        ' '+msg['chat']['title']+' ( '+str(chat_id) + ' ) '
+                            ' ' + msg['chat']['title'] + ' ( ' + str(chat_id) + ' ) '
             elif content_type == 'pinned_message':
                 tuser = msg['pinned_message']['from']['first_name']
                 try:
                     tuser += ' ' + \
-                        msg['pinned_message']['from']['last_name']
+                             msg['pinned_message']['from']['last_name']
                 except KeyError:
                     pass
                 try:
@@ -3064,104 +3160,109 @@ class Log:
                 tmpcontent_type, tmpchat_type = telepot.glance(
                     msg['pinned_message'])
                 if tmpcontent_type == 'text':
-                    dlog += ' ' + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to " +\
-                        msg['chat']['title']+' ( '+str(chat_id) + ' ) by ' + fnick + \
-                        " ( "+fuserid+" ):\n"+msg['pinned_message']['text']
+                    dlog += ' ' + tuser + "'s message[" + str(
+                        msg['pinned_message']['message_id']) + "] was pinned to " + \
+                            msg['chat']['title'] + ' ( ' + str(chat_id) + ' ) by ' + fnick + \
+                            " ( " + fuserid + " ):\n" + msg['pinned_message']['text']
                 else:
-                    dlog += ' ' + tuser + "'s message["+str(msg['pinned_message']['message_id'])+"] was pinned to " +\
-                        msg['chat']['title'] + \
-                        ' ( '+str(chat_id) + ' ) by ' + fnick + " ( "+fuserid+" )"
+                    dlog += ' ' + tuser + "'s message[" + str(
+                        msg['pinned_message']['message_id']) + "] was pinned to " + \
+                            msg['chat']['title'] + \
+                            ' ( ' + str(chat_id) + ' ) by ' + fnick + " ( " + fuserid + " )"
                     self.__log_media(tmpchat_type, msg['pinned_message'])
             elif content_type == 'new_chat_photo':
-                dlog += " The photo of this "+chat_type + ' ' + \
-                    msg['chat']['title']+' ( '+str(chat_id) + \
-                    ' ) was changed by '+fnick + " ( "+fuserid+" )"
+                dlog += " The photo of this " + chat_type + ' ' + \
+                        msg['chat']['title'] + ' ( ' + str(chat_id) + \
+                        ' ) was changed by ' + fnick + " ( " + fuserid + " )"
                 flog = "[New Chat Photo]"
                 photo_array = msg['new_chat_photo']
                 photo_array.reverse()
                 try:
                     flog = flog + "Caption = " + \
-                        msg['caption'] + " ,FileID:" + photo_array[0]['file_id']
+                           msg['caption'] + " ,FileID:" + photo_array[0]['file_id']
                 except KeyError:
                     flog = flog + "FileID:" + photo_array[0]['file_id']
             elif content_type == 'group_chat_created':
                 if msg['new_chat_member']['id'] == bot_me.id:
-                    dlog += ' ' + fnick + " ( "+fuserid+" ) created a " + chat_type + ' ' + \
-                        msg['chat']['title'] + \
-                        ' ( '+str(chat_id) + ' ) and I was added into the group.'
+                    dlog += ' ' + fnick + " ( " + fuserid + " ) created a " + chat_type + ' ' + \
+                            msg['chat']['title'] + \
+                            ' ( ' + str(chat_id) + ' ) and I was added into the group.'
             elif content_type == 'migrate_to_chat_id':
                 newgp = await bot.getChat(msg['migrate_to_chat_id'])
-                dlog += ' ' + chat_type + ' ' + msg['chat']['title']+' ( '+str(
-                    chat_id) + ' ) was migrated to ' + newgp['type'] + ' ' + newgp['title'] + ' ('+str(newgp['id'])+')  by ' + fnick + " ( "+fuserid+" )"
+                dlog += ' ' + chat_type + ' ' + msg['chat']['title'] + ' ( ' + str(
+                    chat_id) + ' ) was migrated to ' + newgp['type'] + ' ' + newgp['title'] + ' (' + str(
+                    newgp['id']) + ')  by ' + fnick + " ( " + fuserid + " )"
             elif content_type == 'migrate_from_chat_id':
                 oldgp = await bot.getChat(msg['migrate_from_chat_id'])
-                dlog += ' ' + chat_type + ' ' + msg['chat']['title']+' ( '+str(
-                    chat_id) + ' ) was migrated from ' + oldgp['type'] + ' ' + oldgp['title'] + ' ('+str(oldgp['id'])+')  by ' + fnick + " ( "+fuserid+" )"
+                dlog += ' ' + chat_type + ' ' + msg['chat']['title'] + ' ( ' + str(
+                    chat_id) + ' ) was migrated from ' + oldgp['type'] + ' ' + oldgp['title'] + ' (' + str(
+                    oldgp['id']) + ')  by ' + fnick + " ( " + fuserid + " )"
             elif content_type == 'delete_chat_photo':
-                dlog += " The photo of this "+chat_type + ' ' + \
-                    msg['chat']['title']+' ( '+str(chat_id) + \
-                    ' ) was deleted by '+fnick + " ( "+fuserid+" )"
+                dlog += " The photo of this " + chat_type + ' ' + \
+                        msg['chat']['title'] + ' ( ' + str(chat_id) + \
+                        ' ) was deleted by ' + fnick + " ( " + fuserid + " )"
             elif content_type == 'new_chat_title':
-                dlog += " The title of this "+chat_type + " was changed to " + \
-                    msg['new_chat_title']+" by "+fnick + " ( "+fuserid+" )"
+                dlog += " The title of this " + chat_type + " was changed to " + \
+                        msg['new_chat_title'] + " by " + fnick + " ( " + fuserid + " )"
             else:
                 dlog += ' ' + fnick + \
-                    " ( "+fuserid+" ) in "+msg['chat']['title'] + \
-                    ' ( '+str(chat_id) + ' ) sent a ' + content_type
+                        " ( " + fuserid + " ) in " + msg['chat']['title'] + \
+                        ' ( ' + str(chat_id) + ' ) sent a ' + content_type
         elif chat_type == 'channel':
             if content_type == 'text':
                 dlog += ' ' + fnick
                 if fuserid:
-                    dlog += " ( "+fuserid+" )"
+                    dlog += " ( " + fuserid + " )"
                 dlog += ' ' + " in channel " + \
-                    msg['chat']['title']+' ( '+str(chat_id) + ' ): ' + msg['text']
+                        msg['chat']['title'] + ' ( ' + str(chat_id) + ' ): ' + msg['text']
             elif content_type == 'new_chat_photo':
-                dlog += " The photo of this "+chat_type+"" + ' ' + \
-                    msg['chat']['title'] + \
-                    ' ( '+str(chat_id) + ' ) was changed by '+fnick
+                dlog += " The photo of this " + chat_type + "" + ' ' + \
+                        msg['chat']['title'] + \
+                        ' ( ' + str(chat_id) + ' ) was changed by ' + fnick
                 if fuserid:
-                    dlog += " ( "+fuserid+" )"
+                    dlog += " ( " + fuserid + " )"
                 flog = "[New Chat Photo]"
                 photo_array = msg['new_chat_photo']
                 photo_array.reverse()
                 try:
                     flog = flog + "Caption = " + \
-                        msg['caption'] + " ,FileID:" + photo_array[0]['file_id']
+                           msg['caption'] + " ,FileID:" + photo_array[0]['file_id']
                 except KeyError:
                     flog = flog + "FileID:" + photo_array[0]['file_id']
             elif content_type == 'pinned_message':
                 tmpcontent_type, tmpchat_type, tmpchat_id = telepot.glance(msg['pinned_message'])
                 if tmpcontent_type == 'text':
-                    dlog += ' ' + "A message["+str(msg['pinned_message']['message_id'])+"] was pinned to " +\
-                        msg['chat']['title']+' ( '+str(chat_id) + ' ) by :\n'+msg['pinned_message']['text']
+                    dlog += ' ' + "A message[" + str(msg['pinned_message']['message_id']) + "] was pinned to " + \
+                            msg['chat']['title'] + ' ( ' + str(chat_id) + ' ) by :\n' + msg['pinned_message']['text']
                 else:
-                    dlog += ' ' "A message["+str(msg['pinned_message']['message_id'])+"] was pinned to " +\
-                        msg['chat']['title'] + \
-                        ' ( '+str(chat_id) + ' ) '
+                    dlog += ' ' "A message[" + str(msg['pinned_message']['message_id']) + "] was pinned to " + \
+                            msg['chat']['title'] + \
+                            ' ( ' + str(chat_id) + ' ) '
                     self.__log_media(tmpchat_type, msg['pinned_message'])
             elif content_type == 'delete_chat_photo':
-                dlog += " The photo of this "+chat_type + ' ' + \
-                    msg['chat']['title'] + \
-                    ' ( '+str(chat_id) + ' ) was deleted by '+fnick
+                dlog += " The photo of this " + chat_type + ' ' + \
+                        msg['chat']['title'] + \
+                        ' ( ' + str(chat_id) + ' ) was deleted by ' + fnick
                 if fuserid:
-                    dlog += " ( "+fuserid+" )"
+                    dlog += " ( " + fuserid + " )"
             elif content_type == 'new_chat_title':
-                dlog += " The title of this "+chat_type + " was changed to " +\
-                    msg['new_chat_title'] + " by "
+                dlog += " The title of this " + chat_type + " was changed to " + \
+                        msg['new_chat_title'] + " by "
                 if fuserid:
-                    dlog += " ( "+fuserid+" )"
+                    dlog += " ( " + fuserid + " )"
             else:
                 dlog += ' ' + fnick
                 if fuserid:
-                    dlog += " ( "+fuserid+" )"
+                    dlog += " ( " + fuserid + " )"
                 dlog += " in channel" + \
-                    msg['chat']['title'] + \
-                    ' ( '+str(chat_id) + ' ) sent a ' + content_type
+                        msg['chat']['title'] + \
+                        ' ( ' + str(chat_id) + ' ) sent a ' + content_type
         self.clog(dlog)
         self.__log_media(content_type, msg)
         if flog != "":
             self.clog(flog)
         return
+
     def __log_media(self, content_type, msg):
         flog = ""
         if content_type == 'photo':
@@ -3170,59 +3271,63 @@ class Log:
             photo_array.reverse()
             try:
                 flog = flog + "Caption = " + \
-                    msg['caption'] + " ,FileID:" + photo_array[0]['file_id']
+                       msg['caption'] + " ,FileID:" + photo_array[0]['file_id']
             except:
                 flog = flog + "FileID:" + photo_array[0]['file_id']
         elif content_type == 'audio':
             flog = "[Audio]"
             try:
                 flog = flog + "Caption = " + \
-                    msg['caption'] + " ,FileID:" + msg['audio']['file_id']
+                       msg['caption'] + " ,FileID:" + msg['audio']['file_id']
             except:
                 flog = flog + "FileID:" + msg['audio']['file_id']
         elif content_type == 'document':
             flog = "[Document]"
             try:
                 flog = flog + "Caption = " + \
-                    msg['caption'] + " ,FileID:" + msg['document']['file_id']
+                       msg['caption'] + " ,FileID:" + msg['document']['file_id']
             except:
                 flog = flog + "FileID:" + msg['document']['file_id']
         elif content_type == 'video':
             flog = "[Video]"
             try:
                 flog = flog + "Caption = " + \
-                    msg['caption'] + " ,FileID:" + msg['video']['file_id']
+                       msg['caption'] + " ,FileID:" + msg['video']['file_id']
             except:
                 flog = flog + "FileID:" + msg['video']['file_id']
         elif content_type == 'voice':
             flog = "[Voice]"
             try:
                 flog = flog + "Caption = " + \
-                    msg['caption'] + " ,FileID:" + msg['voice']['file_id']
+                       msg['caption'] + " ,FileID:" + msg['voice']['file_id']
             except:
                 flog = flog + "FileID:" + msg['voice']['file_id']
         elif content_type == 'sticker':
             flog = "[Sticker]"
             try:
                 flog = flog + "Caption = " + \
-                    msg['caption'] + " ,FileID:" + msg['sticker']['file_id']
+                       msg['caption'] + " ,FileID:" + msg['sticker']['file_id']
             except:
                 flog = flog + "FileID:" + msg['sticker']['file_id']
         if flog != "":
             self.clog(flog)
         return
+
     def clog(self, text):
         print(text)
         self.log(text)
+
     def log(self, text):
         if text[0:7] == "[Debug]":
             if config.Debug == True:
-                with io.open(self.logpath+"-debug.log","a",encoding='utf8') as logger:
-                    logger.write("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'","")+"]"+text+"\n")
+                with io.open(self.logpath + "-debug.log", "a", encoding='utf8') as logger:
+                    logger.write("[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "]" + text + "\n")
             return
-        with io.open(self.logpath+".log","a",encoding='utf8') as logger:
-            logger.write(text+"\n")
+        with io.open(self.logpath + ".log", "a", encoding='utf8') as logger:
+            logger.write(text + "\n")
         return
+
+
 logger = Log()
 try:
     if sys.argv[1] == 'test':
@@ -3236,12 +3341,15 @@ except IndexError:
 botwoasync = telepot.Bot(config.TOKEN)
 bot = telepot.aio.Bot(config.TOKEN)
 
+
 class botprofile:
     def __init__(self):
         self.__bot_me = botwoasync.getMe()
         self.id = self.__bot_me['id']
         self.first_name = self.__bot_me['first_name']
         self.username = self.__bot_me['username']
+
+
 bot_me = botprofile()
 
 function.read_function_list()
@@ -3251,37 +3359,39 @@ chatconfig.read_chatconfig()
 answerer = telepot.helper.Answerer(bot)
 loop = asyncio.get_event_loop()
 loop.create_task(MessageLoop(bot, {'chat': on_chat_message,
-                  'callback_query': on_callback_query}).run_forever())
-logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Bot has started")
-logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Listening ...")
+                                   'callback_query': on_callback_query}).run_forever())
+logger.clog("[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "][Info] Bot has started")
+logger.clog("[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "][Info] Listening ...")
 if os.path.isfile('./statusmessage.py'):
     with open('./statusmessage.py') as fs:
         statMessage = eval(fs.read())
     msg_idf = telepot.message_identifier(statMessage)
     try:
-        botwoasync.editMessageText(msg_idf,'✅ @'+bot_me.username+' is currently online.')
+        botwoasync.editMessageText(msg_idf, '✅ @' + bot_me.username + ' is currently online.')
     except telepot.exception.TelegramError as e1:
         print("Error when updating the status message {0}".format(str(e1.args[0])))
         newstat = botwoasync.sendMessage(
-            statMessage['chat']['id'], '✅ @'+bot_me.username+' is currently online.', disable_notification=True)
-        botwoasync.pinChatMessage(newstat['chat']['id'],newstat['message_id'])
-        with open('./statusmessage.py','w') as fs:
+            statMessage['chat']['id'], '✅ @' + bot_me.username + ' is currently online.', disable_notification=True)
+        botwoasync.pinChatMessage(newstat['chat']['id'], newstat['message_id'])
+        with open('./statusmessage.py', 'w') as fs:
             fs.write(str(newstat))
 try:
     loop.run_forever()
 except KeyboardInterrupt:
-    logger.clog("["+time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "")+"][Info] Interrupt signal received,stopping.")
+    logger.clog(
+        "[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "][Info] Interrupt signal received,stopping.")
     if os.path.isfile('./statusmessage.py'):
         with open('./statusmessage.py') as fs:
             statMessage = eval(fs.read())
         msg_idf = telepot.message_identifier(statMessage)
         try:
             botwoasync.editMessageText(
-                msg_idf, '🔴 @'+bot_me.username+' is currently offline.')
+                msg_idf, '🔴 @' + bot_me.username + ' is currently offline.')
         except telepot.exception.TelegramError as e1:
             print("Error when updating the status message {0}".format(str(e1.args[0])))
             newstat = botwoasync.sendMessage(
-                statMessage['chat']['id'], '🔴 @'+bot_me.username+' is currently offline.', disable_notification=True)
-            botwoasync.pinChatMessage(newstat['chat']['id'],newstat['message_id'])
-            with open('./statusmessage.py','w') as fs:
+                statMessage['chat']['id'], '🔴 @' + bot_me.username + ' is currently offline.',
+                disable_notification=True)
+            botwoasync.pinChatMessage(newstat['chat']['id'], newstat['message_id'])
+            with open('./statusmessage.py', 'w') as fs:
                 fs.write(str(newstat))
