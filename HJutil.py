@@ -3385,6 +3385,7 @@ try:
 except KeyboardInterrupt:
     logger.clog(
         "[" + time.strftime("%Y/%m/%d-%H:%M:%S").replace("'", "") + "][Info] Interrupt signal received,stopping.")
+    status.set_status(True)
     if os.path.isfile('./statusmessage.py'):
         with open('./statusmessage.py') as fs:
             statMessage = eval(fs.read())
@@ -3395,7 +3396,6 @@ except KeyboardInterrupt:
         except telepot.exception.TelegramError as e1:
             print("Error when updating the status message {0}".format(str(e1.args[0])))
 
-            status.set_status()
             # TODO Remove built in status message
             newstat = botwoasync.sendMessage(
                 statMessage['chat']['id'], '🔴 @' + bot_me.username + ' is currently offline.',
